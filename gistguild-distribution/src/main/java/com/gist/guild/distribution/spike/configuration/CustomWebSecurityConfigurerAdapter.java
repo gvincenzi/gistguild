@@ -13,9 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class CustomWebSecurityConfigurerAdapter
         extends WebSecurityConfigurerAdapter {
-    @Value("${guistguild.username}")
+    @Value("${gistguild.username}")
     private String username;
-    @Value("${guistguild.password}")
+    @Value("${gistguild.password}")
     private String password;
 
     @Override

@@ -33,10 +33,15 @@
     </appender>
 
     <springProfile name="gist">
+        <root level="info">
+            <appender-ref ref="Console" />
+        </root>
+        <logger name="com.gist" level="debug">
+            <appender-ref ref="Console" />
+        </logger>
         <logger name="com.gist" level="info">
             <appender-ref ref="RollingFile" />
             <appender-ref ref="Console" />
         </logger>
     </springProfile>
- 
 </configuration>

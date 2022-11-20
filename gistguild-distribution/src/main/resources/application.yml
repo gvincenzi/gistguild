@@ -10,7 +10,7 @@ server:
 
 spring:
   application:
-    name: guistguild-distribution
+    name: gistguild-distribution
   rabbitmq:
     addresses: amqp://server
   cloud:
