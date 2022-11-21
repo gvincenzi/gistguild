@@ -50,24 +50,24 @@ public class MQListener {
         List<Document> items = new ArrayList<>();
         Class documentClass = null;
         if (DistributionEventType.ENTRY_PROPOSITION.equals(msg.getType()) && msg.getContent() != null && StartupConfig.startupProcessed) {
-            Participant participant = null;
             try {
+                Participant participant = null;
                 switch (msg.getContent().getDocumentPropositionType()) {
                     case USER_REGISTRATION:
                         participant = participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                        documentClass = com.gist.guild.commons.message.entity.Participant.class;
+                        items.add(participant);
+                        log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
                         break;
                     case USER_CANCELLATION:
                         participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                        documentClass = com.gist.guild.commons.message.entity.Participant.class;
+                        items.add(participant);
+                        log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
                         break;
                 }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
-            }
-
-            if (participant != null) {
-                documentClass = com.gist.guild.commons.message.entity.Participant.class;
-                items.add(participant);
-                log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
             }
 
             DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();

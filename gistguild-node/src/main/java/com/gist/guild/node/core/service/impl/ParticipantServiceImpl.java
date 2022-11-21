@@ -102,6 +102,12 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
                 participant.setNonce(document.getNonce());
                 participantRepository.save(participant);
                 return validate(participantRepository.findAllByOrderByTimestampAsc());
+        } else if(participantRepository.findByIsCorruptionDetectedTrue().size() == 0 && participantRepository.existsById(document.getId())){
+            Participant participant = participantRepository.findById(document.getId()).get();
+            participant.setActive(document.getActive());
+            participant.setAdministrator(document.getAdministrator());
+            participantRepository.save(participant);
+            return validate(participantRepository.findAllByOrderByTimestampAsc());
         }
 
         return Boolean.TRUE;
