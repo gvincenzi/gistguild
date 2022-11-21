@@ -10,6 +10,7 @@ import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Participant;
+import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.service.NodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,9 @@ import java.util.List;
 public class MQListener {
     @Autowired
     NodeService<com.gist.guild.commons.message.entity.Participant, Participant> participantNodeService;
+
+    @Autowired
+    ParticipantRepository participantRepository;
 
     @Autowired
     MessageChannel responseChannel;
@@ -47,11 +53,11 @@ public class MQListener {
             try {
                 switch (msg.getContent().getDocumentPropositionType()) {
                     case USER_REGISTRATION:
-                            participant = participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
-                            break;
+                        participant = participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                        break;
                     case USER_CANCELLATION:
-                            participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
-                            break;
+                        participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                        break;
                 }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
@@ -62,17 +68,68 @@ public class MQListener {
                 items.add(participant);
                 log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
             }
-        }
 
-        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-        responseMessage.setCorrelationID(msg.getCorrelationID());
-        responseMessage.setInstanceName(instanceName);
-        responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
-        responseMessage.setDocumentClass(documentClass);
-        responseMessage.setContent(items);
-        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-        responseChannel.send(responseMsg);
+            DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+            responseMessage.setCorrelationID(msg.getCorrelationID());
+            responseMessage.setInstanceName(instanceName);
+            responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
+            responseMessage.setDocumentClass(documentClass);
+            responseMessage.setContent(items);
+            Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+            responseChannel.send(responseMsg);
+        } else if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType())) {
+            processIntegrityRequest(msg);
+        } else if (DistributionEventType.GET_DOCUMENT.equals(msg.getType())) {
+            try {
+                processGetDocumentRequest(msg);
+            } catch (NoSuchMethodException e) {
+                log.error(e.getMessage());
+            } catch (InvocationTargetException e) {
+                log.error(e.getMessage());
+            } catch (IllegalAccessException e) {
+                log.error(e.getMessage());
+            }
+        }
         log.info(String.format("END >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
+    }
+
+    private void processGetDocumentRequest(DistributionMessage<DocumentProposition> msg) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        // PARTICIPANT DOCUMENT
+        if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
+            Method repositoryMethod = ParticipantRepository.class.getDeclaredMethod(msg.getDocumentRepositoryMethod());
+            List<Participant> items = (List<Participant>) repositoryMethod.invoke(participantRepository);
+            DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
+            responseMessage.setCorrelationID(msg.getCorrelationID());
+            responseMessage.setInstanceName(instanceName);
+            responseMessage.setType(DistributionEventType.GET_DOCUMENT);
+            responseMessage.setDocumentClass(com.gist.guild.commons.message.entity.Participant.class);
+            responseMessage.setContent(items);
+            Message<DistributionMessage<List<Participant>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+            responseChannel.send(responseMsg);
+        }
+    }
+
+    private void processIntegrityRequest(DistributionMessage<DocumentProposition> msg) {
+        // SEND A MESSAGE FOR EACH DOCUMENT TYPE
+        try {
+            // PARTICIPANT DOCUMENT
+            List<Participant> items = participantNodeService.findAll();
+            Boolean validation = participantNodeService.validate(items);
+            if (!validation) {
+                corruptionDetected(msg);
+            }
+            DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
+            responseMessage.setCorrelationID(msg.getCorrelationID());
+            responseMessage.setInstanceName(instanceName);
+            responseMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
+            responseMessage.setDocumentClass(com.gist.guild.commons.message.entity.Participant.class);
+            responseMessage.setValid(validation);
+            responseMessage.setContent(items);
+            Message<DistributionMessage<List<Participant>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+            responseChannel.send(responseMsg);
+        } catch (GistGuildGenericException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @StreamListener(target = "distributionChannel")
@@ -83,7 +140,7 @@ public class MQListener {
                 try {
                     for (Object item : msg.getContent()) {
                         // PARTICIPANT DOCUMENT
-                        if(msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
+                        if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
                             if (participantNodeService.forceAddItem(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
                                 log.info(String.format("New item with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
                             } else {
@@ -103,7 +160,7 @@ public class MQListener {
 
                 try {
                     List<com.gist.guild.commons.message.entity.Participant> participants = new ArrayList(msg.getContent().size());
-                    if(msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
+                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
                         for (Object document : msg.getContent()) {
                             // PARTICIPANT DOCUMENT
                             participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
@@ -140,32 +197,5 @@ public class MQListener {
         responseMessage.setType(DistributionEventType.CORRUPTION_DETECTED);
         Message<DistributionMessage<List<Document>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
         responseChannel.send(responseMsg);
-    }
-
-    @StreamListener(target = "requestIntegrityChannel")
-    public void processIntegrity(DistributionMessage<Void> msg) {
-        if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType())) {
-
-            // SEND A MESSAGE FOR EACH DOCUMENT TYPE
-            try {
-                // PARTICIPANT DOCUMENT
-                List<Participant> items = participantNodeService.findAll();
-                Boolean validation = participantNodeService.validate(items);
-                if (!validation) {
-                    corruptionDetected(msg);
-                }
-                DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
-                responseMessage.setCorrelationID(msg.getCorrelationID());
-                responseMessage.setInstanceName(instanceName);
-                responseMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
-                responseMessage.setDocumentClass(com.gist.guild.commons.message.entity.Participant.class);
-                responseMessage.setValid(validation);
-                responseMessage.setContent(items);
-                Message<DistributionMessage<List<Participant>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-                responseChannel.send(responseMsg);
-            } catch (GistGuildGenericException e) {
-                log.error(e.getMessage());
-            }
-        }
     }
 }

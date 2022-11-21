@@ -24,9 +24,6 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
     MessageChannel requestChannel;
 
     @Autowired
-    MessageChannel requestIntegrityChannel;
-
-    @Autowired
     DistributionConcurrenceService distributionConcurrenceService;
 
     @Override
@@ -46,14 +43,16 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
         return distributionMessage;
     }
 
-    private DistributionMessage<Void> getVoidDistributionMessage(DistributionEventType listEntriesRequest) throws DistributionException {
+    private DistributionMessage<Void> getVoidDistributionMessage(DistributionEventType listEntriesRequest, Class documentClass, String documentRepositoryMethod) throws DistributionException {
         distributionConcurrenceService.waitingForLastCorrelationIDProcessing();
 
         DistributionMessage<Void> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(listEntriesRequest);
+        distributionMessage.setDocumentClass(documentClass);
+        distributionMessage.setDocumentRepositoryMethod(documentRepositoryMethod);
         Message<DistributionMessage<Void>> msg = MessageBuilder.withPayload(distributionMessage).build();
-        requestIntegrityChannel.send(msg);
+        requestChannel.send(msg);
         DistributionConcurrenceService.setLastBlockingCorrelationID(distributionMessage.getCorrelationID());
         DistributionConcurrenceService.getCorrelationIDs().add(DistributionConcurrenceService.getLastBlockingCorrelationID());
         return distributionMessage;
@@ -61,6 +60,11 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
 
     @Override
     public DistributionMessage<Void> sendIntegrityVerificationRequest() throws DistributionException {
-        return getVoidDistributionMessage(DistributionEventType.INTEGRITY_VERIFICATION);
+        return getVoidDistributionMessage(DistributionEventType.INTEGRITY_VERIFICATION, null, null);
+    }
+
+    @Override
+    public DistributionMessage<Void> sendDocumentClassRequest(String documentClass, String documentRepositoryMethod) throws DistributionException, ClassNotFoundException {
+        return getVoidDistributionMessage(DistributionEventType.GET_DOCUMENT, Class.forName(ENTITY_PACKAGE + documentClass), documentRepositoryMethod);
     }
 }

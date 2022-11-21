@@ -50,6 +50,16 @@ public class MQListener {
             msg.setContent(documents);
             Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
             distributionChannel.send(message);
+        } else if(DistributionEventType.GET_DOCUMENT.equals(msg.getType()) && msg.getContent() != null){
+            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
+            DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
+            try {
+                ControllerResponseCache.putInCache(msg);
+            } catch (DistributionException e) {
+                log.error(e.getMessage());
+            }
+//            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
+//            distributionChannel.send(message);
         }
         log.info(String.format("END >> Message received in Response Channel with Correlation ID [%s]",msg.getCorrelationID()));
     }

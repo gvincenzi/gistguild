@@ -14,7 +14,4 @@ public interface MQBinding {
 
     @Output("distributionChannel")
     MessageChannel distributionChannel();
-
-    @Output("requestIntegrityChannel")
-    MessageChannel requestIntegrityChannel();
 }

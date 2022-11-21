@@ -35,6 +35,30 @@ public class DistributionController {
             new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
     }
 
+    @GetMapping("/document/{documentClass}/{documentRepositoryMethod}")
+    public ResponseEntity<DistributionMessage<Void>> documentByClass(@PathVariable String documentClass, @PathVariable String documentRepositoryMethod) {
+        log.info(String.format("[DISTRIBUTION SPIKE] Get document %s request received",documentClass));
+        DistributionMessage<Void> distributionMessage = null;
+        try {
+            distributionMessage = deliveryValenceService.sendDocumentClassRequest(documentClass, documentRepositoryMethod);
+        } catch (DistributionException e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
+        }
+        try {
+            ControllerResponseCache.putInCache(distributionMessage);
+        } catch (DistributionException e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(distributionMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return distributionMessage.getCorrelationID() != null ?
+                new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
+                new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
+    }
+
     @PostMapping("/verify")
     public ResponseEntity<DistributionMessage<Void>> integrityVerification() {
         log.info(String.format("[DISTRIBUTION SPIKE] Integrity verification request received"));

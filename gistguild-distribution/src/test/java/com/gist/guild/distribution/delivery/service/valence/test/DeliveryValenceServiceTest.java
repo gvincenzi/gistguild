@@ -40,10 +40,6 @@ public class DeliveryValenceServiceTest {
     MessageChannel requestChannel;
 
     @MockBean
-    @Qualifier("requestIntegrityChannel")
-    MessageChannel requestIntegrityChannel;
-
-    @MockBean
     @Qualifier("responseChannel")
     SubscribableChannel responseChannel;
 

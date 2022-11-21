@@ -7,4 +7,5 @@ import com.gist.guild.distribution.exception.DistributionException;
 public interface DeliveryValenceService {
     DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException, ClassNotFoundException;
     DistributionMessage<Void> sendIntegrityVerificationRequest() throws DistributionException;
+    DistributionMessage<Void> sendDocumentClassRequest(String documentClass, String documentRepositoryMethod) throws DistributionException, ClassNotFoundException;
 }

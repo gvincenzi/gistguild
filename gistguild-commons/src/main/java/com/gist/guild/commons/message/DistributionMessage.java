@@ -12,6 +12,7 @@ public class DistributionMessage<T> {
     private UUID correlationID;
     private String instanceName;
     private DistributionEventType type;
+    private String documentRepositoryMethod;
     private Class documentClass;
     private T content;
     private Boolean valid;
