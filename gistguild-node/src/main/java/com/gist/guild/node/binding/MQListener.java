@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
+import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.StartupConfig;
@@ -96,8 +97,15 @@ public class MQListener {
     private void processGetDocumentRequest(DistributionMessage<DocumentProposition> msg) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         // PARTICIPANT DOCUMENT
         if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-            Method repositoryMethod = ParticipantRepository.class.getDeclaredMethod(msg.getDocumentRepositoryMethod());
-            List<Participant> items = (List<Participant>) repositoryMethod.invoke(participantRepository);
+            Class<?>[] arrayParamType = new Class<?>[msg.getParams().size()];
+            Object[] arrayParamValue = new Object[msg.getParams().size()];
+            int index = 0;
+            for (DocumentRepositoryMethodParameter param: msg.getParams()) {
+                arrayParamType[index] = param.getType();
+                arrayParamValue[index++] = param.getValue();
+            }
+            Method repositoryMethod = ParticipantRepository.class.getDeclaredMethod(msg.getDocumentRepositoryMethod(),arrayParamType);
+            List<Participant> items = (List<Participant>) repositoryMethod.invoke(participantRepository,arrayParamValue);
             DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
             responseMessage.setCorrelationID(msg.getCorrelationID());
             responseMessage.setInstanceName(instanceName);

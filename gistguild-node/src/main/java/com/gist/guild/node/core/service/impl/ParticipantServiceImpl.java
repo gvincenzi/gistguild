@@ -164,7 +164,8 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
         if (participantRepository.findByIsCorruptionDetectedTrue().size() > 0) {
             throw new GistGuildGenericException("Gist Guild registry is corrupted");
         }
-        Participant participant = participantRepository.findByMail(document.getMail());
+        //FIXME
+        Participant participant = participantRepository.findByMail(document.getMail()).iterator().next();
         participant.setActive(Boolean.FALSE);
         return participantRepository.save(participant);
     }

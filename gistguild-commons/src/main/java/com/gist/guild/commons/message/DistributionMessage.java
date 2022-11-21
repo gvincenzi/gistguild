@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,6 +14,7 @@ public class DistributionMessage<T> {
     private String instanceName;
     private DistributionEventType type;
     private String documentRepositoryMethod;
+    private List<DocumentRepositoryMethodParameter> params;
     private Class documentClass;
     private T content;
     private Boolean valid;

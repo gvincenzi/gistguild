@@ -8,7 +8,7 @@ import java.util.List;
 public interface ParticipantRepository extends DocumentRepository<Participant>, MongoRepository<Participant, String> {
     List<Participant> findByActiveTrue();
     List<Participant> findByAdministratorTrue();
-    Participant findByMail(String mail);
+    List<Participant> findByMail(String mail);
     List<Participant> findByTelegramUserId(Integer telegramUserId);
     List<Participant> findByTelegramUserIdAndActiveTrue(Integer id);
 }

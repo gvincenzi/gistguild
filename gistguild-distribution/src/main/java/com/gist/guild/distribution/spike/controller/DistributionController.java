@@ -1,6 +1,7 @@
 package com.gist.guild.distribution.spike.controller;
 
 import com.gist.guild.commons.message.DistributionMessage;
+import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
 import com.gist.guild.distribution.exception.DistributionException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,12 +37,14 @@ public class DistributionController {
             new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @GetMapping("/document/{documentClass}/{documentRepositoryMethod}")
-    public ResponseEntity<DistributionMessage<Void>> documentByClass(@PathVariable String documentClass, @PathVariable String documentRepositoryMethod) {
+    @PostMapping("/document/{documentClass}/{documentRepositoryMethod}")
+    public ResponseEntity<DistributionMessage<Void>> documentByClass(@PathVariable String documentClass,
+                                                                     @PathVariable String documentRepositoryMethod,
+                                                                     @RequestBody List<DocumentRepositoryMethodParameter> params) {
         log.info(String.format("[DISTRIBUTION SPIKE] Get document %s request received",documentClass));
         DistributionMessage<Void> distributionMessage = null;
         try {
-            distributionMessage = deliveryValenceService.sendDocumentClassRequest(documentClass, documentRepositoryMethod);
+            distributionMessage = deliveryValenceService.sendDocumentClassRequest(documentClass, documentRepositoryMethod, params);
         } catch (DistributionException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
@@ -48,12 +52,12 @@ public class DistributionController {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
         }
-        try {
+        /*try {
             ControllerResponseCache.putInCache(distributionMessage);
         } catch (DistributionException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        }*/
         return distributionMessage.getCorrelationID() != null ?
                 new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
                 new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
@@ -69,12 +73,12 @@ public class DistributionController {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
         }
-        try {
+        /*try {
             ControllerResponseCache.putInCache(distributionMessage);
         } catch (DistributionException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        }*/
         return distributionMessage.getCorrelationID() != null ?
                 new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
                 new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);

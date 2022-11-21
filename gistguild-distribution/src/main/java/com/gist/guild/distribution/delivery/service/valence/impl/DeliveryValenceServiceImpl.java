@@ -2,6 +2,7 @@ package com.gist.guild.distribution.delivery.service.valence.impl;
 
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
+import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
@@ -13,6 +14,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -43,7 +45,7 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
         return distributionMessage;
     }
 
-    private DistributionMessage<Void> getVoidDistributionMessage(DistributionEventType listEntriesRequest, Class documentClass, String documentRepositoryMethod) throws DistributionException {
+    private DistributionMessage<Void> getVoidDistributionMessage(DistributionEventType listEntriesRequest, Class documentClass, String documentRepositoryMethod, List<DocumentRepositoryMethodParameter> params) throws DistributionException {
         distributionConcurrenceService.waitingForLastCorrelationIDProcessing();
 
         DistributionMessage<Void> distributionMessage = new DistributionMessage<>();
@@ -51,6 +53,7 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
         distributionMessage.setType(listEntriesRequest);
         distributionMessage.setDocumentClass(documentClass);
         distributionMessage.setDocumentRepositoryMethod(documentRepositoryMethod);
+        distributionMessage.setParams(params);
         Message<DistributionMessage<Void>> msg = MessageBuilder.withPayload(distributionMessage).build();
         requestChannel.send(msg);
         DistributionConcurrenceService.setLastBlockingCorrelationID(distributionMessage.getCorrelationID());
@@ -60,11 +63,11 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
 
     @Override
     public DistributionMessage<Void> sendIntegrityVerificationRequest() throws DistributionException {
-        return getVoidDistributionMessage(DistributionEventType.INTEGRITY_VERIFICATION, null, null);
+        return getVoidDistributionMessage(DistributionEventType.INTEGRITY_VERIFICATION, null, null,null);
     }
 
     @Override
-    public DistributionMessage<Void> sendDocumentClassRequest(String documentClass, String documentRepositoryMethod) throws DistributionException, ClassNotFoundException {
-        return getVoidDistributionMessage(DistributionEventType.GET_DOCUMENT, Class.forName(ENTITY_PACKAGE + documentClass), documentRepositoryMethod);
+    public DistributionMessage<Void> sendDocumentClassRequest(String documentClass, String documentRepositoryMethod, List<DocumentRepositoryMethodParameter> params) throws DistributionException, ClassNotFoundException {
+        return getVoidDistributionMessage(DistributionEventType.GET_DOCUMENT, Class.forName(ENTITY_PACKAGE + documentClass), documentRepositoryMethod, params);
     }
 }
