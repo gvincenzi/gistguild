@@ -9,6 +9,7 @@ import lombok.extern.jackson.Jacksonized;
 public class DocumentProposition<T> {
     String description;
     DocumentPropositionType documentPropositionType;
+    String documentClass;
     T document;
 
     @Override

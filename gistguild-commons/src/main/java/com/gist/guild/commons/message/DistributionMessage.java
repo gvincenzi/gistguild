@@ -10,8 +10,9 @@ import java.util.UUID;
 @JsonInclude(Include.NON_NULL)
 public class DistributionMessage<T> {
     private UUID correlationID;
-    String instanceName;
+    private String instanceName;
     private DistributionEventType type;
+    private Class documentClass;
     private T content;
     private Boolean valid;
 }

@@ -3,10 +3,9 @@ package com.gist.guild.distribution;
 import com.gist.guild.distribution.binding.MQBinding;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 
-@EnableEurekaClient
+//@EnableEurekaClient
 @EnableBinding(MQBinding.class)
 @SpringBootApplication
 public class GistGuildDistributionApplication {

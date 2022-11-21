@@ -46,7 +46,7 @@ public class DistributionServiceTest {
     }
 
     @Test
-    public void addNewEntry() throws JsonProcessingException, DistributionException {
+    public void addNewEntry() throws JsonProcessingException, DistributionException, ClassNotFoundException {
         DocumentProposition proposition = getEntryProposition();
         DistributionMessage<DocumentProposition> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());

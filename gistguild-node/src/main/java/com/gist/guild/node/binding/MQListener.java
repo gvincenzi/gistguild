@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.StartupConfig;
@@ -39,32 +38,40 @@ public class MQListener {
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @StreamListener(target = "requestChannel")
-    public void processItemProposition(DistributionMessage<DocumentProposition> msg) {
+    public void processDocumentProposition(DistributionMessage<DocumentProposition> msg) {
         log.info(String.format("START >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
         List<Document> items = new ArrayList<>();
+        Class documentClass = null;
         if (DistributionEventType.ENTRY_PROPOSITION.equals(msg.getType()) && msg.getContent() != null && StartupConfig.startupProcessed) {
-            if (DocumentPropositionType.USER_REGISTRATION.equals(msg.getContent().getDocumentPropositionType())) {
-                Participant participant = null;
-                try {
-                    participant = participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
-                } catch (GistGuildGenericException | JsonProcessingException e) {
-                    log.error(e.getMessage());
+            Participant participant = null;
+            try {
+                switch (msg.getContent().getDocumentPropositionType()) {
+                    case USER_REGISTRATION:
+                            participant = participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                            break;
+                    case USER_CANCELLATION:
+                            participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
+                            break;
                 }
-
-                if (participant != null) {
-                    items.add(participant);
-                    log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
-                }
+            } catch (GistGuildGenericException | JsonProcessingException e) {
+                log.error(e.getMessage());
             }
 
-            DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-            responseMessage.setCorrelationID(msg.getCorrelationID());
-            responseMessage.setInstanceName(instanceName);
-            responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
-            responseMessage.setContent(items);
-            Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-            responseChannel.send(responseMsg);
+            if (participant != null) {
+                documentClass = com.gist.guild.commons.message.entity.Participant.class;
+                items.add(participant);
+                log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
+            }
         }
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(msg.getCorrelationID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
+        responseMessage.setDocumentClass(documentClass);
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
         log.info(String.format("END >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
@@ -72,15 +79,16 @@ public class MQListener {
     public void processDistribution(DistributionMessage<List<?>> msg) {
         log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.startupProcessed) {
-            // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
             try {
-                // PARTICIPANT DOCUMENT
                 try {
                     for (Object item : msg.getContent()) {
-                        if (participantNodeService.forceAddItem(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
-                            log.info(String.format("New item with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
-                        } else {
-                            corruptionDetected(msg);
+                        // PARTICIPANT DOCUMENT
+                        if(msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
+                            if (participantNodeService.forceAddItem(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
+                                log.info(String.format("New item with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
+                            } else {
+                                corruptionDetected(msg);
+                            }
                         }
                     }
                 } catch (JsonProcessingException e) {
@@ -92,24 +100,28 @@ public class MQListener {
         } else if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName())) {
             // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
             try {
-                // PARTICIPANT DOCUMENT
+
                 try {
                     List<com.gist.guild.commons.message.entity.Participant> participants = new ArrayList(msg.getContent().size());
-                    for (Object document : msg.getContent()) {
-                        participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
+                    if(msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
+                        for (Object document : msg.getContent()) {
+                            // PARTICIPANT DOCUMENT
+                            participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
+                        }
+                        participantNodeService.init(participants);
                     }
-                    participantNodeService.init(participants);
+
+                    // How to know if the message received for each document type is the last ? We need un boolean for each document type
+                    if (Boolean.FALSE.equals(StartupConfig.startupProcessed)) {
+                        log.info("Startup process for this node has been correctly terminated");
+                        StartupConfig.startupProcessed = Boolean.TRUE;
+                    }
+
+                    log.info("Integrity verification correctly validated and ingested");
                 } catch (JsonProcessingException e) {
-                    // IT IS NOT A PARTICIPANT DOCUMENT
+                    log.error(e.getMessage());
+                    log.error("Integrity verification failed");
                 }
-
-                // How to know if the message received for each document type is the last ?
-                if (Boolean.FALSE.equals(StartupConfig.startupProcessed)) {
-                    log.info("Startup process for this node has been correctly terminated");
-                    StartupConfig.startupProcessed = Boolean.TRUE;
-                }
-
-                log.info("Integrity verification correctly validated and ingested");
             } catch (GistGuildGenericException e) {
                 log.error(e.getMessage());
                 corruptionDetected(msg);
@@ -146,6 +158,7 @@ public class MQListener {
                 responseMessage.setCorrelationID(msg.getCorrelationID());
                 responseMessage.setInstanceName(instanceName);
                 responseMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
+                responseMessage.setDocumentClass(com.gist.guild.commons.message.entity.Participant.class);
                 responseMessage.setValid(validation);
                 responseMessage.setContent(items);
                 Message<DistributionMessage<List<Participant>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();

@@ -27,8 +27,10 @@ public class DistributionController {
         } catch (DistributionException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage());
         }
-        return distributionMessage.getCorrelationID() != null ?
+        return distributionMessage!=null && distributionMessage.getCorrelationID() != null ?
             new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
             new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
     }

@@ -5,6 +5,6 @@ import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.distribution.exception.DistributionException;
 
 public interface DeliveryValenceService {
-    DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException;
+    DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException, ClassNotFoundException;
     DistributionMessage<Void> sendIntegrityVerificationRequest() throws DistributionException;
 }

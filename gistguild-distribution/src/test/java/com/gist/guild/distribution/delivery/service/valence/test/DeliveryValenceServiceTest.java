@@ -65,7 +65,7 @@ public class DeliveryValenceServiceTest {
     }
 
     @Test
-    public void addNewEntry() throws JsonProcessingException, DistributionException {
+    public void addNewEntry() throws JsonProcessingException, DistributionException, ClassNotFoundException {
         DocumentProposition proposition = getEntryProposition();
         Mockito.when(requestChannel.send(Mockito.any(Message.class))).thenReturn(Boolean.TRUE);
 

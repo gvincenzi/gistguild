@@ -18,6 +18,8 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class DeliveryValenceServiceImpl implements DeliveryValenceService {
+    public static final String ENTITY_PACKAGE = "com.gist.guild.commons.message.entity.";
+
     @Autowired
     MessageChannel requestChannel;
 
@@ -28,12 +30,13 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
     DistributionConcurrenceService distributionConcurrenceService;
 
     @Override
-    public DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException {
+    public DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException, ClassNotFoundException {
         distributionConcurrenceService.waitingForLastCorrelationIDProcessing();
 
         DistributionMessage<DocumentProposition> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(DistributionEventType.ENTRY_PROPOSITION);
+        distributionMessage.setDocumentClass(Class.forName(ENTITY_PACKAGE +proposition.getDocumentClass()));
         distributionMessage.setContent(proposition);
         Message<DistributionMessage<DocumentProposition>> msg = MessageBuilder.withPayload(distributionMessage).build();
         requestChannel.send(msg);
