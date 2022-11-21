@@ -1,7 +1,7 @@
 package com.gist.guild.distribution.spike.controller;
 
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.entity.Document;
+import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
 import com.gist.guild.distribution.exception.DistributionException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +19,9 @@ public class DistributionController {
     DeliveryValenceService deliveryValenceService;
 
     @PostMapping("/document")
-    public ResponseEntity<DistributionMessage<Document>> itemProposition(@RequestBody Document proposition) {
+    public ResponseEntity<DistributionMessage<DocumentProposition>> itemProposition(@RequestBody DocumentProposition proposition) {
         log.info(String.format("[DISTRIBUTION SPIKE] Item proposition received"));
-        DistributionMessage<Document> distributionMessage = null;
+        DistributionMessage<DocumentProposition> distributionMessage = null;
         try {
             distributionMessage = deliveryValenceService.propose(proposition);
         } catch (DistributionException e) {

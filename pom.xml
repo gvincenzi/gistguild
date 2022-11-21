@@ -8,6 +8,7 @@
         <module>gistguild-service-registry</module>
         <module>gistguild-spike</module>
         <module>gistguild-distribution</module>
+        <module>gistguild-node</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

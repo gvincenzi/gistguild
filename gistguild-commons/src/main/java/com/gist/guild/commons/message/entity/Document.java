@@ -1,41 +1,31 @@
 package com.gist.guild.commons.message.entity;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
+import lombok.NoArgsConstructor;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.Instant;
 
 @Data
-@Jacksonized
-public class Document {
-    String description;
-    Participant owner;
-    Map<String, Object> details = new LinkedHashMap<>();
-
-    @JsonAnySetter
-    void setDetail(String key, Object value) {
-        details.put(key, value);
-    }
+@NoArgsConstructor
+public class Document implements Comparable<Document>{
+    String id;
+    String previousId;
+    Instant timestamp = Instant.now();
+    Integer nonce;
+    String nodeInstanceName;
+    Boolean isCorruptionDetected = Boolean.FALSE;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Document)) return false;
-
-        Document document = (Document) o;
-
-        if (!getDescription().equals(document.getDescription())) return false;
-        if (!getOwner().equals(document.getOwner())) return false;
-        return getDetails().equals(document.getDetails());
+    public int compareTo(Document arg0) {
+        return getTimestamp().compareTo(arg0.getTimestamp());
     }
 
-    @Override
-    public int hashCode() {
-        int result = getDescription().hashCode();
-        result = 31 * result + getOwner().hashCode();
-        result = 31 * result + getDetails().hashCode();
-        return result;
+    public static Document getItemCorruption() {
+        Document documentCorruption = new Document();
+        documentCorruption.setId("CORRUPTION_DETECTION");
+        documentCorruption.setNodeInstanceName("gistguild-distribution");
+        documentCorruption.setIsCorruptionDetected(Boolean.TRUE);
+        documentCorruption.setTimestamp(Instant.now());
+        return documentCorruption;
     }
 }

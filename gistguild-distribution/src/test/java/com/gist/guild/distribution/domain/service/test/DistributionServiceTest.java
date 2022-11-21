@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.entity.Document;
+import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
 import com.gist.guild.distribution.exception.DistributionException;
@@ -31,34 +31,30 @@ public class DistributionServiceTest {
     @MockBean
     DeliveryValenceService deliveryValenceService;
 
-    protected static Document getNewDocument(String json) throws JsonProcessingException {
+    protected static DocumentProposition getNewDocument(String json) throws JsonProcessingException {
         log.info(json);
-        Document document = mapper.readValue(json, Document.class);
-        log.info(mapper.writeValueAsString(document));
+        DocumentProposition documentProposition = mapper.readValue(json, DocumentProposition.class);
+        log.info(mapper.writeValueAsString(documentProposition));
 
-        return document;
+        return documentProposition;
     }
 
-    private Document getEntryProposition() throws JsonProcessingException {
-        String json = "{\"description\":\"Test document\",\"countryName\":\"Italy\","
-                + "\"countryPopulation\":60591668,\"male\":29665645,\"female\":30921362}";
-        Document proposition = getNewDocument(json);
-        Participant owner = new Participant();
-        owner.setNickname("test@test.com");
-        proposition.setOwner(owner);
+    private DocumentProposition getEntryProposition() throws JsonProcessingException {
+        String json = "{\"description\":\"Test document\",\"documentPropositionType\":\"USER_REGISTRATION\"}";
+        DocumentProposition proposition = getNewDocument(json);
         return proposition;
     }
 
     @Test
     public void addNewEntry() throws JsonProcessingException, DistributionException {
-        Document proposition = getEntryProposition();
-        DistributionMessage<Document> distributionMessage = new DistributionMessage<>();
+        DocumentProposition proposition = getEntryProposition();
+        DistributionMessage<DocumentProposition> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(DistributionEventType.ENTRY_PROPOSITION);
         distributionMessage.setContent(proposition);
         Mockito.when(deliveryValenceService.propose(proposition)).thenReturn(distributionMessage);
 
-        DistributionMessage<Document> proposed = deliveryValenceService.propose(proposition);
+        DistributionMessage<DocumentProposition> proposed = deliveryValenceService.propose(proposition);
         AssertionErrors.assertNotNull("Correlation ID is null", proposed.getCorrelationID());
         AssertionErrors.assertEquals("DistributionType is not coherent", DistributionEventType.ENTRY_PROPOSITION,proposed.getType());
         AssertionErrors.assertEquals("EntryProposition is not equal", proposition, proposed.getContent());

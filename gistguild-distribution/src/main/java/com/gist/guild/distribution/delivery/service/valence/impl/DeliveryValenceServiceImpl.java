@@ -2,7 +2,7 @@ package com.gist.guild.distribution.delivery.service.valence.impl;
 
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.entity.Document;
+import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
 import com.gist.guild.distribution.exception.DistributionException;
@@ -28,14 +28,14 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
     DistributionConcurrenceService distributionConcurrenceService;
 
     @Override
-    public DistributionMessage<Document> propose(Document proposition) throws DistributionException {
+    public DistributionMessage<DocumentProposition> propose(DocumentProposition proposition) throws DistributionException {
         distributionConcurrenceService.waitingForLastCorrelationIDProcessing();
 
-        DistributionMessage<Document> distributionMessage = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(DistributionEventType.ENTRY_PROPOSITION);
         distributionMessage.setContent(proposition);
-        Message<DistributionMessage<Document>> msg = MessageBuilder.withPayload(distributionMessage).build();
+        Message<DistributionMessage<DocumentProposition>> msg = MessageBuilder.withPayload(distributionMessage).build();
         requestChannel.send(msg);
         DistributionConcurrenceService.setLastBlockingCorrelationID(distributionMessage.getCorrelationID());
         DistributionConcurrenceService.getCorrelationIDs().add(DistributionConcurrenceService.getLastBlockingCorrelationID());

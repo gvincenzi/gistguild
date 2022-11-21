@@ -13,4 +13,5 @@ public class DistributionMessage<T> {
     String instanceName;
     private DistributionEventType type;
     private T content;
+    private Boolean valid;
 }

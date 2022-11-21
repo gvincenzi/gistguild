@@ -1,10 +1,13 @@
 package com.gist.guild.distribution.binding.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Document;
+import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
-import com.gist.guild.commons.message.entity.GistGuildItem;
 import com.gist.guild.distribution.binding.MQListener;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
 import com.gist.guild.distribution.spike.controller.ControllerResponseCache;
@@ -38,13 +41,15 @@ public class MQListenerTest {
     @Qualifier("distributionChannel")
     MessageChannel distributionChannel;
 
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
     @Test
     public void processEntryResponseTest1(){
-        DistributionMessage<List<GistGuildItem>> msg = new DistributionMessage<>();
+        DistributionMessage<List<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_RESPONSE);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setInstanceName("test-instance");
-        List<GistGuildItem> items = new ArrayList<>();
+        List<Document> items = new ArrayList<>();
         items.add(getItem());
         msg.setContent(items);
 
@@ -58,11 +63,11 @@ public class MQListenerTest {
 
     @Test
     public void processEntryResponseTest2(){
-        DistributionMessage<List<GistGuildItem>> msg = new DistributionMessage<>();
+        DistributionMessage<List<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.INTEGRITY_VERIFICATION);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setInstanceName("test-instance");
-        List<GistGuildItem> items = new ArrayList<>();
+        List<Document> items = new ArrayList<>();
         items.add(getItem());
         msg.setContent(items);
 
@@ -80,12 +85,12 @@ public class MQListenerTest {
     }
 
     @Test
-    public void processEntryResponseTest3(){
-        DistributionMessage<List<GistGuildItem>> msg = new DistributionMessage<>();
+    public void processEntryResponseTest3() throws JsonProcessingException {
+        DistributionMessage<List<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.CORRUPTION_DETECTED);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setInstanceName("test-instance");
-        List<GistGuildItem> items = new ArrayList<>();
+        List<Document> items = new ArrayList<>();
         items.add(getItem());
         msg.setContent(items);
 
@@ -94,13 +99,13 @@ public class MQListenerTest {
 
         mqListener.processEntryResponse(msg);
 
-        GistGuildItem gistGuildItem = msg.getContent().iterator().next();
-        Assert.assertTrue(gistGuildItem.getIsCorruptionDetected());
+        Document document = mapper.readValue(mapper.writeValueAsString(msg.getContent().iterator().next()), Document.class) ;
+        Assert.assertTrue(document.getIsCorruptionDetected());
         Assert.assertFalse(DistributionConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID()));
     }
 
-    private GistGuildItem getItem() {
-        GistGuildItem item = new GistGuildItem();
+    private Document getItem() {
+        Document item = new Document();
         item.setIsCorruptionDetected(Boolean.FALSE);
         item.setId(UUID.randomUUID().toString());
         item.setTimestamp(Instant.now());
@@ -108,11 +113,9 @@ public class MQListenerTest {
         item.setPreviousId(UUID.randomUUID().toString());
         item.setNonce(new Random().nextInt());
         Participant owner = new Participant();
-        owner.setNickname("test@test.com");
-        item.setOwner(owner);
-        Document document = new Document();
-        document.setDescription("Test document");
-        item.setDocument(document);
+        owner.setMail("test@test.com");
+        DocumentProposition documentProposition = new DocumentProposition();
+        documentProposition.setDescription("Test documentProposition");
         return item;
     }
 

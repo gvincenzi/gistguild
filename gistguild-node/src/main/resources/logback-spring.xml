@@ -14,7 +14,7 @@
  
     <appender name="RollingFile"
         class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/gistguild-distribution.log</file>
+        <file>${LOGS}/gistguild-node.log</file>
         <encoder
             class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</Pattern>
@@ -23,7 +23,7 @@
         <rollingPolicy
             class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOGS}/archived/gistguild-distribution-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${LOGS}/archived/gistguild-node-%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -32,7 +32,13 @@
         </rollingPolicy>
     </appender>
 
-    <springProfile name="gist">
+    <springProfile name="gist_A">
+        <root level="info">
+            <appender-ref ref="Console" />
+        </root>
+    </springProfile>
+
+    <springProfile name="gist_B">
         <root level="info">
             <appender-ref ref="Console" />
         </root>
