@@ -95,26 +95,31 @@ public class MQListener {
     }
 
     private void processGetDocumentRequest(DistributionMessage<DocumentProposition> msg) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        //Populate DocumentRepositoryMethodParameters arrays
+        Class<?>[] arrayParamType = new Class<?>[msg.getParams().size()];
+        Object[] arrayParamValue = new Object[msg.getParams().size()];
+        int index = 0;
+        for (DocumentRepositoryMethodParameter param: msg.getParams()) {
+            arrayParamType[index] = param.getType();
+            arrayParamValue[index++] = param.getValue();
+        }
+
+        List<?> items = null;
+
         // PARTICIPANT DOCUMENT
         if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-            Class<?>[] arrayParamType = new Class<?>[msg.getParams().size()];
-            Object[] arrayParamValue = new Object[msg.getParams().size()];
-            int index = 0;
-            for (DocumentRepositoryMethodParameter param: msg.getParams()) {
-                arrayParamType[index] = param.getType();
-                arrayParamValue[index++] = param.getValue();
-            }
             Method repositoryMethod = ParticipantRepository.class.getDeclaredMethod(msg.getDocumentRepositoryMethod(),arrayParamType);
-            List<Participant> items = (List<Participant>) repositoryMethod.invoke(participantRepository,arrayParamValue);
-            DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
-            responseMessage.setCorrelationID(msg.getCorrelationID());
-            responseMessage.setInstanceName(instanceName);
-            responseMessage.setType(DistributionEventType.GET_DOCUMENT);
-            responseMessage.setDocumentClass(com.gist.guild.commons.message.entity.Participant.class);
-            responseMessage.setContent(items);
-            Message<DistributionMessage<List<Participant>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-            responseChannel.send(responseMsg);
+            items = (List<Participant>) repositoryMethod.invoke(participantRepository,arrayParamValue);
         }
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(msg.getCorrelationID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.GET_DOCUMENT);
+        responseMessage.setDocumentClass(msg.getDocumentClass());
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
     }
 
     private void processIntegrityRequest(DistributionMessage<DocumentProposition> msg) {
