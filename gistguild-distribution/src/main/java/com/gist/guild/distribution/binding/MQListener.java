@@ -58,6 +58,7 @@ public class MQListener {
             } catch (DistributionException e) {
                 log.error(e.getMessage());
             }
+            // FIXME Distribute this message ?
 //            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
 //            distributionChannel.send(message);
         }

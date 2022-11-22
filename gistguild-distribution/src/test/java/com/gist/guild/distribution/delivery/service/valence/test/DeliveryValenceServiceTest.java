@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
+import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
@@ -24,6 +25,9 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Log
 @RunWith(SpringRunner.class)
@@ -54,21 +58,35 @@ public class DeliveryValenceServiceTest {
         return documentProposition;
     }
 
-    private DocumentProposition getEntryProposition() throws JsonProcessingException {
-        String json = "{\"description\":\"Test document\",\"documentPropositionType\":\"USER_REGISTRATION\"}";
+    private DocumentProposition getDocumentProposition() throws JsonProcessingException {
+        String json = "{\n" +
+                "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
+                "    \"description\" : \"GIST Item\",\n" +
+                "    \"documentClass\" : \"Participant\",\n" +
+                "    \"document\" : {\n" +
+                "      \"mail\":\"test@test.it\",\n" +
+                "      \"telegramUserId\":\"478956\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "}";
         DocumentProposition proposition = getNewDocument(json);
         return proposition;
     }
 
+    private DocumentRepositoryMethodParameter getParam() throws JsonProcessingException {
+        String json = "{\"type\":\"java.lang.String\",\"value\":\"test@test.it\"}";
+        return mapper.readValue(json, DocumentRepositoryMethodParameter.class);
+    }
+
     @Test
-    public void addNewEntry() throws JsonProcessingException, DistributionException, ClassNotFoundException {
-        DocumentProposition proposition = getEntryProposition();
+    public void propose() throws JsonProcessingException, DistributionException, ClassNotFoundException {
+        DocumentProposition proposition = getDocumentProposition();
         Mockito.when(requestChannel.send(Mockito.any(Message.class))).thenReturn(Boolean.TRUE);
 
         DistributionMessage<DocumentProposition> proposed = deliveryValenceService.propose(proposition);
         AssertionErrors.assertNotNull("Correlation ID is null", proposed.getCorrelationID());
         AssertionErrors.assertEquals("DistributionType is not coherent", DistributionEventType.ENTRY_PROPOSITION,proposed.getType());
-        AssertionErrors.assertEquals("EntryProposition is not equal", proposition, proposed.getContent());
+        AssertionErrors.assertEquals("DocumentProposition is not equal", proposition, proposed.getContent());
 
     }
 
@@ -79,6 +97,19 @@ public class DeliveryValenceServiceTest {
         DistributionMessage<Void> proposed = deliveryValenceService.sendIntegrityVerificationRequest();
         AssertionErrors.assertNotNull("Correlation ID is null", proposed.getCorrelationID());
         AssertionErrors.assertEquals("DistributionType is not coherent", DistributionEventType.INTEGRITY_VERIFICATION,proposed.getType());
+
+    }
+
+    @Test
+    public void getDocumentClass() throws JsonProcessingException, DistributionException, ClassNotFoundException {
+        String method = "findByMail";
+        List<DocumentRepositoryMethodParameter> params = new ArrayList<>(1);
+        params.add(getParam());
+        Mockito.when(requestChannel.send(Mockito.any(Message.class))).thenReturn(Boolean.TRUE);
+
+        DistributionMessage<Void> proposed = deliveryValenceService.sendDocumentClassRequest(Participant.class.getSimpleName(),method,params);
+        AssertionErrors.assertNotNull("Correlation ID is null", proposed.getCorrelationID());
+        AssertionErrors.assertEquals("DistributionType is not coherent", DistributionEventType.GET_DOCUMENT,proposed.getType());
 
     }
 }

@@ -51,7 +51,16 @@ public class DistributionControllerPropositionTest {
     }
 
     private DocumentProposition getEntryProposition() throws JsonProcessingException {
-        String json = "{\"description\":\"Test document\",\"documentPropositionType\":\"USER_REGISTRATION\"}";
+        String json = "{\n" +
+                "    \"documentPropositionType\" : \"USER_CANCELLATION\",\n" +
+                "    \"description\" : \"GIST Item\",\n" +
+                "    \"documentClass\" : \"Participant\",\n" +
+                "    \"document\" : {\n" +
+                "      \"mail\":\"test@test.it\",\n" +
+                "      \"telegramUserId\":\"478956\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "}";
         DocumentProposition proposition = getNewDocument(json);
         return proposition;
     }
@@ -82,6 +91,23 @@ public class DistributionControllerPropositionTest {
         distributionMessage.setType(DistributionEventType.ENTRY_PROPOSITION);
         distributionMessage.setContent(proposition);
         Mockito.when(deliveryValenceService.propose(proposition)).thenReturn(distributionMessage);
+        mvc.perform(post("/document")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(proposition)))
+                .andDo(print())
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+    }
+
+    @WithMockUser(value = "test")
+    @Test
+    public void entryKo2() throws Exception {
+        DocumentProposition proposition = getEntryProposition();
+        DistributionMessage<DocumentProposition> distributionMessage = new DistributionMessage<>();
+        distributionMessage.setType(DistributionEventType.ENTRY_PROPOSITION);
+        distributionMessage.setContent(proposition);
+        Mockito.when(deliveryValenceService.propose(proposition)).thenThrow(ClassNotFoundException.class);
         mvc.perform(post("/document")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)

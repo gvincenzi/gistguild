@@ -104,6 +104,25 @@ public class MQListenerTest {
         Assert.assertFalse(DistributionConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID()));
     }
 
+    @Test
+    public void processEntryResponseTest4() throws JsonProcessingException {
+        DistributionMessage<List<?>> msg = new DistributionMessage<>();
+        msg.setType(DistributionEventType.GET_DOCUMENT);
+        msg.setCorrelationID(UUID.randomUUID());
+        msg.setInstanceName("test-instance");
+        List<Document> items = new ArrayList<>();
+        items.add(getItem());
+        msg.setContent(items);
+
+        //Correlation ID added by Controller request
+        DistributionConcurrenceService.getCorrelationIDs().add(msg.getCorrelationID());
+
+        mqListener.processEntryResponse(msg);
+
+        Document document = mapper.readValue(mapper.writeValueAsString(msg.getContent().iterator().next()), Document.class) ;
+        Assert.assertFalse(DistributionConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID()));
+    }
+
     private Document getItem() {
         Document item = new Document();
         item.setIsCorruptionDetected(Boolean.FALSE);
