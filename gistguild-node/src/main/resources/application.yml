@@ -11,7 +11,7 @@ spring:
           group: nodeGroup
         responseChannel:
           producer:
-            routingKeyExpression: "'rdResponseChannel'"
+            routingKeyExpression: "'gistGuildResponseChannel'"
         distributionChannel:
           destination: distributionChannel
   data:
@@ -36,4 +36,4 @@ gistguild:
   difficult:
     level: 1
   spike:
-    url: http://localhost:8881/rd/distribution/spike
+    url: http://localhost:8882/spike

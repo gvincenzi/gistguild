@@ -34,34 +34,6 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
     @Value("${spring.application.name}")
     private String instanceName;
 
-    private static final String REGEX_DIGIT = "[0-9].*";
-
-    public boolean isHashResolved(Participant document, Integer difficultLevel) {
-        List<Integer> digits = new ArrayList<>(difficultLevel);
-
-        Integer index = 0;
-        String hash = document.getId();
-        while (index < hash.length() && digits.size() < difficultLevel) {
-            String s = hash.substring(index, ++index);
-            if (s.matches(REGEX_DIGIT)) {
-                digits.add(Integer.parseInt(s));
-            }
-        }
-
-        Integer sum = digits.parallelStream().reduce(0, Integer::sum);
-        return sum % difficultLevel == 0;
-    }
-
-    public String calculateHash(Participant document) throws GistGuildGenericException {
-        return NodeUtils.applySha256(
-                document.getPreviousId() +
-                        document.getTimestamp().toEpochMilli() +
-                        document.getNonce() +
-                        document.getNodeInstanceName() +
-                        document.getMail()
-        );
-    }
-
     protected Participant getNewItem(com.gist.guild.commons.message.entity.Participant document, Participant previous) throws GistGuildGenericException {
         if (document == null) {
             throw new GistGuildGenericException("Document are mandatory");
@@ -77,11 +49,11 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
         participant.setNonce(nonce);
-        participant.setId(calculateHash(participant));
-        while (!isHashResolved(participant, difficultLevel)) {
+        participant.setId(NodeUtils.calculateHash(participant));
+        while (!NodeUtils.isHashResolved(participant, difficultLevel)) {
             nonce = random.nextInt();
             participant.setNonce(nonce);
-            participant.setId(calculateHash(participant));
+            participant.setId(NodeUtils.calculateHash(participant));
         }
 
         return participant;
@@ -132,7 +104,7 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
         for (int i = 0; i < rdItems.size(); i++) {
             previousItem = i > 0 ? rdItems.get(i - 1) : null;
             currentItem = rdItems.get(i);
-            if (!currentItem.getId().equals(calculateHash(currentItem))) {
+            if (!currentItem.getId().equals(NodeUtils.calculateHash(currentItem))) {
                 result = false;
             }
             if (previousItem != null && !previousItem.getId().equals(currentItem.getPreviousId())) {
@@ -141,7 +113,7 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
             if (previousItem == null && !GENESIS.equals(currentItem.getPreviousId())) {
                 result = false;
             }
-            if (!isHashResolved(currentItem, difficultLevel)) {
+            if (!NodeUtils.isHashResolved(currentItem, difficultLevel)) {
                 result = false;
             }
         }
