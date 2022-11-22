@@ -154,7 +154,7 @@ public class MQListener {
                     for (Object item : msg.getContent()) {
                         // PARTICIPANT DOCUMENT
                         if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-                            if (participantNodeService.forceAddItem(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
+                            if (participantNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
                                 log.info(String.format("New item with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
                             } else {
                                 corruptionDetected(msg);

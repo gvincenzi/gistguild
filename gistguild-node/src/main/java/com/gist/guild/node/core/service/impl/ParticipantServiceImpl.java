@@ -88,7 +88,7 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
     }
 
     @Override
-    public Boolean forceAddItem(com.gist.guild.commons.message.entity.Participant document) throws GistGuildGenericException {
+    public Boolean updateLocal(com.gist.guild.commons.message.entity.Participant document) throws GistGuildGenericException {
         if (participantRepository.findByIsCorruptionDetectedTrue().size() == 0 && !participantRepository.existsById(document.getId())) {
                 Participant participant = new Participant();
                 participant.setId(document.getId());
@@ -186,7 +186,7 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
                     throw new GistGuildGenericException("Guild registry has been corrupted");
                 }
             } else {
-                forceAddItem(content.get(i));
+                updateLocal(content.get(i));
             }
         }
     }

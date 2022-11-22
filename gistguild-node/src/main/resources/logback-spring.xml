@@ -32,21 +32,12 @@
         </rollingPolicy>
     </appender>
 
-    <springProfile name="gist_A">
-        <root level="info">
-            <appender-ref ref="Console" />
-        </root>
-    </springProfile>
-
-    <springProfile name="gist_B">
-        <root level="info">
-            <appender-ref ref="Console" />
-        </root>
-    </springProfile>
-
-    <springProfile name="gist_C">
-        <root level="info">
-            <appender-ref ref="Console" />
-        </root>
-    </springProfile>
+    <logger name="org.springframework.boot" level="error">
+        <appender-ref ref="Console" />
+    </logger>
+    <!-- LOG "com.gist*" at INFO level -->
+    <logger name="com.gist" level="info">
+        <!--            <appender-ref ref="RollingFile" />-->
+        <appender-ref ref="Console" />
+    </logger>
 </configuration>

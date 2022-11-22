@@ -33,8 +33,13 @@
     </appender>
 
     <springProfile name="gist">
-        <root level="info">
+        <logger name="org.springframework.boot" level="error">
             <appender-ref ref="Console" />
-        </root>
+        </logger>
+        <!-- LOG "com.gist*" at INFO level -->
+        <logger name="com.gist" level="info">
+<!--            <appender-ref ref="RollingFile" />-->
+            <appender-ref ref="Console" />
+        </logger>
     </springProfile>
 </configuration>
