@@ -68,7 +68,7 @@ public class DistributionControllerIntegrityValidationTest {
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
         Mockito.when(deliveryValenceService.sendIntegrityVerificationRequest()).thenReturn(distributionMessage);
-        mvc.perform(post("/verify/internal")
+        mvc.perform(post("/verify")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(""))
@@ -82,7 +82,7 @@ public class DistributionControllerIntegrityValidationTest {
         DistributionMessage<Void> distributionMessage = new DistributionMessage<>();
         distributionMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
         Mockito.when(deliveryValenceService.sendIntegrityVerificationRequest()).thenReturn(distributionMessage);
-        mvc.perform(post("/verify/internal")
+        mvc.perform(post("/verify")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(""))

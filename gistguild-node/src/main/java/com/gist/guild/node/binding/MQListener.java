@@ -62,8 +62,12 @@ public class MQListener {
                     case USER_CANCELLATION:
                         participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
                         documentClass = com.gist.guild.commons.message.entity.Participant.class;
-                        items.add(participant);
-                        log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
+                        if(participant != null) {
+                            items.add(participant);
+                            log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
+                        } else {
+                            log.info(String.format("New item not ingested : Participant does not exist"));
+                        }
                         break;
                 }
             } catch (GistGuildGenericException | JsonProcessingException e) {
@@ -181,7 +185,7 @@ public class MQListener {
                         participantNodeService.init(participants);
                     }
 
-                    // How to know if the message received for each document type is the last ? We need un boolean for each document type
+                    // FIXME How to know if the message received for each document type is the last ? We need un boolean for each document type
                     if (Boolean.FALSE.equals(StartupConfig.startupProcessed)) {
                         log.info("Startup process for this node has been correctly terminated");
                         StartupConfig.startupProcessed = Boolean.TRUE;

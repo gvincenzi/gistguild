@@ -2,8 +2,6 @@ package com.gist.guild.distribution.delivery.service.impl;
 
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
 import com.gist.guild.distribution.exception.DistributionException;
-import com.gist.guild.distribution.spike.controller.ControllerResponseCache;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,6 @@ public class DistributionConcurrenceServiceImpl extends DistributionConcurrenceS
         while(getCorrelationIDs().contains(getLastBlockingCorrelationID())){
             log.info(String.format("Waiting last blocking correlationID process end - CorrelationID [%s]",getLastBlockingCorrelationID().toString()));
             if(numberOfTry == 10){
-                ControllerResponseCache.removeFromCache(getLastBlockingCorrelationID());
                 getCorrelationIDs().remove(getLastBlockingCorrelationID());
                 throw new DistributionException(String.format("Timeout while last blocking correlationID process end waiting  - CorrelationID [%s]",getLastBlockingCorrelationID().toString()));
             }

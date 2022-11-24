@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "spike", url = "${gistguild.spike.url}")
 public interface SpikeClient {
-    @PostMapping("/verify/internal")
+    @PostMapping("/verify")
     DistributionMessage<Void> integrityVerification();
 }

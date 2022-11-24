@@ -9,6 +9,7 @@
         <module>gistguild-spike</module>
         <module>gistguild-distribution</module>
         <module>gistguild-node</module>
+        <module>gistguild-gui</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

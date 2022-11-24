@@ -10,7 +10,6 @@ import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.distribution.binding.MQListener;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
-import com.gist.guild.distribution.spike.controller.ControllerResponseCache;
 import lombok.extern.java.Log;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,11 +76,6 @@ public class MQListenerTest {
         mqListener.processEntryResponse(msg);
 
         Assert.assertFalse(DistributionConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID()));
-        Assert.assertNotNull(ControllerResponseCache.getFromCache(msg.getCorrelationID()));
-
-        //Correlation ID remved from cache by Controller request
-        Assert.assertNotNull(ControllerResponseCache.removeFromCache(msg.getCorrelationID()));
-        Assert.assertNull(ControllerResponseCache.getFromCache(msg.getCorrelationID()));
     }
 
     @Test

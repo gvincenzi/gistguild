@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.distribution.domain.service.valence.DeliveryValenceService;
-import com.gist.guild.distribution.spike.controller.ControllerResponseCache;
 import com.gist.guild.distribution.spike.controller.DistributionController;
 import lombok.extern.java.Log;
 import org.junit.Assert;
@@ -56,7 +55,6 @@ public class DistributionControllerGetUUIDTest {
         DistributionMessage<Void> distributionMessage = new DistributionMessage<>();
         distributionMessage.setCorrelationID(UUID.randomUUID());
         distributionMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
-        ControllerResponseCache.putInCache(distributionMessage);
         Mockito.when(deliveryValenceService.sendIntegrityVerificationRequest()).thenReturn(distributionMessage);
         MvcResult mvcResult = mvc.perform(get("/" + distributionMessage.getCorrelationID()))
                 .andDo(print())

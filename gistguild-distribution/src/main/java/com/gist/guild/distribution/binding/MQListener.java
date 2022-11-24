@@ -4,8 +4,6 @@ import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.distribution.delivery.service.DistributionConcurrenceService;
-import com.gist.guild.distribution.exception.DistributionException;
-import com.gist.guild.distribution.spike.controller.ControllerResponseCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -34,11 +32,6 @@ public class MQListener {
         } else if(DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType()) && msg.getContent() != null){
             log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
             DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            try {
-                ControllerResponseCache.putInCache(msg);
-            } catch (DistributionException e) {
-                log.error(e.getMessage());
-            }
             Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
             distributionChannel.send(message);
         } else if(DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType())){
@@ -53,14 +46,8 @@ public class MQListener {
         } else if(DistributionEventType.GET_DOCUMENT.equals(msg.getType()) && msg.getContent() != null){
             log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
             DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            try {
-                ControllerResponseCache.putInCache(msg);
-            } catch (DistributionException e) {
-                log.error(e.getMessage());
-            }
-            // FIXME Distribute this message ?
-//            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
-//            distributionChannel.send(message);
+            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
+            distributionChannel.send(message);
         }
         log.info(String.format("END >> Message received in Response Channel with Correlation ID [%s]",msg.getCorrelationID()));
     }

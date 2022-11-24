@@ -52,12 +52,6 @@ public class DistributionController {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
         }
-        /*try {
-            ControllerResponseCache.putInCache(distributionMessage);
-        } catch (DistributionException e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(distributionMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-        }*/
         return distributionMessage.getCorrelationID() != null ?
                 new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
                 new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
@@ -73,38 +67,8 @@ public class DistributionController {
             log.error(e.getMessage());
             return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
         }
-        /*try {
-            ControllerResponseCache.putInCache(distributionMessage);
-        } catch (DistributionException e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(distributionMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-        }*/
         return distributionMessage.getCorrelationID() != null ?
                 new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
                 new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
     }
-
-    @PostMapping("/verify/internal")
-    public ResponseEntity<DistributionMessage<Void>> integrityVerificationInternal() {
-        log.info(String.format("[DISTRIBUTION SPIKE] Internal integrity verification request received"));
-        DistributionMessage<Void> distributionMessage = null;
-        try {
-            distributionMessage = deliveryValenceService.sendIntegrityVerificationRequest();
-        } catch (DistributionException e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(distributionMessage, HttpStatus.GATEWAY_TIMEOUT);
-        }
-        return distributionMessage.getCorrelationID() != null ?
-                new ResponseEntity<>(distributionMessage, HttpStatus.OK) :
-                new ResponseEntity<>(distributionMessage, HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    @GetMapping("/{uuid}")
-    public ResponseEntity<DistributionMessage> get(@PathVariable UUID uuid) {
-        log.info(String.format("[DISTRIBUTION SPIKE] Get asynchronous result request received with Correlation ID [%s]",uuid.toString()));
-        if(ControllerResponseCache.getFromCache(uuid) != null){
-            return new ResponseEntity<>(ControllerResponseCache.removeFromCache(uuid), HttpStatus.OK);
-        } else return new ResponseEntity(uuid, HttpStatus.NO_CONTENT);
-    }
-
 }
