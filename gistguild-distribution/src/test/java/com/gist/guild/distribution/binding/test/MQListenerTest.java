@@ -127,8 +127,6 @@ public class MQListenerTest {
         item.setNonce(new Random().nextInt());
         Participant owner = new Participant();
         owner.setMail("test@test.com");
-        DocumentProposition documentProposition = new DocumentProposition();
-        documentProposition.setDescription("Test documentProposition");
         return item;
     }
 

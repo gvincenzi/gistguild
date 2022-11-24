@@ -7,7 +7,6 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Jacksonized
 public class DocumentProposition<T> {
-    String description;
     DocumentPropositionType documentPropositionType;
     String documentClass;
     T document;
@@ -19,8 +18,6 @@ public class DocumentProposition<T> {
 
         DocumentProposition<?> documentProposition1 = (DocumentProposition<?>) o;
 
-        if (getDescription() != null ? !getDescription().equals(documentProposition1.getDescription()) : documentProposition1.getDescription() != null)
-            return false;
         if (getDocumentPropositionType() != null ? !getDocumentPropositionType().equals(documentProposition1.getDocumentPropositionType()) : documentProposition1.getDocumentPropositionType() != null)
             return false;
         return getDocument() != null ? getDocument().equals(documentProposition1.getDocument()) : documentProposition1.getDocument() == null;
@@ -28,8 +25,7 @@ public class DocumentProposition<T> {
 
     @Override
     public int hashCode() {
-        int result = getDescription() != null ? getDescription().hashCode() : 0;
-        result = 31 * result + (getDocumentPropositionType() != null ? getDocumentPropositionType().hashCode() : 0);
+        int result = (getDocumentPropositionType() != null ? getDocumentPropositionType().hashCode() : 0);
         result = 31 * result + (getDocument() != null ? getDocument().hashCode() : 0);
         return result;
     }
