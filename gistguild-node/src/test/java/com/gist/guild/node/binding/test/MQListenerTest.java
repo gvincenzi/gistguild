@@ -70,7 +70,6 @@ public class MQListenerTest {
     private DocumentProposition getDocumentPropositionUserRegistration() throws JsonProcessingException {
         String json = "{\n" +
                 "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
-                "    \"description\" : \"GIST Item\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
                 "      \"mail\":\"test@test.it\",\n" +
@@ -84,12 +83,12 @@ public class MQListenerTest {
 
     private DocumentProposition getDocumentPropositionUserCancellation() throws JsonProcessingException {
         String json = "{\n" +
-                "    \"documentPropositionType\" : \"USER_CANCELLATION\",\n" +
-                "    \"description\" : \"GIST Item\",\n" +
+                "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
                 "      \"mail\":\"test@test.it\",\n" +
-                "      \"telegramUserId\":\"478956\"\n" +
+                "      \"telegramUserId\":\"478956\",\n" +
+                "      \"active\":\"false\"\n" +
                 "      }\n" +
                 "    }\n" +
                 "}";

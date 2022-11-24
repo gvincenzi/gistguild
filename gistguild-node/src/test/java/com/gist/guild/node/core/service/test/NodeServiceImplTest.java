@@ -75,16 +75,6 @@ public class NodeServiceImplTest {
 		Assert.assertTrue(serviceUnderTest.validate(items));
 	}
 
-	@Test
-	public void testDesactivateOK() throws GistGuildGenericException {
-		List<Participant> items = new ArrayList<>(1);
-		items.add(getDocumentMock("Genesis block"));
-		Mockito.when(participantRepository.findTopByOrderByTimestampDesc()).thenReturn(null);
-		Mockito.when(participantRepository.findByMail(getDocumentMock("Genesis block").getMail())).thenReturn(items);
-		Participant item = serviceUnderTest.add(getDocumentMock("Genesis block"));
-		Assert.assertFalse(item.getActive());
-	}
-
 	@Test(expected = GistGuildGenericException.class)
 	public void testDesactivateKO() throws GistGuildGenericException {
 		List<Participant> items = new ArrayList<>(1);
