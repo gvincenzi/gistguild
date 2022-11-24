@@ -81,7 +81,7 @@ public class NodeServiceImplTest {
 		items.add(getDocumentMock("Genesis block"));
 		Mockito.when(participantRepository.findTopByOrderByTimestampDesc()).thenReturn(null);
 		Mockito.when(participantRepository.findByMail(getDocumentMock("Genesis block").getMail())).thenReturn(items);
-		Participant item = serviceUnderTest.desactivate(getDocumentMock("Genesis block"));
+		Participant item = serviceUnderTest.add(getDocumentMock("Genesis block"));
 		Assert.assertFalse(item.getActive());
 	}
 
@@ -91,7 +91,7 @@ public class NodeServiceImplTest {
 		items.add(getDocumentMock("Genesis block"));
 		Mockito.when(participantRepository.findTopByOrderByTimestampDesc()).thenReturn(null);
 		Mockito.when(participantRepository.findByMail(getDocumentMock("Genesis block").getMail())).thenReturn(items);
-		Participant item = serviceUnderTest.desactivate(null);
+		Participant item = serviceUnderTest.add(null);
 	}
 
 	@Test

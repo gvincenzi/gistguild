@@ -172,7 +172,7 @@ public class MQListenerTest {
 
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
 
-        Mockito.when(participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class))).thenReturn(participant);
+        Mockito.when(participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class))).thenReturn(participant);
         Mockito.when(responseChannel.send(responseMsg)).thenReturn(Boolean.TRUE);
         mqListener.processDocumentProposition(msg);
     }

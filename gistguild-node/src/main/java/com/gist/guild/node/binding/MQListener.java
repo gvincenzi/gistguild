@@ -59,16 +59,6 @@ public class MQListener {
                         items.add(participant);
                         log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
                         break;
-                    case USER_CANCELLATION:
-                        participant = participantNodeService.desactivate(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class));
-                        documentClass = com.gist.guild.commons.message.entity.Participant.class;
-                        if(participant != null) {
-                            items.add(participant);
-                            log.info(String.format("New item with ID [%s] correctly validated and ingested", participant.getId()));
-                        } else {
-                            log.info(String.format("New item not ingested : Participant does not exist"));
-                        }
-                        break;
                 }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());

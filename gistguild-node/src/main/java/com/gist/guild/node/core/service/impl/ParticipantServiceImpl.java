@@ -129,26 +129,17 @@ public class ParticipantServiceImpl implements NodeService<com.gist.guild.common
         if (participantRepository.findByIsCorruptionDetectedTrue().size() > 0) {
             throw new GistGuildGenericException("Gist Guild registry is corrupted");
         }
-        Participant previous = participantRepository.findTopByOrderByTimestampDesc();
-        Participant newItem = getNewItem(document, previous);
-        return participantRepository.save(newItem);
-    }
 
-    @Override
-    public Participant desactivate(com.gist.guild.commons.message.entity.Participant document) throws GistGuildGenericException {
-        if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
-        }
-        if (participantRepository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
-        }
         List<Participant> participants = participantRepository.findByMail(document.getMail());
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
-            participant.setActive(Boolean.FALSE);
+            participant.setActive(document.getActive());
+            participant.setAdministrator(document.getAdministrator());
             return participantRepository.save(participant);
         } else {
-            return null;
+            Participant previous = participantRepository.findTopByOrderByTimestampDesc();
+            Participant newItem = getNewItem(document, previous);
+            return participantRepository.save(newItem);
         }
     }
 
