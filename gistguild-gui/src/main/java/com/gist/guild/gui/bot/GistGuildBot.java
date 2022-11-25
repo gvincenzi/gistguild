@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Slf4j
 @Component
@@ -43,8 +44,16 @@ public class GistGuildBot extends TelegramLongPollingBot {
             if (call_data.equals("iscrizione")) {
                 message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nInMediArt GasSMan vi iscriverà al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
             } else if (call_data.equals("cancellazione")) {
-                /*resourceManagerService.addOrUpdateParticipant(resourceManagerService.findParticipantByTelegramId(user_id).get());
-                message = itemFactory.message(chat_id, "Utente rimosso correttamente");*/
+                try {
+                    Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+                    participant.setActive(Boolean.FALSE);
+                    resourceManagerService.addOrUpdateParticipant(participant).get();
+                    message = itemFactory.message(chat_id, "Utente rimosso correttamente");
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                } catch (ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             }
         } else if (update.hasMessage()) {
             user_id = update.getMessage().getFrom().getId();
