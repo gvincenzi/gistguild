@@ -6,6 +6,8 @@ import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.gui.binding.DocumentAsyncService;
+import com.gist.guild.gui.bot.action.entity.Action;
+import com.gist.guild.gui.bot.action.repository.ActionRepository;
 import com.gist.guild.gui.client.DocumentClient;
 import com.gist.guild.gui.service.GuiConcurrenceService;
 import com.gist.guild.gui.service.ResourceManagerService;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 @Slf4j
@@ -26,6 +29,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
 
     @Autowired
     DocumentAsyncService documentAsyncService;
+
+    @Autowired
+    private ActionRepository actionRepository;
 
     @Override
     public Future<Participant> findParticipantByTelegramId(Long participant_id) {
@@ -47,7 +53,12 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Participant getParticipantByMail(String call_data) {
-        return null;
+    public Action getActionInProgress(Long telegramUserId){
+        Optional<Action> actionOptional = actionRepository.findByTelegramUserIdAndInProgressTrue(telegramUserId);
+        if(actionOptional.isPresent()){
+            return actionOptional.get();
+        } else {
+            return null;
+        }
     }
 }

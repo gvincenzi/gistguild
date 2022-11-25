@@ -1,6 +1,7 @@
 package com.gist.guild.gui.bot;
 
 import com.gist.guild.commons.message.entity.Participant;
+import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -59,13 +60,11 @@ public class GistGuildBot extends TelegramLongPollingBot {
             user_id = update.getMessage().getFrom().getId();
             Long chat_id = update.getMessage().getChatId();
 
-            //Action actionInProgress = getActionInProgress(user_id);
+            Action actionInProgress = getActionInProgress(user_id);
 
             if (update.getMessage().getText() != null && update.getMessage().getText().equalsIgnoreCase("/start")) {
                 message = itemFactory.welcomeMessage(update.getMessage(), user_id);
-            } else if (update.getMessage().getText() != null && update.getMessage().getText().contains("@")
-                //&& actionInProgress ==null
-            ) {
+            } else if (update.getMessage().getText() != null && update.getMessage().getText().contains("@") && actionInProgress ==null) {
                 Participant participant = null;
                 try {
                     participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getMessage().getFrom(), update.getMessage().getText())).get();
@@ -88,6 +87,10 @@ public class GistGuildBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private Action getActionInProgress(Long user_id) {
+        return resourceManagerService.getActionInProgress(user_id);
     }
 
     @Override

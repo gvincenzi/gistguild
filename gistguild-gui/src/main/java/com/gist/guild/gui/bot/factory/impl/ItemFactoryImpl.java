@@ -1,6 +1,7 @@
 package com.gist.guild.gui.bot.factory.impl;
 
 import com.gist.guild.commons.message.entity.Participant;
+import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +35,10 @@ public class ItemFactoryImpl implements ItemFactory {
         }
 
         if(participant != null) {
-            //TODO If participant exists
-        }
+            Action actionInProgress = resourceManagerService.getActionInProgress(participant.getTelegramUserId());
 
+            //TODO DIfferent actions
+        }
 
         message = message(update.getChatId(),String.format("%s,\nScegli tra le seguenti opzioni:", participant == null ? "Benvenuto nel sistema GIST Guild" : "Bentornato nel sistema GIST Guild"));
 
