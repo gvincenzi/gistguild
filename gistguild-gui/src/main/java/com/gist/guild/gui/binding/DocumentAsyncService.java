@@ -41,7 +41,9 @@ public class DocumentAsyncService<T extends Document> {
         if(!cacheMap.containsKey(correlationID)){
             cacheMap.put(correlationID, new ArrayList<>());
         }
-        cacheMap.get(correlationID).add(document);
+        if(document != null){
+            cacheMap.get(correlationID).add(document);
+        }
     }
 
 }

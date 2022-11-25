@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.Participant;
+import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.service.GuiConcurrenceService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,48 +22,54 @@ import java.util.List;
 public class MQListener {
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Autowired
-    private DocumentAsyncService<Participant> documentAsyncService;
+    private DocumentAsyncService<Participant> participantAsyncService;
+
+    @Autowired
+    private DocumentAsyncService<Product> productAsyncService;
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
         log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && GuiConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID())) {
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
+            log.info(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
             GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            try {
+            putInCache(msg);
+        } else if (DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType()) && msg.getContent() != null) {
+            //FIXNME How ?
+        } else if (DistributionEventType.GET_DOCUMENT.equals(msg.getType())) {
+            log.info(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
+            GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
+            putInCache(msg);
+        }
+        log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+    }
+
+    private void putInCache(DistributionMessage<List<?>> msg) {
+        try {
+            if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                if (msg.getContent() == null || msg.getContent().isEmpty()) {
+                    participantAsyncService.putInCache(msg.getCorrelationID(), null);
+                }
                 for (Object item : msg.getContent()) {
                     // PARTICIPANT DOCUMENT
                     if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
                         Participant participant = mapper.readValue(mapper.writeValueAsString(item), Participant.class);
-                        log.info(String.format("Participant [%s] created or updated",participant.getMail()));
-                        documentAsyncService.putInCache(msg.getCorrelationID(), participant);
+                        participantAsyncService.putInCache(msg.getCorrelationID(), participant);
                     }
                 }
-            } catch (JsonProcessingException e) {
-                // IT IS NOT A PARTICIPANT DOCUMENT
-            }
-        } else if (DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType()) && msg.getContent() != null) {
-            //FIXNME How ?
-        } else if (DistributionEventType.GET_DOCUMENT.equals(msg.getType())){
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
-            GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            if(msg.getContent() == null || msg.getContent().isEmpty()){
-                documentAsyncService.putInCache(msg.getCorrelationID(), null);
-            } else {
-                try {
-                    for (Object item : msg.getContent()) {
-                        // PARTICIPANT DOCUMENT
-                        if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-                            Participant participant = mapper.readValue(mapper.writeValueAsString(item), Participant.class);
-                            log.info(String.format("Participant [%s] created or updated", participant.getMail()));
-                            documentAsyncService.putInCache(msg.getCorrelationID(), participant);
-                        }
+            } else if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                if (msg.getContent() == null || msg.getContent().isEmpty()) {
+                    productAsyncService.putInCache(msg.getCorrelationID(), null);
+                }
+                for (Object item : msg.getContent()) {
+                    // PRODUCT DOCUMENT
+                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Product.class.getSimpleName())) {
+                        Product product = mapper.readValue(mapper.writeValueAsString(item), Product.class);
+                        productAsyncService.putInCache(msg.getCorrelationID(), product);
                     }
-                } catch (JsonProcessingException e) {
-                    // IT IS NOT A PARTICIPANT DOCUMENT
                 }
             }
+        } catch (JsonProcessingException e) {
         }
-        log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 }

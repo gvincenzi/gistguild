@@ -13,6 +13,7 @@ import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.ParticipantRepository;
+import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class MQListener {
 
     @Autowired
     ParticipantRepository participantRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     @Autowired
     MessageChannel responseChannel;
@@ -113,10 +117,14 @@ public class MQListener {
 
         List<?> items = null;
 
-        // PARTICIPANT DOCUMENT
         if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-            Method repositoryMethod = ParticipantRepository.class.getDeclaredMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
+            // PARTICIPANT DOCUMENT
+            Method repositoryMethod = ParticipantRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
             items = (List<Participant>) repositoryMethod.invoke(participantRepository, arrayParamValue);
+        } else if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Product.class.getSimpleName())) {
+            // PRODUCT DOCUMENT
+            Method repositoryMethod = ProductRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
+            items = (List<Product>) repositoryMethod.invoke(productRepository, arrayParamValue);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();

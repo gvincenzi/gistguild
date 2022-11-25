@@ -3,6 +3,7 @@ package com.gist.guild.commons.message.entity;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.Objects;
 
 @Data
@@ -11,8 +12,8 @@ public class Product extends Document {
     private String description;
     private String url;
     private String password;
-    private BigDecimal price;
-    private Integer availableQuantity;
+    private Long price;
+    private Long availableQuantity;
     private Boolean active = Boolean.TRUE;
     private Boolean delivery = Boolean.FALSE;
 
@@ -34,5 +35,13 @@ public class Product extends Document {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, description, active, delivery);
+    }
+
+    @Override
+    public String toString() {
+        return  "Nome :'" + name + '\'' +
+                "\nDescrizione :'" + description + '\''+
+                "\nPrezzo :'" + NumberFormat.getCurrencyInstance().format(price) + '\'' +
+                (delivery!=null && delivery ? " (con consegna a domicilio)" : "");
     }
 }

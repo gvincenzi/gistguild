@@ -5,6 +5,7 @@ import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.Participant;
+import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.binding.DocumentAsyncService;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.repository.ActionRepository;
@@ -36,7 +37,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Override
     public Future<Participant> findParticipantByTelegramId(Long participant_id) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
-        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class,participant_id));
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, participant_id));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Participant.class.getSimpleName(), "findByTelegramUserIdAndActiveTrue", params);
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
@@ -53,12 +54,29 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Action getActionInProgress(Long telegramUserId){
+    public Action getActionInProgress(Long telegramUserId) {
         Optional<Action> actionOptional = actionRepository.findByTelegramUserIdAndInProgressTrue(telegramUserId);
-        if(actionOptional.isPresent()){
+        if (actionOptional.isPresent()) {
             return actionOptional.get();
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Future<List<Product>> getProducts(Boolean all) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(0);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrue", params);
+        return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<Product> getProduct(String call_data) {
+        String[] split = call_data.split("#");
+        String productName = (split[1]);
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<String>(String.class, productName));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findByName", params);
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 }

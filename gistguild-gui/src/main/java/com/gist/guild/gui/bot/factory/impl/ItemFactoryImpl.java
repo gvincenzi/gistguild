@@ -53,7 +53,10 @@ public class ItemFactoryImpl implements ItemFactory {
             button.setCallbackData("iscrizione");
             rowInline1.add(button);
         } else {
-//            rowInline1.add(new InlineKeyboardButton().setText("Catalogo").setCallbackData("catalogo"));
+            InlineKeyboardButton button1 = new InlineKeyboardButton();
+            button1.setText("Catalogo");
+            button1.setCallbackData("catalogo");
+            rowInline1.add(button1);
 //            rowInline2.add(new InlineKeyboardButton().setText("I tuoi ordini").setCallbackData("listaOrdini"));
 //            rowInline3.add(new InlineKeyboardButton().setText("Credito residuo").setCallbackData("creditoResiduo"));
 //            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData("ricaricaCredito"));

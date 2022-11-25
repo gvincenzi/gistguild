@@ -31,8 +31,10 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         if(products.size() > 0){
             Product product = products.iterator().next();
             product.setActive(document.getActive());
+            product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
+            product.setName(document.getName());
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
@@ -52,6 +54,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setPreviousId(previous != null ? previous.getId() : GENESIS);
         product.setNodeInstanceName(instanceName);
         product.setActive(document.getActive());
+        product.setPrice(document.getPrice());
         product.setAvailableQuantity(document.getAvailableQuantity());
         product.setDelivery(document.getDelivery());
         product.setDescription(document.getDescription());
@@ -79,6 +82,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setPreviousId(document.getPreviousId());
             product.setNodeInstanceName(document.getNodeInstanceName());
             product.setActive(document.getActive());
+            product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
             product.setDescription(document.getDescription());
@@ -90,6 +94,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Product product = repository.findById(document.getId()).get();
             product.setActive(document.getActive());
+            product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
             product.setDescription(document.getDescription());
