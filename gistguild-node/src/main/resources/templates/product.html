@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Amministrazione della copia locale di un Registro</title>
+    <script th:src="@{webjars/jquery/3.4.0/jquery.min.js}"></script>
+    <link rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/">Gestione partecipanti</a>
+    <a class="navbar-brand" href="#">Gestione prodotti</a>
+</nav>
+
+<main role="main" class="container">
+
+    <div class="starter-template">
+        <h1>Lista dei prodotti</h1>
+        <h2>
+            <span th:text="'Il nome della tua istanza : ' + ${instanceName}"></span>
+        </h2>
+        <h3><td th:text="${startup} ? 'Il Registro è correttamente inizializzato' : 'Il Registro non è correttamente inizializzato'" /></h3>
+        <h3><td th:text="${validation} ? 'Il Registro è valido' : 'Il Registro è corrotto'" /></h3>
+    </div>
+
+    <div style="display: flex; margin: 1em">
+        <form th:action="@{/init}">
+            <button class="btn btn-primary" type="submit" style="margin: 0.5em">Aggiornamento della copia</button>
+        </form>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Descrizione</th>
+                <th scope="col">URL</th>
+                <th scope="col">Prezzo</th>
+                <th scope="col">Quantità disponibile</th>
+                <th scope="col">Consegna</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td scope="row" th:text="${item.name}"></td>
+                <td scope="row" th:text="${item.description}"></td>
+                <td scope="row" th:text="${item.url}"></td>
+                <td scope="row" th:text="${item.price}"></td>
+                <td scope="row" th:text="${item.availableQuantity}"></td>
+                <td scope="row" th:text="${item.delivery}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+</main>
+<!-- /.container -->
+
+<script type="text/javascript" th:src="@{webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+</body>
+</html>
