@@ -43,7 +43,7 @@ public class MQListener {
             msg.setContent(documents);
             Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
             distributionChannel.send(message);
-        } else if(DistributionEventType.GET_DOCUMENT.equals(msg.getType()) && msg.getContent() != null){
+        } else if(DistributionEventType.GET_DOCUMENT.equals(msg.getType())){
             log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
             DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
             Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();

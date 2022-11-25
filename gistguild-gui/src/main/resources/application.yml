@@ -1,0 +1,21 @@
+info:
+  name: Gist Guild - GUI
+  artifact: '@project.artifactId@'
+  version: '@project.version@'
+
+spring:
+  application:
+    name: gistguild-gui
+  rabbitmq:
+    addresses: amqp://test
+  cloud:
+    stream:
+      bindings:
+        distributionChannel:
+          destination: distributionChannel
+
+gistguild:
+  spike:
+    username: username
+    password: password
+    url: http://localhost:8882/spike

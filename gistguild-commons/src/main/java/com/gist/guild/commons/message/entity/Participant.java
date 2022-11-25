@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class Participant extends Document {
     private String mail;
-    private Integer telegramUserId;
+    private Long telegramUserId;
     private Boolean active = Boolean.TRUE;
     private Boolean administrator = Boolean.FALSE;
 

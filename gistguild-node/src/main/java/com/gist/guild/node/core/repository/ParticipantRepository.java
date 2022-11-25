@@ -9,6 +9,6 @@ public interface ParticipantRepository extends DocumentRepository<Participant>, 
     List<Participant> findByActiveTrue();
     List<Participant> findByAdministratorTrue();
     List<Participant> findByMail(String mail);
-    List<Participant> findByTelegramUserId(Integer telegramUserId);
-    List<Participant> findByTelegramUserIdAndActiveTrue(Integer id);
+    List<Participant> findByTelegramUserId(Long telegramUserId);
+    List<Participant> findByTelegramUserIdAndActiveTrue(Long id);
 }

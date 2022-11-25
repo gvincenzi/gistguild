@@ -203,7 +203,7 @@ public class NodeServiceImplTest {
 	public Participant getDocumentMock(String title){
 		Participant participant = new Participant();
 		participant.setMail("test@test.it");
-		participant.setTelegramUserId(478956);
+		participant.setTelegramUserId(478956L);
 		return participant;
 	}
 }

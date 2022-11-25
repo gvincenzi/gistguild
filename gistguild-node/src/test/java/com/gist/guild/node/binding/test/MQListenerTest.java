@@ -107,7 +107,7 @@ public class MQListenerTest {
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
         participant.setMail("test@test.it");
-        participant.setTelegramUserId(478956);
+        participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
@@ -146,7 +146,7 @@ public class MQListenerTest {
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
         participant.setMail("test@test.it");
-        participant.setTelegramUserId(478956);
+        participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();

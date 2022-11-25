@@ -56,8 +56,7 @@ public class DeliveryValenceServiceImpl implements DeliveryValenceService {
         distributionMessage.setParams(params);
         Message<DistributionMessage<Void>> msg = MessageBuilder.withPayload(distributionMessage).build();
         requestChannel.send(msg);
-        DistributionConcurrenceService.setLastBlockingCorrelationID(distributionMessage.getCorrelationID());
-        DistributionConcurrenceService.getCorrelationIDs().add(DistributionConcurrenceService.getLastBlockingCorrelationID());
+        DistributionConcurrenceService.getCorrelationIDs().add(distributionMessage.getCorrelationID());
         return distributionMessage;
     }
 

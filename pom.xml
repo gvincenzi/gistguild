@@ -27,7 +27,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <telegram.version>4.1.2</telegram.version>
+        <telegram.version>6.1.0</telegram.version>
         <spring-cloud.version>Greenwich.SR4</spring-cloud.version>
         <lombok.version>1.18.16</lombok.version>
         <jackson.version>2.13.0</jackson.version>
