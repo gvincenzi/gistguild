@@ -11,7 +11,8 @@ import org.springframework.context.event.EventListener;
 @Log
 @Configuration
 public class StartupConfig {
-    public static volatile Boolean startupProcessed = Boolean.FALSE;
+    public static volatile Boolean startupParticipantProcessed = Boolean.FALSE;
+    public static volatile Boolean startupProductProcessed = Boolean.FALSE;
 
     @Autowired
     SpikeClient spikeClient;
@@ -27,7 +28,12 @@ public class StartupConfig {
             log.info("Integrity verification request sent");
         } else {
             log.info("Startup node not required");
-            startupProcessed = Boolean.TRUE;
+            startupParticipantProcessed = Boolean.TRUE;
+            startupProductProcessed = Boolean.TRUE;
         }
+    }
+
+    public static Boolean getStartupProcessed(){
+        return startupParticipantProcessed && startupProductProcessed;
     }
 }

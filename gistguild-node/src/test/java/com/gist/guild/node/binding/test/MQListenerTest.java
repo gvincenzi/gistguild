@@ -112,11 +112,11 @@ public class MQListenerTest {
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
         participant.setNonce(nonce);
-        participant.setId(NodeUtils.calculateHash(participant));
+        participant.setId(participantNodeService.calculateHash(participant));
         while (!NodeUtils.isHashResolved(participant, difficultLevel)) {
             nonce = random.nextInt();
             participant.setNonce(nonce);
-            participant.setId(NodeUtils.calculateHash(participant));
+            participant.setId(participantNodeService.calculateHash(participant));
         }
 
         List<Document> items = new ArrayList<>();
@@ -151,11 +151,11 @@ public class MQListenerTest {
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
         participant.setNonce(nonce);
-        participant.setId(NodeUtils.calculateHash(participant));
+        participant.setId(participantNodeService.calculateHash(participant));
         while (!NodeUtils.isHashResolved(participant, difficultLevel)) {
             nonce = random.nextInt();
             participant.setNonce(nonce);
-            participant.setId(NodeUtils.calculateHash(participant));
+            participant.setId(participantNodeService.calculateHash(participant));
         }
 
         participant.setActive(Boolean.FALSE);

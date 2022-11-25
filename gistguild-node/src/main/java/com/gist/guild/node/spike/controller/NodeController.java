@@ -36,7 +36,7 @@ public class NodeController {
         List<Participant> items = participantRepository.findAll();
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
-        model.addAttribute("startup", StartupConfig.startupProcessed);
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
         model.addAttribute("items", items);
 
         return "welcome"; //view

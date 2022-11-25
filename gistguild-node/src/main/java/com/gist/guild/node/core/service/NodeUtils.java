@@ -1,6 +1,7 @@
 package com.gist.guild.node.core.service;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
+import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.node.core.document.Participant;
 
 import java.nio.charset.StandardCharsets;
@@ -13,7 +14,7 @@ public class NodeUtils {
     private static final String ALGORITHM = "SHA-256";
     private static final String REGEX_DIGIT = "[0-9].*";
 
-    public static boolean isHashResolved(Participant document, Integer difficultLevel) {
+    public static boolean isHashResolved(Document document, Integer difficultLevel) {
         List<Integer> digits = new ArrayList<>(difficultLevel);
 
         Integer index = 0;
@@ -27,16 +28,6 @@ public class NodeUtils {
 
         Integer sum = digits.parallelStream().reduce(0, Integer::sum);
         return sum % difficultLevel == 0;
-    }
-
-    public static String calculateHash(Participant document) throws GistGuildGenericException {
-        return NodeUtils.applySha256(
-                document.getPreviousId() +
-                        document.getTimestamp().toEpochMilli() +
-                        document.getNonce() +
-                        document.getNodeInstanceName() +
-                        document.getMail()
-        );
     }
 
     public static String applySha256(String input) throws GistGuildGenericException {
