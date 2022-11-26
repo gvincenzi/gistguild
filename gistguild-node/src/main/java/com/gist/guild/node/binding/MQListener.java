@@ -10,8 +10,10 @@ import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.StartupConfig;
+import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
+import com.gist.guild.node.core.repository.OrderRepository;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
@@ -39,10 +41,16 @@ public class MQListener {
     NodeService<com.gist.guild.commons.message.entity.Product, Product> productNodeService;
 
     @Autowired
+    NodeService<com.gist.guild.commons.message.entity.Order, Order> orderNodeService;
+
+    @Autowired
     ParticipantRepository participantRepository;
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     @Autowired
     MessageChannel responseChannel;
@@ -74,6 +82,13 @@ public class MQListener {
                         log.info(String.format("New product with ID [%s] correctly validated and ingested", product.getId()));
                         sendResponseMessage(msg, items, documentClass);
                         break;
+                    case ORDER_REGISTRATION:
+                        Order order = orderNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Order.class));
+                        documentClass = com.gist.guild.commons.message.entity.Order.class;
+                        items.add(order);
+                        log.info(String.format("New order with ID [%s] correctly validated and ingested", order.getId()));
+                        sendResponseMessage(msg, items, documentClass);
+                        break;
                 }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
@@ -85,9 +100,7 @@ public class MQListener {
                 processGetDocumentRequest(msg);
             } catch (NoSuchMethodException e) {
                 log.error(e.getMessage());
-            } catch (InvocationTargetException e) {
-                log.error(e.getMessage());
-            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException | IllegalAccessException e) {
                 log.error(e.getMessage());
             }
         }
@@ -171,6 +184,22 @@ public class MQListener {
             responseProductMessage.setContent(productList);
             Message<DistributionMessage<List<Product>>> responseProductMsg = MessageBuilder.withPayload(responseProductMessage).build();
             responseChannel.send(responseProductMsg);
+
+            // ORDER DOCUMENT
+            List<Order> orderList = orderNodeService.findAll();
+            Boolean validationOrder = orderNodeService.validate(orderList);
+            if (!validationOrder) {
+                corruptionDetected(msg);
+            }
+            DistributionMessage<List<Order>> responseOrderMessage = new DistributionMessage<>();
+            responseOrderMessage.setCorrelationID(msg.getCorrelationID());
+            responseOrderMessage.setInstanceName(instanceName);
+            responseOrderMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
+            responseOrderMessage.setDocumentClass(com.gist.guild.commons.message.entity.Order.class);
+            responseOrderMessage.setValid(validationOrder);
+            responseOrderMessage.setContent(orderList);
+            Message<DistributionMessage<List<Order>>> responseOrderMsg = MessageBuilder.withPayload(responseOrderMessage).build();
+            responseChannel.send(responseOrderMsg);
         } catch (GistGuildGenericException e) {
             log.error(e.getMessage());
         }
@@ -178,30 +207,36 @@ public class MQListener {
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
-        log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.getStartupProcessed()) {
+            log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     for (Object item : msg.getContent()) {
                         // PARTICIPANT DOCUMENT
-                        if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-                            if (participantNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
-                                log.info(String.format("New participant with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
-                            } else {
-                                corruptionDetected(msg);
-                            }
+                        if (participantNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
+                            log.info(String.format("New participant with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
+                        } else {
+                            corruptionDetected(msg);
                         }
                     }
                 }
                 if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     for (Object item : msg.getContent()) {
                         // PRODUCT DOCUMENT
-                        if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Product.class.getSimpleName())) {
-                            if (productNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Product.class))) {
-                                log.info(String.format("New product with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Product) item).getId()));
-                            } else {
-                                corruptionDetected(msg);
-                            }
+                        if (productNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Product.class))) {
+                            log.info(String.format("New product with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Product) item).getId()));
+                        } else {
+                            corruptionDetected(msg);
+                        }
+                    }
+                }
+                if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    for (Object item : msg.getContent()) {
+                        // ORDER DOCUMENT
+                        if (orderNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Order.class))) {
+                            log.info(String.format("New order with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Order) item).getId()));
+                        } else {
+                            corruptionDetected(msg);
                         }
                     }
                 }
@@ -225,6 +260,13 @@ public class MQListener {
                     }
                     productNodeService.init(products);
                     StartupConfig.startupProductProcessed = Boolean.TRUE;
+                } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    List<com.gist.guild.commons.message.entity.Order> orders = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        orders.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Order.class));
+                    }
+                    orderNodeService.init(orders);
+                    StartupConfig.startupOrderProcessed = Boolean.TRUE;
                 }
 
                 if (Boolean.TRUE.equals(StartupConfig.getStartupProcessed())) {

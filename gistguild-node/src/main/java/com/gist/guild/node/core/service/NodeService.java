@@ -61,10 +61,10 @@ public abstract class NodeService<T extends Document, S extends T> {
 
 	public void init(List<T> content) throws GistGuildGenericException {
 		Collections.sort(content);
-		List<S> products = getRepository().findAllByOrderByTimestampAsc();
+		List<S> documents = getRepository().findAllByOrderByTimestampAsc();
 		for (int i = 0; i < content.size(); i++) {
-			if (i < products.size()) {
-				if (!products.get(i).getId().equals(content.get(i).getId())) {
+			if (i < documents.size()) {
+				if (!documents.get(i).getId().equals(content.get(i).getId())) {
 					throw new GistGuildGenericException("Guild registry has been corrupted");
 				}
 			} else {

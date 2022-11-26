@@ -81,6 +81,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
     public Boolean updateLocal(com.gist.guild.commons.message.entity.Product document) throws GistGuildGenericException {
         if (repository.findByIsCorruptionDetectedTrue().size() == 0 && !repository.existsById(document.getId())) {
             Product product = new Product();
+            product.setId(document.getId());
             product.setPreviousId(document.getPreviousId());
             product.setNodeInstanceName(document.getNodeInstanceName());
             product.setActive(document.getActive());
@@ -91,6 +92,10 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setName(document.getName());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
+            product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
+            product.setOwnerMail(document.getOwnerMail());
+            product.setTimestamp(document.getTimestamp());
+            product.setNonce(document.getNonce());
             repository.save(product);
             return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){

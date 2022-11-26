@@ -13,6 +13,7 @@ import org.springframework.context.event.EventListener;
 public class StartupConfig {
     public static volatile Boolean startupParticipantProcessed = Boolean.FALSE;
     public static volatile Boolean startupProductProcessed = Boolean.FALSE;
+    public static volatile Boolean startupOrderProcessed = Boolean.FALSE;
 
     @Autowired
     SpikeClient spikeClient;
@@ -30,10 +31,11 @@ public class StartupConfig {
             log.info("Startup node not required");
             startupParticipantProcessed = Boolean.TRUE;
             startupProductProcessed = Boolean.TRUE;
+            startupOrderProcessed = Boolean.TRUE;
         }
     }
 
     public static Boolean getStartupProcessed(){
-        return startupParticipantProcessed && startupProductProcessed;
+        return startupParticipantProcessed && startupProductProcessed && startupOrderProcessed;
     }
 }
