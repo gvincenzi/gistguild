@@ -11,6 +11,9 @@ public interface ResourceManagerService {
     Future<Participant> findParticipantByTelegramId(Long participant_id);
     Future<Participant> addOrUpdateParticipant(Participant participant);
     Action getActionInProgress(Long telegramUserId);
+    void saveAction(Action action);
+    void deleteActionInProgress(Action action);
     Future<List<Product>> getProducts(Boolean all);
-    Future<Product> getProduct(String call_data);
+    Future<Product> getProduct(String productName);
+    Future<Product> updateProduct(Product product);
 }

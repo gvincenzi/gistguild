@@ -71,12 +71,31 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<Product> getProduct(String call_data) {
-        String[] split = call_data.split("#");
-        String productName = (split[1]);
+    public Future<Product> getProduct(String productName) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<String>(String.class, productName));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findByName", params);
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<Product> updateProduct(Product product) {
+        DocumentProposition documentProposition = new DocumentProposition();
+        documentProposition.setDocumentPropositionType(DocumentPropositionType.PRODUCT_REGISTRATION);
+        documentProposition.setDocumentClass(Product.class.getSimpleName());
+        documentProposition.setDocument(product);
+        ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
+        GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public void saveAction(Action action) {
+        actionRepository.save(action);
+    }
+
+    @Override
+    public void deleteActionInProgress(Action action) {
+        actionRepository.delete(action);
     }
 }

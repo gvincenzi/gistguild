@@ -18,7 +18,7 @@ public class Action {
     @Column
     private Long telegramUserIdToManage;
     @Column
-    private Long productIdToManage;
+    private String productIdToManage;
     @Column
     private ActionType actionType;
     @Column

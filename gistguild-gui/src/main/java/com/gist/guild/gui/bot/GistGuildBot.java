@@ -3,6 +3,7 @@ package com.gist.guild.gui.bot;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.bot.action.entity.Action;
+import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +93,9 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 }
             } else if (call_data.startsWith("detailProduct#")) {
                 try {
-                    Product product = resourceManagerService.getProduct(call_data).get();
+                    String[] split = call_data.split("#");
+                    String productName = (split[1]);
+                    Product product = resourceManagerService.getProduct(productName).get();
                     message = itemFactory.message(chat_id, product.toString());
                     InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                     List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -135,6 +138,28 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 } catch (ExecutionException e) {
                     log.error(e.getMessage());
                 }
+            } else if (call_data.startsWith("catalogmng#url#")) {
+                String[] split = call_data.split("#");
+                String productId = split[2];
+                Action action = new Action();
+                action.setActionType(ActionType.PRODUCT_URL);
+                action.setProductIdToManage(productId);
+                action.setTelegramUserId(user_id);
+                resourceManagerService.saveAction(action);
+                message = itemFactory.productUrlManagement(chat_id);
+            } else if (call_data.startsWith("catalogmng#active#")) {
+                try {
+                    String[] split = call_data.split("#");
+                    String productName = split[2];
+                    Product product = resourceManagerService.getProduct(productName).get();
+                    product.setActive(!product.getActive());
+                    product = resourceManagerService.updateProduct(product).get();
+                    message = itemFactory.message(chat_id, String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.",product.getName()));
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                } catch (ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             } else if (call_data.startsWith("welcomeMenu")) {
                 message = itemFactory.welcomeMessage(update.getCallbackQuery().getMessage(), user_id);
             }
@@ -160,7 +185,8 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
-
+            } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains("@") && actionInProgress != null) {
+                message = itemFactory.welcomeMessage(update.getMessage(), user_id);
             }
         }
 
