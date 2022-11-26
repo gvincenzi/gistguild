@@ -2,7 +2,6 @@ package com.gist.guild.commons.message.entity;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Objects;
 
@@ -16,6 +15,8 @@ public class Product extends Document {
     private Long availableQuantity;
     private Boolean active = Boolean.TRUE;
     private Boolean delivery = Boolean.FALSE;
+    private String ownerMail;
+    private Long ownerTelegramUserId;
 
     @Override
     public boolean equals(Object o) {
@@ -23,6 +24,8 @@ public class Product extends Document {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
         return id.equals(product.id) &&
+                ownerMail.equals(product.ownerMail) &&
+                ownerTelegramUserId.equals(product.ownerTelegramUserId) &&
                 name.equals(product.name) &&
                 description.equals(product.description) &&
                 url.equals(product.url) &&

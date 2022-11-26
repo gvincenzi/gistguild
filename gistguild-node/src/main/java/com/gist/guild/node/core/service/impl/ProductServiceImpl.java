@@ -61,6 +61,8 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setName(document.getName());
         product.setPassword(document.getPassword());
         product.setUrl(document.getUrl());
+        product.setOwnerMail(document.getOwnerMail());
+        product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
@@ -100,6 +102,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
+            // WE CANNOT MODIFY OWNER AND NAME
             repository.save(product);
             return validate(repository.findAllByOrderByTimestampAsc());
         }
@@ -114,7 +117,9 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getName()
+                        document.getName() +
+                        document.getOwnerMail()+
+                        document.getOwnerTelegramUserId()
         );
     }
 }
