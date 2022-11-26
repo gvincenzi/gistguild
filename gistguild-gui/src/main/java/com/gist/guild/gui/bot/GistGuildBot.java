@@ -1,5 +1,6 @@
 package com.gist.guild.gui.bot;
 
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.bot.action.entity.Action;
@@ -57,9 +58,41 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     participant.setActive(Boolean.FALSE);
                     resourceManagerService.addOrUpdateParticipant(participant).get();
                     message = itemFactory.message(chat_id, "Utente rimosso correttamente");
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
-                } catch (ExecutionException e) {
+                }
+            } else if (call_data.startsWith("listaOrdini")) {
+                try {
+                    List<Order> orders = resourceManagerService.getOrders(user_id).get();
+                    if (orders.isEmpty()) {
+                        message = itemFactory.message(chat_id, "Non hai ordini in corso");
+                    } else {
+                        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                        Collections.sort(orders);
+                        for (Order order : orders) {
+                            List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                            InlineKeyboardButton button = new InlineKeyboardButton();
+                            button.setText(order.getProductName());
+                            // FIXME order.getOrderID() is too long for button
+                            button.setCallbackData("orderDetails#" + order.getProductName());
+                            rowInline.add(button);
+                            rowsInline.add(rowInline);
+                        }
+
+                        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                        InlineKeyboardButton button2 = new InlineKeyboardButton();
+                        button2.setText("Torna al menù principale");
+                        button2.setCallbackData("welcomeMenu");
+                        rowInline.add(button2);
+                        rowsInline.add(rowInline);
+
+                        markupInline.setKeyboard(rowsInline);
+                        message = itemFactory.message(chat_id, "Qui di seguito la lista dei tuoi ordini in corso, per accedere ai dettagli cliccare sull'ordine:\n");
+
+                        ((SendMessage) message).setReplyMarkup(markupInline);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
             } else if (call_data.startsWith("catalogo")) {
@@ -154,7 +187,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     Product product = resourceManagerService.getProduct(productName).get();
                     product.setActive(!product.getActive());
                     product = resourceManagerService.updateProduct(product).get();
-                    message = itemFactory.message(chat_id, String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.",product.getName()));
+                    message = itemFactory.message(chat_id, String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.", product.getName()));
                 } catch (InterruptedException e) {
                     log.error(e.getMessage());
                 } catch (ExecutionException e) {

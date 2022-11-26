@@ -1,5 +1,6 @@
 package com.gist.guild.gui.service;
 
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.bot.action.entity.Action;
@@ -16,4 +17,5 @@ public interface ResourceManagerService {
     Future<List<Product>> getProducts(Boolean all);
     Future<Product> getProduct(String productName);
     Future<Product> updateProduct(Product product);
+    Future<List<Order>> getOrders(Long telegramUserId);
 }

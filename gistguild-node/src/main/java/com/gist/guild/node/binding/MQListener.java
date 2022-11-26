@@ -138,6 +138,10 @@ public class MQListener {
             // PRODUCT DOCUMENT
             Method repositoryMethod = ProductRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
             items = (List<Product>) repositoryMethod.invoke(productRepository, arrayParamValue);
+        } else if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Order.class.getSimpleName())) {
+            // ORDER DOCUMENT
+            Method repositoryMethod = OrderRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
+            items = (List<Order>) repositoryMethod.invoke(orderRepository, arrayParamValue);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
@@ -207,8 +211,8 @@ public class MQListener {
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
+        log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.getStartupProcessed()) {
-            log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     for (Object item : msg.getContent()) {

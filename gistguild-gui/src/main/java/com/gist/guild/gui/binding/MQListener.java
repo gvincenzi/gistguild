@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.service.GuiConcurrenceService;
@@ -26,6 +27,9 @@ public class MQListener {
 
     @Autowired
     private DocumentAsyncService<Product> productAsyncService;
+
+    @Autowired
+    private DocumentAsyncService<Order> orderAsyncService;
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
@@ -66,6 +70,17 @@ public class MQListener {
                     if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Product.class.getSimpleName())) {
                         Product product = mapper.readValue(mapper.writeValueAsString(item), Product.class);
                         productAsyncService.putInCache(msg.getCorrelationID(), product);
+                    }
+                }
+            } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                if (msg.getContent() == null || msg.getContent().isEmpty()) {
+                    orderAsyncService.putInCache(msg.getCorrelationID(), null);
+                }
+                for (Object item : msg.getContent()) {
+                    // ORDER DOCUMENT
+                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Order.class.getSimpleName())) {
+                        Order order = mapper.readValue(mapper.writeValueAsString(item), Order.class);
+                        orderAsyncService.putInCache(msg.getCorrelationID(), order);
                     }
                 }
             }

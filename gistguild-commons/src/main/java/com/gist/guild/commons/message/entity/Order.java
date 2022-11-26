@@ -9,5 +9,5 @@ public class Order extends Document {
     private String address;
     private String productName;
     private String customerMail;
-    private String customerTelegramUserId;
+    private Long customerTelegramUserId;
 }

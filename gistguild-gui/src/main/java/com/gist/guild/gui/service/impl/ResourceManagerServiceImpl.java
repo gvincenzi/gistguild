@@ -4,6 +4,7 @@ import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.DocumentProposition;
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.gui.binding.DocumentAsyncService;
@@ -87,6 +88,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
         GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<List<Order>> getOrders(Long telegramUserId) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserId", params);
+        return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
     @Override
