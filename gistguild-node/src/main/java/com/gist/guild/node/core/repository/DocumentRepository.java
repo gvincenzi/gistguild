@@ -6,4 +6,5 @@ public interface DocumentRepository<T> {
     List<T> findByIsCorruptionDetectedTrue();
     List<T> findAllByOrderByTimestampAsc();
     T findTopByOrderByTimestampDesc();
+    List<T> findByExternalShortId(Long externalShortId);
 }

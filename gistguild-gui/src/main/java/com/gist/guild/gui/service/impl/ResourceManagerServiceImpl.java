@@ -72,10 +72,10 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<Product> getProduct(String productName) {
+    public Future<Product> getProduct(Long productExternalShortId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
-        params.add(new DocumentRepositoryMethodParameter<String>(String.class, productName));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findByName", params);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, productExternalShortId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findByExternalShortId", params);
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 

@@ -53,6 +53,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             participant.setId(calculateHash(participant));
         }
 
+        participant.setExternalShortId(repository.count());
         return participant;
     }
 

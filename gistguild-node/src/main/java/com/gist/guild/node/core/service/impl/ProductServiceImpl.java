@@ -74,6 +74,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setId(calculateHash(product));
         }
 
+        product.setExternalShortId(repository.count());
         return product;
     }
 

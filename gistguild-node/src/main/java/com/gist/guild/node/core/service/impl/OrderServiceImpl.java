@@ -2,16 +2,13 @@ package com.gist.guild.node.core.service.impl;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.node.core.document.Order;
-import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.OrderRepository;
-import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
 
 @Data
@@ -64,6 +61,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setId(calculateHash(order));
         }
 
+        order.setExternalShortId(repository.count());
         return order;
     }
 

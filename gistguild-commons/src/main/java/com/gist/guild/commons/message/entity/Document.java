@@ -14,6 +14,7 @@ public class Document implements Comparable<Document>{
     Integer nonce;
     String nodeInstanceName;
     Boolean isCorruptionDetected = Boolean.FALSE;
+    Long externalShortId;
 
     @Override
     public int compareTo(Document arg0) {

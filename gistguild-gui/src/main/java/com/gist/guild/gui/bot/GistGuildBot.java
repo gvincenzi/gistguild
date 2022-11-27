@@ -74,8 +74,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                             List<InlineKeyboardButton> rowInline = new ArrayList<>();
                             InlineKeyboardButton button = new InlineKeyboardButton();
                             button.setText(order.getProductName());
-                            // FIXME order.getOrderID() is too long for button
-                            button.setCallbackData("orderDetails#" + order.getProductName());
+                            button.setCallbackData("orderDetails#" + order.getExternalShortId());
                             rowInline.add(button);
                             rowsInline.add(rowInline);
                         }
@@ -109,7 +108,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                             List<InlineKeyboardButton> rowInline = new ArrayList<>();
                             InlineKeyboardButton button = new InlineKeyboardButton();
                             button.setText((participant.getAdministrator() ? (product.getActive() ? "+" : "-") : "") + product.getName() + (product.getAvailableQuantity() != null ? String.format(" (disponibilità: %d)", product.getAvailableQuantity().intValue()) : ""));
-                            button.setCallbackData("detailProduct#" + product.getName());
+                            button.setCallbackData("detailProduct#" + product.getExternalShortId());
                             rowInline.add(button);
                             rowsInline.add(rowInline);
                         }
@@ -127,8 +126,8 @@ public class GistGuildBot extends TelegramLongPollingBot {
             } else if (call_data.startsWith("detailProduct#")) {
                 try {
                     String[] split = call_data.split("#");
-                    String productName = (split[1]);
-                    Product product = resourceManagerService.getProduct(productName).get();
+                    Long productExternalShortId = Long.parseLong(split[1]);
+                    Product product = resourceManagerService.getProduct(productExternalShortId).get();
                     message = itemFactory.message(chat_id, product.toString());
                     InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                     List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -137,7 +136,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
                     InlineKeyboardButton button = new InlineKeyboardButton();
                     button.setText("Ordina questo prodotto");
-                    button.setCallbackData("selectProduct#" + product.getName());
+                    button.setCallbackData("selectProduct#" + product.getExternalShortId());
                     rowInline.add(button);
                     InlineKeyboardButton button2 = new InlineKeyboardButton();
                     button2.setText("Torna alla lista dei prodotti");
@@ -146,11 +145,11 @@ public class GistGuildBot extends TelegramLongPollingBot {
 
                     InlineKeyboardButton button3 = new InlineKeyboardButton();
                     button3.setText("Modifica URL");
-                    button3.setCallbackData("catalogmng#url#" + product.getName());
+                    button3.setCallbackData("catalogmng#url#" + product.getExternalShortId());
                     rowInline1.add(button3);
                     InlineKeyboardButton button4 = new InlineKeyboardButton();
                     button4.setText(product.getActive() ? "Disattiva dal catalogo" : "Attiva nel catalogo");
-                    button4.setCallbackData("catalogmng#active#" + product.getName());
+                    button4.setCallbackData("catalogmng#active#" + product.getExternalShortId());
                     rowInline1.add(button4);
 
                     InlineKeyboardButton button5 = new InlineKeyboardButton();
@@ -173,18 +172,18 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 }
             } else if (call_data.startsWith("catalogmng#url#")) {
                 String[] split = call_data.split("#");
-                String productId = split[2];
+                Long productExternalShortId = Long.parseLong(split[2]);
                 Action action = new Action();
                 action.setActionType(ActionType.PRODUCT_URL);
-                action.setProductIdToManage(productId);
+                action.setProductIdToManage(productExternalShortId);
                 action.setTelegramUserId(user_id);
                 resourceManagerService.saveAction(action);
                 message = itemFactory.productUrlManagement(chat_id);
             } else if (call_data.startsWith("catalogmng#active#")) {
                 try {
                     String[] split = call_data.split("#");
-                    String productName = split[2];
-                    Product product = resourceManagerService.getProduct(productName).get();
+                    Long productExternalShortId = Long.parseLong(split[2]);
+                    Product product = resourceManagerService.getProduct(productExternalShortId).get();
                     product.setActive(!product.getActive());
                     product = resourceManagerService.updateProduct(product).get();
                     message = itemFactory.message(chat_id, String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.", product.getName()));
