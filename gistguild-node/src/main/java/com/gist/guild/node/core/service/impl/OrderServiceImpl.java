@@ -80,6 +80,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setQuantity(document.getQuantity());
             order.setTimestamp(document.getTimestamp());
             order.setNonce(document.getNonce());
+            order.setExternalShortId(document.getExternalShortId());
             repository.save(order);
             return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){

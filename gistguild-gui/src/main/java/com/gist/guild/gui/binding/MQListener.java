@@ -8,6 +8,7 @@ import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
+import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.service.GuiConcurrenceService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,9 @@ public class MQListener {
 
     @Autowired
     private DocumentAsyncService<Order> orderAsyncService;
+
+    @Autowired
+    private DocumentAsyncService<RechargeCredit> rechargeCreditAsyncService;
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
@@ -56,10 +60,8 @@ public class MQListener {
                 }
                 for (Object item : msg.getContent()) {
                     // PARTICIPANT DOCUMENT
-                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Participant.class.getSimpleName())) {
-                        Participant participant = mapper.readValue(mapper.writeValueAsString(item), Participant.class);
-                        participantAsyncService.putInCache(msg.getCorrelationID(), participant);
-                    }
+                    Participant participant = mapper.readValue(mapper.writeValueAsString(item), Participant.class);
+                    participantAsyncService.putInCache(msg.getCorrelationID(), participant);
                 }
             } else if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                 if (msg.getContent() == null || msg.getContent().isEmpty()) {
@@ -67,10 +69,8 @@ public class MQListener {
                 }
                 for (Object item : msg.getContent()) {
                     // PRODUCT DOCUMENT
-                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Product.class.getSimpleName())) {
-                        Product product = mapper.readValue(mapper.writeValueAsString(item), Product.class);
-                        productAsyncService.putInCache(msg.getCorrelationID(), product);
-                    }
+                    Product product = mapper.readValue(mapper.writeValueAsString(item), Product.class);
+                    productAsyncService.putInCache(msg.getCorrelationID(), product);
                 }
             } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                 if (msg.getContent() == null || msg.getContent().isEmpty()) {
@@ -78,10 +78,17 @@ public class MQListener {
                 }
                 for (Object item : msg.getContent()) {
                     // ORDER DOCUMENT
-                    if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Order.class.getSimpleName())) {
-                        Order order = mapper.readValue(mapper.writeValueAsString(item), Order.class);
-                        orderAsyncService.putInCache(msg.getCorrelationID(), order);
-                    }
+                    Order order = mapper.readValue(mapper.writeValueAsString(item), Order.class);
+                    orderAsyncService.putInCache(msg.getCorrelationID(), order);
+                }
+            } else if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                if (msg.getContent() == null || msg.getContent().isEmpty()) {
+                    rechargeCreditAsyncService.putInCache(msg.getCorrelationID(), null);
+                }
+                for (Object item : msg.getContent()) {
+                    // ORDER DOCUMENT
+                    RechargeCredit rechargeCredit = mapper.readValue(mapper.writeValueAsString(item), RechargeCredit.class);
+                    rechargeCreditAsyncService.putInCache(msg.getCorrelationID(), rechargeCredit);
                 }
             }
         } catch (JsonProcessingException e) {

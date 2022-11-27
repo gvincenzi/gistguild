@@ -70,6 +70,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                 participant.setMail(document.getMail());
                 participant.setTelegramUserId(document.getTelegramUserId());
                 participant.setNonce(document.getNonce());
+                participant.setExternalShortId(document.getExternalShortId());
                 repository.save(participant);
                 return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){

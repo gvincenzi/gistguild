@@ -97,6 +97,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setOwnerMail(document.getOwnerMail());
             product.setTimestamp(document.getTimestamp());
             product.setNonce(document.getNonce());
+            product.setExternalShortId(document.getExternalShortId());
             repository.save(product);
             return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){

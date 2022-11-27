@@ -13,9 +13,11 @@ import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
+import com.gist.guild.node.core.document.RechargeCredit;
 import com.gist.guild.node.core.repository.OrderRepository;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
+import com.gist.guild.node.core.repository.RechargeCreditRepository;
 import com.gist.guild.node.core.service.NodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class MQListener {
     NodeService<com.gist.guild.commons.message.entity.Order, Order> orderNodeService;
 
     @Autowired
+    NodeService<com.gist.guild.commons.message.entity.RechargeCredit, RechargeCredit> rechargeCreditNodeService;
+
+    @Autowired
     ParticipantRepository participantRepository;
 
     @Autowired
@@ -51,6 +56,9 @@ public class MQListener {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Autowired
+    RechargeCreditRepository rechargeCreditRepository;
 
     @Autowired
     MessageChannel responseChannel;
@@ -87,6 +95,13 @@ public class MQListener {
                         documentClass = com.gist.guild.commons.message.entity.Order.class;
                         items.add(order);
                         log.info(String.format("New order with ID [%s] correctly validated and ingested", order.getId()));
+                        sendResponseMessage(msg, items, documentClass);
+                        break;
+                    case RECHARGE_USER_CREDIT:
+                        RechargeCredit rechargeCredit = rechargeCreditNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.RechargeCredit.class));
+                        documentClass = com.gist.guild.commons.message.entity.RechargeCredit.class;
+                        items.add(rechargeCredit);
+                        log.info(String.format("New rechargeCredit with ID [%s] correctly validated and ingested", rechargeCredit.getId()));
                         sendResponseMessage(msg, items, documentClass);
                         break;
                 }
@@ -142,6 +157,10 @@ public class MQListener {
             // ORDER DOCUMENT
             Method repositoryMethod = OrderRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
             items = (List<Order>) repositoryMethod.invoke(orderRepository, arrayParamValue);
+        } else if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(RechargeCredit.class.getSimpleName())) {
+            // RECHARGE_CREDIT DOCUMENT
+            Method repositoryMethod = RechargeCreditRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
+            items = (List<Order>) repositoryMethod.invoke(rechargeCreditRepository, arrayParamValue);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
@@ -204,6 +223,22 @@ public class MQListener {
             responseOrderMessage.setContent(orderList);
             Message<DistributionMessage<List<Order>>> responseOrderMsg = MessageBuilder.withPayload(responseOrderMessage).build();
             responseChannel.send(responseOrderMsg);
+
+            // RECHARGE_CREDIT DOCUMENT
+            List<RechargeCredit> rechargeCreditList = rechargeCreditNodeService.findAll();
+            Boolean validationRechargeCredit = rechargeCreditNodeService.validate(rechargeCreditList);
+            if (!validationRechargeCredit) {
+                corruptionDetected(msg);
+            }
+            DistributionMessage<List<RechargeCredit>> responseRechargeCreditMessage = new DistributionMessage<>();
+            responseRechargeCreditMessage.setCorrelationID(msg.getCorrelationID());
+            responseRechargeCreditMessage.setInstanceName(instanceName);
+            responseRechargeCreditMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
+            responseRechargeCreditMessage.setDocumentClass(com.gist.guild.commons.message.entity.RechargeCredit.class);
+            responseRechargeCreditMessage.setValid(validationOrder);
+            responseRechargeCreditMessage.setContent(rechargeCreditList);
+            Message<DistributionMessage<List<RechargeCredit>>> responseRechargeCreditMsg = MessageBuilder.withPayload(responseRechargeCreditMessage).build();
+            responseChannel.send(responseRechargeCreditMsg);
         } catch (GistGuildGenericException e) {
             log.error(e.getMessage());
         }
@@ -244,6 +279,16 @@ public class MQListener {
                         }
                     }
                 }
+                if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    for (Object item : msg.getContent()) {
+                        // RECAHRGE_CREDIT DOCUMENT
+                        if (rechargeCreditNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.RechargeCredit.class))) {
+                            log.info(String.format("New rechargeCredit with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.RechargeCredit) item).getId()));
+                        } else {
+                            corruptionDetected(msg);
+                        }
+                    }
+                }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
             }
@@ -271,6 +316,13 @@ public class MQListener {
                     }
                     orderNodeService.init(orders);
                     StartupConfig.startupOrderProcessed = Boolean.TRUE;
+                } else if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    List<com.gist.guild.commons.message.entity.RechargeCredit> rechargeCredits = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        rechargeCredits.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.RechargeCredit.class));
+                    }
+                    rechargeCreditNodeService.init(rechargeCredits);
+                    StartupConfig.startupRechargeCreditProcessed = Boolean.TRUE;
                 }
 
                 if (Boolean.TRUE.equals(StartupConfig.getStartupProcessed())) {

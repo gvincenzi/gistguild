@@ -80,7 +80,10 @@ public class ItemFactoryImpl implements ItemFactory {
             button2.setText("I tuoi ordini");
             button2.setCallbackData("listaOrdini");
             rowInline2.add(button2);
-//            rowInline3.add(new InlineKeyboardButton().setText("Credito residuo").setCallbackData("creditoResiduo"));
+            InlineKeyboardButton button3 = new InlineKeyboardButton();
+            button3.setText("Credito residuo");
+            button3.setCallbackData("creditoResiduo");
+            rowInline2.add(button3);
 //            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData("ricaricaCredito"));
             InlineKeyboardButton button4 = new InlineKeyboardButton();
             button4.setText("Cancellazione");
