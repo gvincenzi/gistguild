@@ -3,6 +3,7 @@ package com.gist.guild.gui.bot;
 import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
+import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.ItemFactory;
@@ -22,6 +23,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -59,6 +61,19 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     resourceManagerService.addOrUpdateParticipant(participant).get();
                     message = itemFactory.message(chat_id, "Utente rimosso correttamente");
                 } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
+            } else if (call_data.equals("creditoResiduo")) {
+                try {
+                    RechargeCredit rechargeCredit = resourceManagerService.getCredit(user_id).get();
+                    message = itemFactory.message(chat_id, String.format("Il tuo credito residuo : %s €", rechargeCredit.getNewCredit()));
+                } catch (ExecutionException e) {
+                    if(NoSuchElementException.class == e.getCause().getClass()){
+                        message = itemFactory.message(chat_id, "Non hai credito residuo");
+                    } else {
+                        log.error(e.getMessage());
+                    }
+                } catch (InterruptedException e) {
                     log.error(e.getMessage());
                 }
             } else if (call_data.startsWith("listaOrdini")) {

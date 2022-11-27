@@ -3,10 +3,7 @@ package com.gist.guild.gui.service.impl;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
-import com.gist.guild.commons.message.entity.DocumentProposition;
-import com.gist.guild.commons.message.entity.Order;
-import com.gist.guild.commons.message.entity.Participant;
-import com.gist.guild.commons.message.entity.Product;
+import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.binding.DocumentAsyncService;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.repository.ActionRepository;
@@ -96,6 +93,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserId", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<RechargeCredit> getCredit(Long telegramUserId) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(RechargeCredit.class.getSimpleName(), "findTopByCustomerTelegramUserIdOrderByTimestampDesc", params);
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
     @Override

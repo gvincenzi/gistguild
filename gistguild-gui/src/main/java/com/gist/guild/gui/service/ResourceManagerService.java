@@ -3,6 +3,7 @@ package com.gist.guild.gui.service;
 import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
+import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.bot.action.entity.Action;
 
 import java.util.List;
@@ -18,4 +19,5 @@ public interface ResourceManagerService {
     Future<Product> getProduct(Long productExternalShortId);
     Future<Product> updateProduct(Product product);
     Future<List<Order>> getOrders(Long telegramUserId);
+    Future<RechargeCredit> getCredit(Long telegramUserId);
 }

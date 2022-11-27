@@ -160,7 +160,7 @@ public class MQListener {
         } else if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(RechargeCredit.class.getSimpleName())) {
             // RECHARGE_CREDIT DOCUMENT
             Method repositoryMethod = RechargeCreditRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
-            items = (List<Order>) repositoryMethod.invoke(rechargeCreditRepository, arrayParamValue);
+            items = (List<RechargeCredit>) repositoryMethod.invoke(rechargeCreditRepository, arrayParamValue);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
