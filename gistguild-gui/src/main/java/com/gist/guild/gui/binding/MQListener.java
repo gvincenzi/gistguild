@@ -86,7 +86,7 @@ public class MQListener {
                     rechargeCreditAsyncService.putInCache(msg.getCorrelationID(), null);
                 }
                 for (Object item : msg.getContent()) {
-                    // ORDER DOCUMENT
+                    // RECHARGE_CREDIT DOCUMENT
                     RechargeCredit rechargeCredit = mapper.readValue(mapper.writeValueAsString(item), RechargeCredit.class);
                     rechargeCreditAsyncService.putInCache(msg.getCorrelationID(), rechargeCredit);
                 }

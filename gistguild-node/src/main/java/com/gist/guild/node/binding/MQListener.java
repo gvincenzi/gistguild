@@ -10,14 +10,8 @@ import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.StartupConfig;
-import com.gist.guild.node.core.document.Order;
-import com.gist.guild.node.core.document.Participant;
-import com.gist.guild.node.core.document.Product;
-import com.gist.guild.node.core.document.RechargeCredit;
-import com.gist.guild.node.core.repository.OrderRepository;
-import com.gist.guild.node.core.repository.ParticipantRepository;
-import com.gist.guild.node.core.repository.ProductRepository;
-import com.gist.guild.node.core.repository.RechargeCreditRepository;
+import com.gist.guild.node.core.document.*;
+import com.gist.guild.node.core.repository.*;
 import com.gist.guild.node.core.service.NodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +43,9 @@ public class MQListener {
     NodeService<com.gist.guild.commons.message.entity.RechargeCredit, RechargeCredit> rechargeCreditNodeService;
 
     @Autowired
+    NodeService<com.gist.guild.commons.message.entity.Payment, Payment> paymentNodeService;
+
+    @Autowired
     ParticipantRepository participantRepository;
 
     @Autowired
@@ -59,6 +56,9 @@ public class MQListener {
 
     @Autowired
     RechargeCreditRepository rechargeCreditRepository;
+
+    @Autowired
+    PaymentRepository paymentRepository;
 
     @Autowired
     MessageChannel responseChannel;
@@ -102,6 +102,13 @@ public class MQListener {
                         documentClass = com.gist.guild.commons.message.entity.RechargeCredit.class;
                         items.add(rechargeCredit);
                         log.info(String.format("New rechargeCredit with ID [%s] correctly validated and ingested", rechargeCredit.getId()));
+                        sendResponseMessage(msg, items, documentClass);
+                        break;
+                    case ORDER_PAYMENT_CONFIRMATION:
+                        Payment payment = paymentNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Payment.class));
+                        documentClass = com.gist.guild.commons.message.entity.Payment.class;
+                        items.add(payment);
+                        log.info(String.format("New payment with ID [%s] correctly validated and ingested", payment.getId()));
                         sendResponseMessage(msg, items, documentClass);
                         break;
                 }
@@ -161,6 +168,10 @@ public class MQListener {
             // RECHARGE_CREDIT DOCUMENT
             Method repositoryMethod = RechargeCreditRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
             items = (List<RechargeCredit>) repositoryMethod.invoke(rechargeCreditRepository, arrayParamValue);
+        } else if (msg.getDocumentClass().getSimpleName().equalsIgnoreCase(Payment.class.getSimpleName())) {
+            // PAYMENT DOCUMENT
+            Method repositoryMethod = PaymentRepository.class.getMethod(msg.getDocumentRepositoryMethod(), arrayParamType);
+            items = (List<Payment>) repositoryMethod.invoke(paymentRepository, arrayParamValue);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
@@ -239,6 +250,22 @@ public class MQListener {
             responseRechargeCreditMessage.setContent(rechargeCreditList);
             Message<DistributionMessage<List<RechargeCredit>>> responseRechargeCreditMsg = MessageBuilder.withPayload(responseRechargeCreditMessage).build();
             responseChannel.send(responseRechargeCreditMsg);
+
+            // PAYMENT DOCUMENT
+            List<Payment> paymentList = paymentNodeService.findAll();
+            Boolean validationPayment = rechargeCreditNodeService.validate(rechargeCreditList);
+            if (!validationPayment) {
+                corruptionDetected(msg);
+            }
+            DistributionMessage<List<Payment>> responsePaymentMessage = new DistributionMessage<>();
+            responsePaymentMessage.setCorrelationID(msg.getCorrelationID());
+            responsePaymentMessage.setInstanceName(instanceName);
+            responsePaymentMessage.setType(DistributionEventType.INTEGRITY_VERIFICATION);
+            responsePaymentMessage.setDocumentClass(com.gist.guild.commons.message.entity.Payment.class);
+            responsePaymentMessage.setValid(validationPayment);
+            responsePaymentMessage.setContent(paymentList);
+            Message<DistributionMessage<List<Payment>>> responsePaymentMsg = MessageBuilder.withPayload(responsePaymentMessage).build();
+            responseChannel.send(responsePaymentMsg);
         } catch (GistGuildGenericException e) {
             log.error(e.getMessage());
         }
@@ -289,6 +316,16 @@ public class MQListener {
                         }
                     }
                 }
+                if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    for (Object item : msg.getContent()) {
+                        // PAYMENT DOCUMENT
+                        if (paymentNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Payment.class))) {
+                            log.info(String.format("New payment with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Payment) item).getId()));
+                        } else {
+                            corruptionDetected(msg);
+                        }
+                    }
+                }
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
             }
@@ -323,6 +360,13 @@ public class MQListener {
                     }
                     rechargeCreditNodeService.init(rechargeCredits);
                     StartupConfig.startupRechargeCreditProcessed = Boolean.TRUE;
+                } else if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    List<com.gist.guild.commons.message.entity.Payment> payments = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        payments.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Payment.class));
+                    }
+                    paymentNodeService.init(payments);
+                    StartupConfig.startupPaymentProcessed = Boolean.TRUE;
                 }
 
                 if (Boolean.TRUE.equals(StartupConfig.getStartupProcessed())) {
