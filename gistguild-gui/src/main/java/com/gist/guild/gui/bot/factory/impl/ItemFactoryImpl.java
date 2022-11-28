@@ -2,6 +2,7 @@ package com.gist.guild.gui.bot.factory.impl;
 
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
+import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.ItemFactory;
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -55,9 +57,35 @@ public class ItemFactoryImpl implements ItemFactory {
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
+            } else if (actionInProgress != null && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+                Participant participantByMail = null;
+                try {
+                    participantByMail = resourceManagerService.findParticipantByMail(update.getText()).get();
+                } catch (ExecutionException e) {
+                    if (NoSuchElementException.class == e.getCause().getClass()) {
+                        return message(update.getChatId(), "Nessun iscritto con questa mail\nClicca su /start per tornare al menu principale.");
+                    } else {
+                        log.error(e.getMessage());
+                    }
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                }
+
+                if(!participantByMail.getActive()){
+                    return message(update.getChatId(), "Nessun iscritto con questa mail\nClicca su /start per tornare al menu principale.");
+                }
+
+                Action action = new Action();
+                action.setActionType(ActionType.USER_MANAGEMENT);
+                action.setTelegramUserIdToManage(participantByMail.getTelegramUserId());
+                action.setTelegramUserId(participant.getTelegramUserId());
+                resourceManagerService.saveAction(action);
+                return userManagementMenu(update.getChatId(), participantByMail);
             }
-            //TODO DIfferent actions
+
         }
+        //TODO DIfferent actions
 
         message = message(update.getChatId(), String.format("%s,\nScegli tra le seguenti opzioni:", participant == null ? "Benvenuto nel sistema GIST Guild" : "Bentornato nel sistema GIST Guild"));
 
@@ -89,7 +117,10 @@ public class ItemFactoryImpl implements ItemFactory {
             button4.setText("Cancellazione");
             button4.setCallbackData("cancellazione");
             rowInline4.add(button4);
-//            rowInline5.add(new InlineKeyboardButton().setText("Gestione iscritti").setCallbackData("usermng"));
+            InlineKeyboardButton button5 = new InlineKeyboardButton();
+            button5.setText("Gestione iscritti");
+            button5.setCallbackData("usermng");
+            rowInline5.add(button5);
         }
 
         // Set the keyboard to the markup
@@ -118,5 +149,49 @@ public class ItemFactoryImpl implements ItemFactory {
     @Override
     public SendMessage productUrlManagement(Long chat_id) {
         return message(chat_id, "Inviare un ulteriore messaggio indicando l'URL da associare al prodotto");
+    }
+
+    @Override
+    public SendMessage userManagementMenu(Long chat_id, Participant participantToManage) {
+        SendMessage message;
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        RechargeCredit credit = null;
+        try {
+            credit = resourceManagerService.getCredit(participantToManage.getTelegramUserId()).get();
+        } catch (ExecutionException e) {
+            if (NoSuchElementException.class == e.getCause().getClass()) {
+                message = message(chat_id, String.format("Utente : %s\nNon ha credito residuo", participantToManage.getMail(), credit.getNewCredit()));
+            } else {
+                log.error(e.getMessage());
+            }
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
+        message = message(chat_id, String.format("Utente : %s\nCredito residuo : %s €", participantToManage.getMail(), credit.getNewCredit()));
+        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+        button1.setText("Ricarica credito");
+        button1.setCallbackData("usermng#ricaricaCredito");
+        rowInline1.add(button1);
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
+        button2.setText("Cancellazione");
+        button2.setCallbackData("usermng#cancellazione");
+        rowInline1.add(button2);
+        InlineKeyboardButton button3 = new InlineKeyboardButton();
+        button3.setText("Modifica terminata");
+        button3.setCallbackData("usermng#end");
+        rowInline2.add(button3);
+
+        // Set the keyboard to the markup
+        rowsInline.add(rowInline1);
+        rowsInline.add(rowInline2);
+
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        return message;
     }
 }

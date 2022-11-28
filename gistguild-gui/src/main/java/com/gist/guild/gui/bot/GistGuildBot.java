@@ -207,6 +207,53 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 } catch (ExecutionException e) {
                     log.error(e.getMessage());
                 }
+            } else if (call_data.equalsIgnoreCase("usermng")) {
+                Action action = new Action();
+                action.setActionType(ActionType.USER_SEARCH);
+                action.setTelegramUserId(user_id);
+                resourceManagerService.saveAction(action);
+                message = itemFactory.message(chat_id, "Scrivi la mail dell'utente che vuoi gestire");
+            } else if (call_data.equalsIgnoreCase("usermng#end")) {
+                Action actionInProgress = getActionInProgress(user_id);
+                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                    resourceManagerService.deleteActionInProgress(actionInProgress);
+                    message = itemFactory.message(chat_id,"Modifica terminata.\nClicca su /start per tornare al menu principale.");
+                }
+            } else if (call_data.equalsIgnoreCase("usermng#cancellazione")) {
+                Action actionInProgress = getActionInProgress(user_id);
+                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                    Participant participantToDelete = null;
+                    try {
+                        participantToDelete = resourceManagerService.findParticipantByTelegramId(actionInProgress.getTelegramUserIdToManage()).get();
+                        participantToDelete.setActive(Boolean.FALSE);
+                        resourceManagerService.addOrUpdateParticipant(participantToDelete).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error(e.getMessage());
+                    }
+
+                    resourceManagerService.deleteActionInProgress(actionInProgress);
+                    message = itemFactory.message(chat_id, "Utente rimosso correttamente\nClicca su /start per tornare al menu principale.");
+                }
+            } else if (call_data.equalsIgnoreCase("usermng#ricaricaCredito")) {
+                /*Action actionInProgress = getActionInProgress(user_id);
+                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                    Action action = new Action();
+                    action.setActionType(ActionType.USER_CREDIT);
+                    action.setTelegramUserIdToManage(actionInProgress.getTelegramUserIdToManage());
+                    action.setTelegramUserId(user_id);
+                    resourceManagerService.deleteActionInProgress(actionInProgress);
+                    resourceManagerService.saveAction(action);
+                    message = itemFactory.userManagementCredit(chat_id);
+                }*/
+            } else if (call_data.startsWith("usermng#ricaricaCredito#")) {
+                /*String[] split = call_data.split("#");
+                Long credit = Long.parseLong(split[2]);
+                Action actionInProgress = getActionInProgress(user_id);
+                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null && ActionType.USER_CREDIT.equals(actionInProgress.getActionType())) {
+                    resourceManagerService.deleteActionInProgress(actionInProgress);
+                    resourceManagerService.addCredit(actionInProgress.getTelegramUserIdToManage(), BigDecimal.valueOf(credit));
+                    message = itemFactory.message(chat_id, "Credito aggiornato correttamente\nClicca su /start per tornare al menu principale.");
+                }*/
             } else if (call_data.startsWith("welcomeMenu")) {
                 message = itemFactory.welcomeMessage(update.getCallbackQuery().getMessage(), user_id);
             }
@@ -233,6 +280,8 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     log.error(e.getMessage());
                 }
             } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains("@") && actionInProgress != null) {
+                message = itemFactory.welcomeMessage(update.getMessage(), user_id);
+            } else if (update.getMessage().getText().contains("@") && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())){
                 message = itemFactory.welcomeMessage(update.getMessage(), user_id);
             }
         }

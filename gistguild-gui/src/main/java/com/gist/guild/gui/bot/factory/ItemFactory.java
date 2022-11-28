@@ -1,5 +1,6 @@
 package com.gist.guild.gui.bot.factory;
 
+import com.gist.guild.commons.message.entity.Participant;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -7,4 +8,5 @@ public interface ItemFactory {
     SendMessage welcomeMessage(Message update, Long user_id);
     SendMessage message(Long chat_id, String text);
     SendMessage productUrlManagement(Long chat_id);
+    SendMessage userManagementMenu(Long chat_id, Participant participantToManage);
 }

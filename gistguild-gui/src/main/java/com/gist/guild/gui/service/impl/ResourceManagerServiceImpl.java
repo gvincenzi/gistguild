@@ -41,6 +41,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public Future<Participant> findParticipantByMail(String participant_mail) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<String>(String.class, participant_mail));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Participant.class.getSimpleName(), "findByMail", params);
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
     public Future<Participant> addOrUpdateParticipant(Participant participant) {
         DocumentProposition documentProposition = new DocumentProposition();
         documentProposition.setDocumentPropositionType(DocumentPropositionType.USER_REGISTRATION);
