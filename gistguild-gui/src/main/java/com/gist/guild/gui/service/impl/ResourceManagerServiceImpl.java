@@ -60,6 +60,17 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public Future<Order> addOrUpdateOrder(Order order) {
+        DocumentProposition documentProposition = new DocumentProposition();
+        documentProposition.setDocumentPropositionType(DocumentPropositionType.ORDER_REGISTRATION);
+        documentProposition.setDocumentClass(Order.class.getSimpleName());
+        documentProposition.setDocument(order);
+        ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
+        GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
     public Action getActionInProgress(Long telegramUserId) {
         Optional<Action> actionOptional = actionRepository.findByTelegramUserIdAndInProgressTrue(telegramUserId);
         if (actionOptional.isPresent()) {

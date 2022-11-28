@@ -26,7 +26,7 @@ public class Action {
     @Column
     private Long selectedProductId;
     @Column
-    private Double quantity;
+    private Long quantity;
     @Column
     private Boolean inProgress = Boolean.TRUE;
 }

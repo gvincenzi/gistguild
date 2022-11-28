@@ -8,6 +8,7 @@ public class Order extends Document {
     private Long quantity;
     private String address;
     private String productName;
+    private String productId;
     private String customerMail;
     private Long customerTelegramUserId;
 }

@@ -233,4 +233,14 @@ public class ItemFactoryImpl implements ItemFactory {
         message.setReplyMarkup(markupInline);
         return message;
     }
+
+    @Override
+    public SendMessage selectProductQuantity(Long chat_id) {
+        return message(chat_id, "Inviare ora un messaggio indicando la quantità desiderata (solo il valore numerico) per finalizzare l'ordine");
+    }
+
+    @Override
+    public SendMessage selectAddress(Long chat_id) {
+        return message(chat_id, "Inviare un ulteriore messaggio indicando l'indirizzo di spedizione per finalizzare l'ordine");
+    }
 }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -71,7 +72,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     RechargeCredit rechargeCredit = resourceManagerService.getCredit(user_id).get();
                     message = itemFactory.message(chat_id, String.format("Il tuo credito residuo : %s €", rechargeCredit.getNewCredit()));
                 } catch (ExecutionException e) {
-                    if(NoSuchElementException.class == e.getCause().getClass()){
+                    if (NoSuchElementException.class == e.getCause().getClass()) {
                         message = itemFactory.message(chat_id, "Non hai credito residuo");
                     } else {
                         log.error(e.getMessage());
@@ -80,38 +81,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     log.error(e.getMessage());
                 }
             } else if (call_data.startsWith("listaOrdini")) {
-                try {
-                    List<Order> orders = resourceManagerService.getOrders(user_id).get();
-                    if (orders.isEmpty()) {
-                        message = itemFactory.message(chat_id, "Non hai ordini in corso");
-                    } else {
-                        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-                        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-                        Collections.sort(orders);
-                        for (Order order : orders) {
-                            List<InlineKeyboardButton> rowInline = new ArrayList<>();
-                            InlineKeyboardButton button = new InlineKeyboardButton();
-                            button.setText(order.getProductName());
-                            button.setCallbackData("orderDetails#" + order.getExternalShortId());
-                            rowInline.add(button);
-                            rowsInline.add(rowInline);
-                        }
-
-                        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-                        InlineKeyboardButton button2 = new InlineKeyboardButton();
-                        button2.setText("Torna al menù principale");
-                        button2.setCallbackData("welcomeMenu");
-                        rowInline.add(button2);
-                        rowsInline.add(rowInline);
-
-                        markupInline.setKeyboard(rowsInline);
-                        message = itemFactory.message(chat_id, "Qui di seguito la lista dei tuoi ordini in corso, per accedere ai dettagli cliccare sull'ordine:\n");
-
-                        ((SendMessage) message).setReplyMarkup(markupInline);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e.getMessage());
-                }
+                message = getOrderList(message, user_id, chat_id);
             } else if (call_data.startsWith("catalogo")) {
                 try {
                     Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
@@ -210,6 +180,41 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 } catch (ExecutionException e) {
                     log.error(e.getMessage());
                 }
+            } else if (call_data.startsWith("selectProduct#")) {
+                try {
+                    Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+                    String[] split = call_data.split("#");
+                    Long productExternalShortId = Long.parseLong(split[1]);
+                    Product product = resourceManagerService.getProduct(productExternalShortId).get();
+
+                    if (product.getAvailableQuantity() == null && !product.getDelivery()) {
+                        Order order = new Order();
+                        order.setCustomerMail(participant.getMail());
+                        order.setCustomerTelegramUserId(participant.getTelegramUserId());
+                        order.setProductId(product.getId());
+                        order.setProductName(product.getName());
+                        resourceManagerService.addOrUpdateOrder(order).get();
+                        message = getOrderList(message, user_id, chat_id);
+                    } else if (product.getAvailableQuantity() != null) {
+                        Action action = new Action();
+                        action.setActionType(ActionType.SELECT_PRODUCT);
+                        action.setTelegramUserId(user_id);
+                        action.setSelectedProductId(product.getExternalShortId());
+                        resourceManagerService.saveAction(action);
+                        message = itemFactory.selectProductQuantity(chat_id);
+                    } else if (product.getAvailableQuantity() == null && product.getDelivery()) {
+                        Action action = new Action();
+                        action.setActionType(ActionType.SELECT_ADDRESS);
+                        action.setTelegramUserId(user_id);
+                        action.setSelectedProductId(product.getExternalShortId());
+                        resourceManagerService.saveAction(action);
+                        message = itemFactory.selectAddress(chat_id);
+                    }
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                } catch (ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             } else if (call_data.equalsIgnoreCase("usermng")) {
                 Action action = new Action();
                 action.setActionType(ActionType.USER_SEARCH);
@@ -218,13 +223,13 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 message = itemFactory.message(chat_id, "Scrivi la mail dell'utente che vuoi gestire");
             } else if (call_data.equalsIgnoreCase("usermng#end")) {
                 Action actionInProgress = getActionInProgress(user_id);
-                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                if (actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
                     resourceManagerService.deleteActionInProgress(actionInProgress);
-                    message = itemFactory.message(chat_id,"Modifica terminata.\nClicca su /start per tornare al menu principale.");
+                    message = itemFactory.message(chat_id, "Modifica terminata.\nClicca su /start per tornare al menu principale.");
                 }
             } else if (call_data.equalsIgnoreCase("usermng#cancellazione")) {
                 Action actionInProgress = getActionInProgress(user_id);
-                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                if (actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
                     Participant participantToDelete = null;
                     try {
                         participantToDelete = resourceManagerService.findParticipantByTelegramId(actionInProgress.getTelegramUserIdToManage()).get();
@@ -239,7 +244,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 }
             } else if (call_data.equalsIgnoreCase("usermng#ricaricaCredito")) {
                 Action actionInProgress = getActionInProgress(user_id);
-                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
+                if (actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
                     Action action = new Action();
                     action.setActionType(ActionType.USER_CREDIT);
                     action.setTelegramUserIdToManage(actionInProgress.getTelegramUserIdToManage());
@@ -252,7 +257,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 String[] split = call_data.split("#");
                 Long credit = Long.parseLong(split[2]);
                 Action actionInProgress = getActionInProgress(user_id);
-                if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null && ActionType.USER_CREDIT.equals(actionInProgress.getActionType())) {
+                if (actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null && ActionType.USER_CREDIT.equals(actionInProgress.getActionType())) {
                     resourceManagerService.deleteActionInProgress(actionInProgress);
 
                     Participant participantToRecharge = null;
@@ -288,7 +293,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 try {
                     participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getMessage().getFrom(), update.getMessage().getText())).get();
                     message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo %s.\nClicca su /start per iniziare.", participant.getMail()));
-                    if(entryFreeCredit){
+                    if (entryFreeCredit) {
                         RechargeCredit rechargeCredit = new RechargeCredit();
                         rechargeCredit.setCustomerMail(participant.getMail());
                         rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
@@ -297,16 +302,59 @@ public class GistGuildBot extends TelegramLongPollingBot {
                         rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
                         resourceManagerService.addCredit(rechargeCredit).get();
                         message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nRiceverai anche un credito di %s € in regalo da utilizzare da subito per gli acquisti di prodotti dal catalogo.\nClicca su /start per iniziare.", entryFreeCreditAmount));
-                    } else{
+                    } else {
                         message = itemFactory.message(chat_id, "Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nClicca su /start per iniziare.");
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
-            } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains("@") && actionInProgress != null) {
+            } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains("@") && actionInProgress != null && !(ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType()))) {
                 message = itemFactory.welcomeMessage(update.getMessage(), user_id);
-            } else if (update.getMessage().getText().contains("@") && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())){
+            } else if (update.getMessage().getText().contains("@") && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
                 message = itemFactory.welcomeMessage(update.getMessage(), user_id);
+            } else if (update.getMessage().getText() != null && BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress != null && ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType())) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+                try {
+                    Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+                    Product product = resourceManagerService.getProduct(actionInProgress.getSelectedProductId()).get();
+                    if (product.getDelivery()) {
+                        Action action = new Action();
+                        action.setActionType(ActionType.SELECT_ADDRESS);
+                        action.setTelegramUserId(user_id);
+                        action.setSelectedProductId(actionInProgress.getSelectedProductId());
+                        action.setQuantity(Long.parseLong(update.getMessage().getText()));
+                        resourceManagerService.saveAction(action);
+                        message = itemFactory.selectAddress(chat_id);
+                    } else {
+                        Order order = new Order();
+                        order.setCustomerMail(participant.getMail());
+                        order.setCustomerTelegramUserId(participant.getTelegramUserId());
+                        order.setProductId(product.getId());
+                        order.setProductName(product.getName());
+                        order.setQuantity(Long.parseLong(update.getMessage().getText()));
+                        resourceManagerService.addOrUpdateOrder(order).get();
+                        message = getOrderList(message, user_id, chat_id);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
+            } else if (update.getMessage().getText() != null && !BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress !=null && ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType())) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+                try {
+                    Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+                    Product product = resourceManagerService.getProduct(actionInProgress.getSelectedProductId()).get();
+                    Order order = new Order();
+                    order.setCustomerMail(participant.getMail());
+                    order.setCustomerTelegramUserId(participant.getTelegramUserId());
+                    order.setProductId(product.getId());
+                    order.setProductName(product.getName());
+                    order.setQuantity(actionInProgress.getQuantity());
+                    order.setAddress(update.getMessage().getText());
+                    resourceManagerService.addOrUpdateOrder(order).get();
+                    message = getOrderList(message, user_id, chat_id);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             }
         }
 
@@ -315,6 +363,42 @@ public class GistGuildBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private BotApiMethod getOrderList(BotApiMethod message, Long user_id, Long chat_id) {
+        try {
+            List<Order> orders = resourceManagerService.getOrders(user_id).get();
+            if (orders.isEmpty()) {
+                message = itemFactory.message(chat_id, "Non hai ordini in corso");
+            } else {
+                InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                Collections.sort(orders);
+                for (Order order : orders) {
+                    List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                    InlineKeyboardButton button = new InlineKeyboardButton();
+                    button.setText("ID#"+order.getExternalShortId()+" : "+order.getProductName());
+                    button.setCallbackData("orderDetails#" + order.getExternalShortId());
+                    rowInline.add(button);
+                    rowsInline.add(rowInline);
+                }
+
+                List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                InlineKeyboardButton button2 = new InlineKeyboardButton();
+                button2.setText("Torna al menù principale");
+                button2.setCallbackData("welcomeMenu");
+                rowInline.add(button2);
+                rowsInline.add(rowInline);
+
+                markupInline.setKeyboard(rowsInline);
+                message = itemFactory.message(chat_id, "Qui di seguito la lista dei tuoi ordini in corso, per accedere ai dettagli cliccare sull'ordine:\n");
+
+                ((SendMessage) message).setReplyMarkup(markupInline);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+        }
+        return message;
     }
 
     private Action getActionInProgress(Long user_id) {

@@ -11,4 +11,6 @@ public interface ItemFactory {
     SendMessage productUrlManagement(Long chat_id);
     SendMessage userManagementMenu(Long chat_id, Participant participantToManage);
     SendMessage userManagementCredit(Long chat_id);
+    SendMessage selectProductQuantity(Long chat_id);
+    SendMessage selectAddress(Long chat_id);
 }
