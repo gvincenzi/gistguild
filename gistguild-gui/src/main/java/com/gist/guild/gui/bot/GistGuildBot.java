@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -210,9 +209,16 @@ public class GistGuildBot extends TelegramLongPollingBot {
                         resourceManagerService.saveAction(action);
                         message = itemFactory.selectAddress(chat_id);
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
-                } catch (ExecutionException e) {
+                }
+            } else if (call_data.startsWith("orderDetails#")) {
+                try {
+                    String[] split = call_data.split("#");
+                    Long orderExternalShortId = Long.parseLong(split[1]);
+                    Order order = resourceManagerService.getOrder(orderExternalShortId).get();
+                    message = itemFactory.orderDetailsMessageBuilder(chat_id,order);
+                } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
             } else if (call_data.equalsIgnoreCase("usermng")) {
@@ -338,7 +344,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
-            } else if (update.getMessage().getText() != null && !BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress !=null && ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType())) {
+            } else if (update.getMessage().getText() != null && !BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress != null && ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType())) {
                 resourceManagerService.deleteActionInProgress(actionInProgress);
                 try {
                     Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
@@ -377,7 +383,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 for (Order order : orders) {
                     List<InlineKeyboardButton> rowInline = new ArrayList<>();
                     InlineKeyboardButton button = new InlineKeyboardButton();
-                    button.setText("ID#"+order.getExternalShortId()+" : "+order.getProductName());
+                    button.setText("ID#" + order.getExternalShortId() + " : " + order.getProductName());
                     button.setCallbackData("orderDetails#" + order.getExternalShortId());
                     rowInline.add(button);
                     rowsInline.add(rowInline);

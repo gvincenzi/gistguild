@@ -115,6 +115,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public Future<Order> getOrder(Long orderExternalId) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
     public Future<RechargeCredit> getCredit(Long telegramUserId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));

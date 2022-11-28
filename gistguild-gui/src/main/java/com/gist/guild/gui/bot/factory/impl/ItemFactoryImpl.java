@@ -1,5 +1,6 @@
 package com.gist.guild.gui.bot.factory.impl;
 
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.commons.message.entity.RechargeCredit;
@@ -10,11 +11,13 @@ import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -242,5 +245,66 @@ public class ItemFactoryImpl implements ItemFactory {
     @Override
     public SendMessage selectAddress(Long chat_id) {
         return message(chat_id, "Inviare un ulteriore messaggio indicando l'indirizzo di spedizione per finalizzare l'ordine");
+    }
+
+    @Override
+    public SendMessage orderDetailsMessageBuilder(Long chat_id, Order order) {
+        SendMessage message = message(chat_id, order.toString());
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline4 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline5 = new ArrayList<>();
+
+        /*InlineKeyboardButton button1 = new InlineKeyboardButton();
+        button1.setText("Paga questo ordine : "+ NumberFormat.getCurrencyInstance().format(order.getAmount()));
+        button1.setCallbackData("makePayment#"+order.getExternalShortId());
+        rowInline1.add(button1);*/
+
+        /*InlineKeyboardButton button2 = new InlineKeyboardButton();
+        button2.setText("Annulla questo ordine");
+        button2.setCallbackData("deleteOrder#"+order.getExternalShortId());
+        rowInline2.add(button2);*/
+
+        /*if(!StringUtils.isEmpty(product.getUrl())){
+            InlineKeyboardButton button3 = new InlineKeyboardButton();
+            button3.setText("Guarda il contenuto");
+            button3.setUrl(product.getUrl());
+            rowInline3.add(button3);
+        }*/
+
+        InlineKeyboardButton button4 = new InlineKeyboardButton();
+        button4.setText("Torna alla lista degli ordini");
+        button4.setCallbackData("listaOrdini");
+        rowInline4.add(button4);
+
+        InlineKeyboardButton button3 = new InlineKeyboardButton();
+        button3.setText("Torna al menù principale");
+        button3.setCallbackData("welcomeMenu");
+        rowInline5.add(button3);
+
+        /*
+        // Set the keyboard to the markup
+        if(!order.getPaid()){
+            rowsInline.add(rowInline1);
+            rowsInline.add(rowInline2);
+        } else {
+            if(StringUtils.isNotEmpty(order.getProduct().getUrl())){
+                rowsInline.add(rowInline3);
+            }
+        }
+        */
+
+        rowsInline.add(rowInline4);
+        rowsInline.add(rowInline5);
+
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+
+        return message;
     }
 }
