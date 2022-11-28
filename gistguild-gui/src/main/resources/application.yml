@@ -15,7 +15,16 @@ spring:
           destination: distributionChannel
 
 gistguild:
+  bot:
+    username: gist_it_bot
+    token: TOKEN
+    channelId: gist_it
+    entryFreeCredit:
+      active: true
+      amount: 5
+
   spike:
     username: username
     password: password
     url: http://localhost:8882/spike
+

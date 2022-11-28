@@ -32,6 +32,12 @@ public class GistGuildBot extends TelegramLongPollingBot {
     @Value("${gistguild.bot.token}")
     private String botToken;
 
+    @Value("${gistguild.bot.entryFreeCredit.active}")
+    private Boolean entryFreeCredit;
+
+    @Value("${gistguild.bot.entryFreeCredit.amount}")
+    private Long entryFreeCreditAmount;
+
     @Autowired
     ResourceManagerService resourceManagerService;
 
@@ -50,7 +56,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
             Long chat_id = update.getCallbackQuery().getMessage().getChatId();
 
             if (call_data.equals("iscrizione")) {
-                message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nInMediArt GasSMan vi iscriverà al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
+                message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nSarete iscritti al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
             } else if (call_data.equals("cancellazione")) {
                 try {
                     Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
@@ -282,12 +288,18 @@ public class GistGuildBot extends TelegramLongPollingBot {
                 try {
                     participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getMessage().getFrom(), update.getMessage().getText())).get();
                     message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo %s.\nClicca su /start per iniziare.", participant.getMail()));
-                    /*if(entryFreeCredit){
-                        resourceManagerService.addCredit(user_id, BigDecimal.valueOf(entryFreeCreditAmount*100));
+                    if(entryFreeCredit){
+                        RechargeCredit rechargeCredit = new RechargeCredit();
+                        rechargeCredit.setCustomerMail(participant.getMail());
+                        rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
+                        rechargeCredit.setNewCredit(entryFreeCreditAmount);
+                        rechargeCredit.setOldCredit(0L);
+                        rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                        resourceManagerService.addCredit(rechargeCredit).get();
                         message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nRiceverai anche un credito di %s € in regalo da utilizzare da subito per gli acquisti di prodotti dal catalogo.\nClicca su /start per iniziare.", entryFreeCreditAmount));
                     } else{
                         message = itemFactory.message(chat_id, "Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nClicca su /start per iniziare.");
-                    }*/
+                    }
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
