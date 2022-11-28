@@ -112,6 +112,17 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit) {
+        DocumentProposition documentProposition = new DocumentProposition();
+        documentProposition.setDocumentPropositionType(DocumentPropositionType.RECHARGE_USER_CREDIT);
+        documentProposition.setDocumentClass(RechargeCredit.class.getSimpleName());
+        documentProposition.setDocument(rechargeCredit);
+        ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
+        GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
+        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
     public void saveAction(Action action) {
         actionRepository.save(action);
     }

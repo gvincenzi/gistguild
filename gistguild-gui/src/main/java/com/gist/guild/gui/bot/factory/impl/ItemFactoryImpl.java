@@ -194,4 +194,43 @@ public class ItemFactoryImpl implements ItemFactory {
         message.setReplyMarkup(markupInline);
         return message;
     }
+
+    @Override
+    public SendMessage userManagementCredit(Long chat_id) {
+        SendMessage message;
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        message = message(chat_id, "Ricarica il credito dell'utente scegliendo tra le seguenti opzioni:");
+
+        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+        button1.setText("5 €");
+        button1.setCallbackData("usermng#ricaricaCredito#5");
+        rowInline1.add(button1);
+
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
+        button2.setText("10 €");
+        button2.setCallbackData("usermng#ricaricaCredito#10");
+        rowInline1.add(button2);
+
+        InlineKeyboardButton button3 = new InlineKeyboardButton();
+        button3.setText("20 €");
+        button3.setCallbackData("usermng#ricaricaCredito#20");
+        rowInline2.add(button3);
+
+        InlineKeyboardButton button4 = new InlineKeyboardButton();
+        button4.setText("50 €");
+        button4.setCallbackData("usermng#ricaricaCredito#50");
+        rowInline2.add(button4);
+
+        rowsInline.add(rowInline1);
+        rowsInline.add(rowInline2);
+
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        return message;
+    }
 }

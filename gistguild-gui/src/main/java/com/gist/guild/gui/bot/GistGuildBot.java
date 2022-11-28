@@ -1,9 +1,6 @@
 package com.gist.guild.gui.bot;
 
-import com.gist.guild.commons.message.entity.Order;
-import com.gist.guild.commons.message.entity.Participant;
-import com.gist.guild.commons.message.entity.Product;
-import com.gist.guild.commons.message.entity.RechargeCredit;
+import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.ItemFactory;
@@ -235,7 +232,7 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     message = itemFactory.message(chat_id, "Utente rimosso correttamente\nClicca su /start per tornare al menu principale.");
                 }
             } else if (call_data.equalsIgnoreCase("usermng#ricaricaCredito")) {
-                /*Action actionInProgress = getActionInProgress(user_id);
+                Action actionInProgress = getActionInProgress(user_id);
                 if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
                     Action action = new Action();
                     action.setActionType(ActionType.USER_CREDIT);
@@ -244,16 +241,31 @@ public class GistGuildBot extends TelegramLongPollingBot {
                     resourceManagerService.deleteActionInProgress(actionInProgress);
                     resourceManagerService.saveAction(action);
                     message = itemFactory.userManagementCredit(chat_id);
-                }*/
+                }
             } else if (call_data.startsWith("usermng#ricaricaCredito#")) {
-                /*String[] split = call_data.split("#");
+                String[] split = call_data.split("#");
                 Long credit = Long.parseLong(split[2]);
                 Action actionInProgress = getActionInProgress(user_id);
                 if(actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null && ActionType.USER_CREDIT.equals(actionInProgress.getActionType())) {
                     resourceManagerService.deleteActionInProgress(actionInProgress);
-                    resourceManagerService.addCredit(actionInProgress.getTelegramUserIdToManage(), BigDecimal.valueOf(credit));
-                    message = itemFactory.message(chat_id, "Credito aggiornato correttamente\nClicca su /start per tornare al menu principale.");
-                }*/
+
+                    Participant participantToRecharge = null;
+                    try {
+                        RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(user_id).get();
+                        participantToRecharge = resourceManagerService.findParticipantByTelegramId(actionInProgress.getTelegramUserIdToManage()).get();
+                        RechargeCredit rechargeCredit = new RechargeCredit();
+                        rechargeCredit.setCustomerMail(participantToRecharge.getMail());
+                        rechargeCredit.setCustomerTelegramUserId(participantToRecharge.getTelegramUserId());
+                        rechargeCredit.setNewCredit(credit);
+                        rechargeCredit.setOldCredit(rechargeCreditLast.getOldCredit());
+                        rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                        resourceManagerService.addCredit(rechargeCredit).get();
+                        message = itemFactory.message(chat_id, "Credito aggiornato correttamente\nClicca su /start per tornare al menu principale.");
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error(e.getMessage());
+                    }
+
+                }
             } else if (call_data.startsWith("welcomeMenu")) {
                 message = itemFactory.welcomeMessage(update.getCallbackQuery().getMessage(), user_id);
             }
