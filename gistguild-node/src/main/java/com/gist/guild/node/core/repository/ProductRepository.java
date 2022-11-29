@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ProductRepository extends DocumentRepository<Product>, MongoRepository<Product, String> {
     List<Product> findByActiveTrue();
-    List<Product> findByName(String name);
+    List<Product> findByNameAndOwnerTelegramUserId(String name, Long ownerTelegramUserId);
 }

@@ -5,7 +5,6 @@ import com.gist.guild.gui.bot.BotUtils;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -75,7 +74,9 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductUrl(product.getUrl());
                     order.setQuantity(Long.parseLong(update.getMessage().getText()));
+                    order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                     resourceManagerService.addOrUpdateOrder(order).get();
                     message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
                 }
@@ -92,8 +93,10 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setCustomerTelegramUserId(participant.getTelegramUserId());
                 order.setProductId(product.getId());
                 order.setProductName(product.getName());
+                order.setProductUrl(product.getUrl());
                 order.setQuantity(actionInProgress.getQuantity());
                 order.setAddress(update.getMessage().getText());
+                order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                 resourceManagerService.addOrUpdateOrder(order).get();
                 message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
             } catch (InterruptedException | ExecutionException e) {

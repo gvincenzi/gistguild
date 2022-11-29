@@ -27,7 +27,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             throw new GistGuildGenericException("Gist Guild registry is corrupted");
         }
 
-        List<Product> products = getRepository().findByName(document.getName());
+        List<Product> products = getRepository().findByNameAndOwnerTelegramUserId(document.getName(), document.getOwnerTelegramUserId());
         if(products.size() > 0){
             Product product = products.iterator().next();
             product.setActive(document.getActive());

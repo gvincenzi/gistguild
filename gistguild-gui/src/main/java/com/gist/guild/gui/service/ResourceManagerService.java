@@ -22,6 +22,7 @@ public interface ResourceManagerService {
     Future<List<Order>> getOrders(Long telegramUserId);
     Future<Order> addOrUpdateOrder(Order order);
     Future<Order> getOrder(Long orderExternalId);
+    Order getOrderProcessed(Long orderExternalId);
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);
 }

@@ -4,12 +4,7 @@ import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.bot.BotUtils;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
-import com.gist.guild.gui.bot.factory.ItemFactory;
-import com.gist.guild.gui.bot.processor.UpdateProcessor;
-import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -171,6 +166,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setAmount(product.getPrice());
                     resourceManagerService.addOrUpdateOrder(order).get();
                     message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
                 } else if (product.getAvailableQuantity() != null) {
@@ -192,14 +188,10 @@ public class CallbackProcessor extends UpdateProcessor {
                 log.error(e.getMessage());
             }
         } else if (call_data.startsWith("orderDetails#")) {
-            try {
-                String[] split = call_data.split("#");
-                Long orderExternalShortId = Long.parseLong(split[1]);
-                Order order = resourceManagerService.getOrder(orderExternalShortId).get();
-                message = itemFactory.orderDetailsMessageBuilder(chat_id,order);
-            } catch (InterruptedException | ExecutionException e) {
-                log.error(e.getMessage());
-            }
+            String[] split = call_data.split("#");
+            Long orderExternalShortId = Long.parseLong(split[1]);
+            Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
+            message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
         } else if (call_data.equalsIgnoreCase("usermng")) {
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);

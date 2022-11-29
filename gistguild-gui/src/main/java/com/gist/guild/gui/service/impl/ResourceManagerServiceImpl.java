@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @Slf4j
@@ -120,6 +122,42 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Order getOrderProcessed(Long orderExternalId) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
+        Order order = null;
+        try {
+            order = (Order) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+        }
+
+        params.clear();
+        params.add(new DocumentRepositoryMethodParameter<String>(String.class, order.getId()));
+        distributionMessageResponseEntity = documentClient.documentByClass(Payment.class.getSimpleName(), "findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc", params);
+        try {
+            Payment payment = (Payment) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
+            if(payment != null){
+                log.info(String.format("Order ID [%s] has been payed by Payment ID [%s]", order.getId(), payment.getId()));
+                order.setPaid(Boolean.TRUE);
+            } else {
+                order.setPaid(Boolean.FALSE);
+            }
+
+        } catch (ExecutionException e) {
+            if (NoSuchElementException.class == e.getCause().getClass()) {
+                order.setPaid(Boolean.FALSE);
+            } else {
+                log.error(e.getMessage());
+            }
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
+         return order;
     }
 
     @Override

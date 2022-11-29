@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -259,22 +258,22 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline4 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline5 = new ArrayList<>();
 
-        /*InlineKeyboardButton button1 = new InlineKeyboardButton();
-        button1.setText("Paga questo ordine : "+ NumberFormat.getCurrencyInstance().format(order.getAmount()));
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+        button1.setText(String.format("Paga questo ordine : %s €",order.getAmount()));
         button1.setCallbackData("makePayment#"+order.getExternalShortId());
-        rowInline1.add(button1);*/
+        rowInline1.add(button1);
 
         /*InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("Annulla questo ordine");
         button2.setCallbackData("deleteOrder#"+order.getExternalShortId());
         rowInline2.add(button2);*/
 
-        /*if(!StringUtils.isEmpty(product.getUrl())){
+        if(!StringUtils.isEmpty(order.getProductUrl())){
             InlineKeyboardButton button3 = new InlineKeyboardButton();
             button3.setText("Guarda il contenuto");
-            button3.setUrl(product.getUrl());
+            button3.setUrl(order.getProductUrl());
             rowInline3.add(button3);
-        }*/
+        }
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
         button4.setText("Torna alla lista degli ordini");
@@ -286,17 +285,15 @@ public class ItemFactoryImpl implements ItemFactory {
         button3.setCallbackData("welcomeMenu");
         rowInline5.add(button3);
 
-        /*
         // Set the keyboard to the markup
         if(!order.getPaid()){
             rowsInline.add(rowInline1);
             rowsInline.add(rowInline2);
         } else {
-            if(StringUtils.isNotEmpty(order.getProduct().getUrl())){
+            if(!StringUtils.isEmpty(order.getProductUrl())){
                 rowsInline.add(rowInline3);
             }
         }
-        */
 
         rowsInline.add(rowInline4);
         rowsInline.add(rowInline5);

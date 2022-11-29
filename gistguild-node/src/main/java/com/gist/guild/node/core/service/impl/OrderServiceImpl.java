@@ -50,6 +50,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         order.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
         order.setProductName(document.getProductName());
         order.setProductId(document.getProductId());
+        order.setProductUrl(document.getProductUrl());
         order.setQuantity(document.getQuantity());
 
         Random random = new Random(order.getTimestamp().toEpochMilli());
@@ -79,6 +80,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
             order.setProductName(document.getProductName());
             order.setProductId(document.getProductId());
+            order.setProductUrl(document.getProductUrl());
             order.setQuantity(document.getQuantity());
             order.setTimestamp(document.getTimestamp());
             order.setNonce(document.getNonce());

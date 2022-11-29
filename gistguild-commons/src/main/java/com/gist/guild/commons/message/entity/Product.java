@@ -2,7 +2,6 @@ package com.gist.guild.commons.message.entity;
 
 import lombok.Data;
 
-import java.text.NumberFormat;
 import java.util.Objects;
 
 @Data
@@ -44,7 +43,7 @@ public class Product extends Document {
     public String toString() {
         return  "Nome :'" + name + '\'' +
                 "\nDescrizione :'" + description + '\''+
-                "\nPrezzo :'" + NumberFormat.getCurrencyInstance().format(price) + '\'' +
+                String.format("\nPrezzo : %s €", price) +
                 (delivery!=null && delivery ? " (con consegna a domicilio)" : "");
     }
 }
