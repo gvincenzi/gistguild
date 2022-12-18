@@ -1,5 +1,6 @@
 package com.gist.guild.gui.service;
 
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
@@ -22,7 +23,7 @@ public interface ResourceManagerService {
     Future<List<Order>> getOrders(Long telegramUserId);
     Future<Order> addOrUpdateOrder(Order order);
     Order getOrderProcessed(Long orderExternalId);
-    void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId);
+    void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException;
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);
 }

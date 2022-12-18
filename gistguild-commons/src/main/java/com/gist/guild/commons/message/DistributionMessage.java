@@ -2,6 +2,7 @@ package com.gist.guild.commons.message;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import lombok.Data;
 
 import java.util.List;
@@ -18,4 +19,5 @@ public class DistributionMessage<T> {
     private Class documentClass;
     private T content;
     private Boolean valid;
+    private List<GistGuildGenericException> exceptions;
 }

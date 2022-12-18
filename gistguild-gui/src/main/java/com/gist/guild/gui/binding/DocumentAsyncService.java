@@ -1,5 +1,6 @@
 package com.gist.guild.gui.binding;
 
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.Document;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.Future;
 @Service
 public class DocumentAsyncService<T extends Document> {
     private Map<UUID, List<T>> cacheMap = new HashMap<>();
+    private Map<UUID, List<GistGuildGenericException>> cacheExceptionMap = new HashMap<>();
 
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
@@ -37,13 +39,20 @@ public class DocumentAsyncService<T extends Document> {
         });
     }
 
-    public void putInCache(UUID correlationID, T document){
+    public void putInCache(UUID correlationID, T document, List<GistGuildGenericException> exceptions){
         if(!cacheMap.containsKey(correlationID)){
             cacheMap.put(correlationID, new ArrayList<>());
+            cacheExceptionMap.put(correlationID, new ArrayList<>());
         }
         if(document != null){
             cacheMap.get(correlationID).add(document);
         }
+        if(exceptions != null && !exceptions.isEmpty()){
+            cacheExceptionMap.get(correlationID).addAll(exceptions);
+        }
     }
 
+    public List<GistGuildGenericException> getExceptionResult(UUID correlationID){
+        return cacheExceptionMap.remove(correlationID);
+    }
 }

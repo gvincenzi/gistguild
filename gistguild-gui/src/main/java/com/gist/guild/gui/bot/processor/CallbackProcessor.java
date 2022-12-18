@@ -1,5 +1,6 @@
 package com.gist.guild.gui.bot.processor;
 
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.bot.BotUtils;
 import com.gist.guild.gui.bot.action.entity.Action;
@@ -166,9 +167,10 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductUrl(product.getUrl());
                     order.setAmount(product.getPrice());
-                    resourceManagerService.addOrUpdateOrder(order).get();
-                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                    order = resourceManagerService.addOrUpdateOrder(order).get();
+                    message = itemFactory.message(chat_id,String.format("Ordine ID[%d] effettuato con successo",order.getExternalShortId()));
                 } else if (product.getAvailableQuantity() != null) {
                     Action action = new Action();
                     action.setActionType(ActionType.SELECT_PRODUCT);
@@ -197,8 +199,12 @@ public class CallbackProcessor extends UpdateProcessor {
             Long orderExternalShortId = Long.parseLong(split[1]);
             try{
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
-                resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
-                message = itemFactory.message(chat_id,"Richiesta di pagamento inviata");
+                try {
+                    resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
+                    message = itemFactory.message(chat_id,"Pagamento effettuato con successo");
+                } catch (GistGuildGenericException e) {
+                    message = itemFactory.message(chat_id,String.format("Errore nel pagamento [%s]",e.getMessage()));
+                }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }

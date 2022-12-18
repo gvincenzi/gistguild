@@ -67,9 +67,11 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
 
         Product product = productOptional.get();
-        if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()<order.getQuantity()) throw new GistGuildInsufficientQuantityException(participant, "Not enough quantity available");
-
-        product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
+        if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()<order.getQuantity()){
+            throw new GistGuildInsufficientQuantityException(participant, "Not enough quantity available");
+        } else if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()>=order.getQuantity()){
+            product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
+        }
 
         productRepository.save(product);
     }

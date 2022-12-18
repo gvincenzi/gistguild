@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.exception.GistGuildGenericException;
+import com.gist.guild.commons.exception.GistGuildInsufficientCreditException;
+import com.gist.guild.commons.exception.GistGuildInsufficientQuantityException;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
@@ -91,8 +93,15 @@ public class MQListener {
                         sendResponseMessage(msg, items, documentClass);
                         break;
                     case ORDER_REGISTRATION:
-                        Order order = orderNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Order.class));
+                        Order order = null;
                         documentClass = com.gist.guild.commons.message.entity.Order.class;
+                        try {
+                            order = orderNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Order.class));
+                        } catch (GistGuildInsufficientQuantityException e) {
+                            log.error(e.getMessage());
+                            sendResponseExceptionMessage(msg, items, documentClass, e);
+                            break;
+                        }
                         items.add(order);
                         log.info(String.format("New order with ID [%s] correctly validated and ingested", order.getId()));
                         sendResponseMessage(msg, items, documentClass);
@@ -105,8 +114,15 @@ public class MQListener {
                         sendResponseMessage(msg, items, documentClass);
                         break;
                     case ORDER_PAYMENT_CONFIRMATION:
-                        Payment payment = paymentNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Payment.class));
+                        Payment payment = null;
                         documentClass = com.gist.guild.commons.message.entity.Payment.class;
+                        try{
+                            payment = paymentNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Payment.class));
+                        } catch (GistGuildInsufficientCreditException e) {
+                            log.error(e.getMessage());
+                            sendResponseExceptionMessage(msg, items, documentClass, e);
+                            break;
+                        }
                         items.add(payment);
                         log.info(String.format("New payment with ID [%s] correctly validated and ingested", payment.getId()));
                         sendResponseMessage(msg, items, documentClass);
@@ -136,6 +152,21 @@ public class MQListener {
         responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
         responseMessage.setDocumentClass(documentClass);
         responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
+    }
+
+    private void sendResponseExceptionMessage(DistributionMessage<DocumentProposition> msg, List<Document> items, Class documentClass, GistGuildGenericException e) {
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(msg.getCorrelationID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.BUSINESS_EXCEPTION);
+        responseMessage.setDocumentClass(documentClass);
+        responseMessage.setContent(items);
+
+        List<GistGuildGenericException> exceptions = new ArrayList<>(1);
+        exceptions.add(e);
+        responseMessage.setExceptions(exceptions);
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
         responseChannel.send(responseMsg);
     }

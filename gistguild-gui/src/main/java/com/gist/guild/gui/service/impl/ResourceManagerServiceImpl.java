@@ -1,5 +1,6 @@
 package com.gist.guild.gui.service.impl;
 
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -86,9 +84,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
 
     @Override
     public Future<List<Product>> getProducts(Boolean all) {
-        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(0);
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrueAndAvailableQuantityIsNullOrAvailableQuantityGreaterThan", all ? null : params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrueAndAvailableQuantityIsNullOrAvailableQuantityGreaterThan", all ? new ArrayList<>(0) : params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
@@ -164,7 +162,8 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) {
+    public void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException {
+        UUID correlationID = null;
         try {
             Order order = getOrder(orderExternalId).get();
             Payment payment = new Payment();
@@ -177,10 +176,16 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             documentProposition.setDocumentClass(Payment.class.getSimpleName());
             documentProposition.setDocument(payment);
             ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
-            //GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
-            //documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+            correlationID = distributionMessageResponseEntity.getBody().getCorrelationID();
+            documentAsyncService.getUniqueResult(correlationID).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());
+            if(correlationID != null) {
+                List<? extends GistGuildGenericException> exceptionResult = documentAsyncService.getExceptionResult(correlationID);
+                if (exceptionResult != null && !exceptionResult.isEmpty()) {
+                    throw exceptionResult.iterator().next();
+                }
+            }
         }
     }
 
