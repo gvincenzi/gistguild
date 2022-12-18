@@ -33,6 +33,8 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         if(document.getId() != null && getRepository().findById(document.getId()).isPresent()){
             Order order = getRepository().findById(document.getId()).get();
             order.setAddress(document.getAddress());
+            order.setDeleted(document.getDeleted());
+            if(order.getDeleted()) nodeBusinessService.deleteOrder(document);
             return repository.save(order);
         } else {
             Order previous = repository.findTopByOrderByTimestampDesc();
@@ -60,6 +62,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         order.setProductUrl(document.getProductUrl());
         order.setProductPassword(document.getProductPassword());
         order.setQuantity(document.getQuantity());
+        order.setDeleted(document.getDeleted());
 
         Random random = new Random(order.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
@@ -94,12 +97,13 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setTimestamp(document.getTimestamp());
             order.setNonce(document.getNonce());
             order.setExternalShortId(document.getExternalShortId());
+            order.setDeleted(document.getDeleted());
             repository.save(order);
             return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Order order = new Order();
             order.setAddress(document.getAddress());
-            // WE CANNOT MODIFY ONLY ADDRESS
+            order.setDeleted(document.getDeleted());
             repository.save(order);
             return validate(repository.findAllByOrderByTimestampAsc());
         }

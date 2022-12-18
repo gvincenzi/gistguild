@@ -263,10 +263,10 @@ public class ItemFactoryImpl implements ItemFactory {
         button1.setCallbackData("makePayment#"+order.getExternalShortId());
         rowInline1.add(button1);
 
-        /*InlineKeyboardButton button2 = new InlineKeyboardButton();
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("Annulla questo ordine");
         button2.setCallbackData("deleteOrder#"+order.getExternalShortId());
-        rowInline2.add(button2);*/
+        rowInline2.add(button2);
 
         if(!StringUtils.isEmpty(order.getProductUrl())){
             InlineKeyboardButton button3 = new InlineKeyboardButton();

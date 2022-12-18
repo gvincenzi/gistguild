@@ -213,6 +213,17 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }
+        } else if (call_data.startsWith("deleteOrder#")) {
+            String[] split = call_data.split("#");
+            Long orderExternalShortId = Long.parseLong(split[1]);
+            try {
+                Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
+                order.setDeleted(Boolean.TRUE);
+                order = resourceManagerService.addOrUpdateOrder(order);
+                message = itemFactory.message(chat_id,String.format("Ordine ID[%d] annullato con successo",order.getExternalShortId()));
+            } catch (GistGuildGenericException e) {
+                message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+            }
         } else if (call_data.equalsIgnoreCase("usermng")) {
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);

@@ -13,6 +13,7 @@ public class Order extends Document {
     private String productPassword;
     private String customerMail;
     private Long customerTelegramUserId;
+    private Boolean deleted = Boolean.FALSE;
     private transient Boolean paid;
 
     @Override

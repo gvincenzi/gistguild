@@ -75,4 +75,14 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
 
         productRepository.save(product);
     }
+
+    @Override
+    public void deleteOrder(Order order) throws GistGuildGenericException {
+        Optional<Product> productOptional = productRepository.findById(order.getProductId());
+        if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
+
+        Product product = productOptional.get();
+        product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
+        productRepository.save(product);
+    }
 }
