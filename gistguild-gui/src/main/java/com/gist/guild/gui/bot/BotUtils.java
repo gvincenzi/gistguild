@@ -2,6 +2,7 @@ package com.gist.guild.gui.bot;
 
 import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
+import com.gist.guild.gui.bot.factory.CallbackDataKey;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -47,7 +48,7 @@ public class BotUtils {
                     List<InlineKeyboardButton> rowInline = new ArrayList<>();
                     InlineKeyboardButton button = new InlineKeyboardButton();
                     button.setText("ID#" + order.getExternalShortId() + " : " + order.getProductName());
-                    button.setCallbackData("orderDetails#" + order.getExternalShortId());
+                    button.setCallbackData(CallbackDataKey.ORDER_DETAILS.name() + CallbackDataKey.DELIMITER + order.getExternalShortId());
                     rowInline.add(button);
                     rowsInline.add(rowInline);
                 }
@@ -55,7 +56,7 @@ public class BotUtils {
                 List<InlineKeyboardButton> rowInline = new ArrayList<>();
                 InlineKeyboardButton button2 = new InlineKeyboardButton();
                 button2.setText("Torna al menù principale");
-                button2.setCallbackData("welcomeMenu");
+                button2.setCallbackData(CallbackDataKey.WELCOME.name());
                 rowInline.add(button2);
                 rowsInline.add(rowInline);
 

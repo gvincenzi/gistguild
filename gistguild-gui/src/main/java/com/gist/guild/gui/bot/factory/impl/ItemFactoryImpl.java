@@ -6,6 +6,7 @@ import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
+import com.gist.guild.gui.bot.factory.CallbackDataKey;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +88,6 @@ public class ItemFactoryImpl implements ItemFactory {
             }
 
         }
-        //TODO DIfferent actions
 
         message = message(update.getChatId(), String.format("%s,\nScegli tra le seguenti opzioni:", participant == null ? "Benvenuto nel sistema GIST Guild" : "Bentornato nel sistema GIST Guild"));
 
@@ -99,29 +99,29 @@ public class ItemFactoryImpl implements ItemFactory {
         if (participant == null) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("Iscrizione");
-            button.setCallbackData("iscrizione");
+            button.setCallbackData(CallbackDataKey.REGISTRATION.name());
             rowInline1.add(button);
         } else {
             InlineKeyboardButton button1 = new InlineKeyboardButton();
             button1.setText("Catalogo");
-            button1.setCallbackData("catalogo");
+            button1.setCallbackData(CallbackDataKey.CATALOG.name());
             rowInline1.add(button1);
             InlineKeyboardButton button2 = new InlineKeyboardButton();
             button2.setText("I tuoi ordini");
-            button2.setCallbackData("listaOrdini");
+            button2.setCallbackData(CallbackDataKey.ORDER_LIST.name());
             rowInline2.add(button2);
             InlineKeyboardButton button3 = new InlineKeyboardButton();
             button3.setText("Credito residuo");
-            button3.setCallbackData("creditoResiduo");
+            button3.setCallbackData(CallbackDataKey.CREDIT.name());
             rowInline2.add(button3);
-//            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData("ricaricaCredito"));
+//            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData(CallbackDataKey.ADD_CREDIT.name()));
             InlineKeyboardButton button4 = new InlineKeyboardButton();
             button4.setText("Cancellazione");
-            button4.setCallbackData("cancellazione");
+            button4.setCallbackData(CallbackDataKey.CANCELLATION.name());
             rowInline4.add(button4);
             InlineKeyboardButton button5 = new InlineKeyboardButton();
             button5.setText("Gestione iscritti");
-            button5.setCallbackData("usermng");
+            button5.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name());
             rowInline5.add(button5);
         }
 
@@ -176,15 +176,15 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
         InlineKeyboardButton button1 = new InlineKeyboardButton();
         button1.setText("Ricarica credito");
-        button1.setCallbackData("usermng#ricaricaCredito");
+        button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name());
         rowInline1.add(button1);
         InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("Cancellazione");
-        button2.setCallbackData("usermng#cancellazione");
+        button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION);
         rowInline1.add(button2);
         InlineKeyboardButton button3 = new InlineKeyboardButton();
         button3.setText("Modifica terminata");
-        button3.setCallbackData("usermng#end");
+        button3.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.END.name());
         rowInline2.add(button3);
 
         // Set the keyboard to the markup
@@ -209,22 +209,22 @@ public class ItemFactoryImpl implements ItemFactory {
 
         InlineKeyboardButton button1 = new InlineKeyboardButton();
         button1.setText("5 €");
-        button1.setCallbackData("usermng#ricaricaCredito#5");
+        button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"5");
         rowInline1.add(button1);
 
         InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("10 €");
-        button2.setCallbackData("usermng#ricaricaCredito#10");
+        button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"10");
         rowInline1.add(button2);
 
         InlineKeyboardButton button3 = new InlineKeyboardButton();
         button3.setText("20 €");
-        button3.setCallbackData("usermng#ricaricaCredito#20");
+        button3.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"20");
         rowInline2.add(button3);
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
         button4.setText("50 €");
-        button4.setCallbackData("usermng#ricaricaCredito#50");
+        button4.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"50");
         rowInline2.add(button4);
 
         rowsInline.add(rowInline1);
@@ -260,12 +260,12 @@ public class ItemFactoryImpl implements ItemFactory {
 
         InlineKeyboardButton button1 = new InlineKeyboardButton();
         button1.setText(String.format("Paga questo ordine : %s €",order.getAmount()));
-        button1.setCallbackData("makePayment#"+order.getExternalShortId());
+        button1.setCallbackData(CallbackDataKey.PAYMENT.name()+CallbackDataKey.DELIMITER + order.getExternalShortId());
         rowInline1.add(button1);
 
         InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("Annulla questo ordine");
-        button2.setCallbackData("deleteOrder#"+order.getExternalShortId());
+        button2.setCallbackData(CallbackDataKey.ORDER_DELETE.name() + CallbackDataKey.DELIMITER + order.getExternalShortId());
         rowInline2.add(button2);
 
         if(!StringUtils.isEmpty(order.getProductUrl())){
@@ -277,12 +277,12 @@ public class ItemFactoryImpl implements ItemFactory {
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
         button4.setText("Torna alla lista degli ordini");
-        button4.setCallbackData("listaOrdini");
+        button4.setCallbackData(CallbackDataKey.ORDER_LIST.name());
         rowInline4.add(button4);
 
         InlineKeyboardButton button3 = new InlineKeyboardButton();
         button3.setText("Torna al menù principale");
-        button3.setCallbackData("welcomeMenu");
+        button3.setCallbackData(CallbackDataKey.WELCOME.name());
         rowInline5.add(button3);
 
         // Set the keyboard to the markup
