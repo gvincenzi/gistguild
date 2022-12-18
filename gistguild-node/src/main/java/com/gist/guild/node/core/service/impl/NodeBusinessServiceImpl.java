@@ -2,11 +2,15 @@ package com.gist.guild.node.core.service.impl;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.exception.GistGuildInsufficientCreditException;
+import com.gist.guild.commons.exception.GistGuildInsufficientQuantityException;
+import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Payment;
 import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.commons.message.entity.RechargeCreditType;
 import com.gist.guild.node.core.document.Participant;
+import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.ParticipantRepository;
+import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.repository.RechargeCreditRepository;
 import com.gist.guild.node.core.service.NodeBusinessService;
 import com.gist.guild.node.core.service.NodeService;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NodeBusinessServiceImpl implements NodeBusinessService {
@@ -22,6 +27,9 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
 
     @Autowired
     ParticipantRepository participantRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     @Autowired
     NodeService<RechargeCredit, com.gist.guild.node.core.document.RechargeCredit> rechargeCreditNodeService;
@@ -47,5 +55,22 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         rechargeCredit.setRechargeUserCreditType(RechargeCreditType.PAYMENT);
 
         rechargeCreditNodeService.add(rechargeCredit);
+    }
+
+    @Override
+    public void validateOrder(Order order) throws GistGuildGenericException {
+        List<Participant> byTelegramUserId = participantRepository.findByTelegramUserId(order.getCustomerTelegramUserId());
+        if(byTelegramUserId.isEmpty()) throw new GistGuildGenericException("Participant does not exist");
+        Participant participant = byTelegramUserId.iterator().next();
+
+        Optional<Product> productOptional = productRepository.findById(order.getProductId());
+        if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
+
+        Product product = productOptional.get();
+        if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()<order.getQuantity()) throw new GistGuildInsufficientQuantityException(participant, "Not enough quantity available");
+
+        product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
+
+        productRepository.save(product);
     }
 }

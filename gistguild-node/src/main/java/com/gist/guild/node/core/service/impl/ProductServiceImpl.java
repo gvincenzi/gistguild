@@ -1,6 +1,7 @@
 package com.gist.guild.node.core.service.impl;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
+import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
@@ -27,9 +28,8 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             throw new GistGuildGenericException("Gist Guild registry is corrupted");
         }
 
-        List<Product> products = getRepository().findByNameAndOwnerTelegramUserId(document.getName(), document.getOwnerTelegramUserId());
-        if(products.size() > 0){
-            Product product = products.iterator().next();
+        if(document.getId() != null && getRepository().findById(document.getId()).isPresent()){
+            Product product = getRepository().findById(document.getId()).get();
             product.setActive(document.getActive());
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());

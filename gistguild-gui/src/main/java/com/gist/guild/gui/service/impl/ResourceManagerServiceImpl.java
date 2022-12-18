@@ -87,7 +87,8 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Override
     public Future<List<Product>> getProducts(Boolean all) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(0);
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrue", params);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrueAndAvailableQuantityIsNullOrAvailableQuantityGreaterThan", all ? null : params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 

@@ -3,6 +3,7 @@ package com.gist.guild.node.core.service.impl;
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.repository.OrderRepository;
+import com.gist.guild.node.core.service.NodeBusinessService;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
 import lombok.Data;
@@ -16,6 +17,9 @@ import java.util.Random;
 public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message.entity.Order, Order> {
     @Autowired
     OrderRepository repository;
+
+    @Autowired
+    NodeBusinessService nodeBusinessService;
 
     @Override
     public Order add(com.gist.guild.commons.message.entity.Order document) throws GistGuildGenericException {
@@ -33,6 +37,9 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         } else {
             Order previous = repository.findTopByOrderByTimestampDesc();
             Order newItem = getNewItem(document, previous);
+
+            //Validation order : check if Product has availability quantity
+            nodeBusinessService.validateOrder(document);
             return repository.save(newItem);
         }
     }
