@@ -10,6 +10,7 @@ public class Order extends Document {
     private String productName;
     private String productId;
     private String productUrl;
+    private String productPassword;
     private String customerMail;
     private Long customerTelegramUserId;
     private transient Boolean paid;

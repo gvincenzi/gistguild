@@ -21,7 +21,7 @@ public interface ResourceManagerService {
     Future<Product> getProduct(Long productExternalShortId);
     Future<Product> updateProduct(Product product);
     Future<List<Order>> getOrders(Long telegramUserId);
-    Future<Order> addOrUpdateOrder(Order order);
+    Order addOrUpdateOrder(Order order) throws GistGuildGenericException;
     Order getOrderProcessed(Long orderExternalId);
     void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException;
     Future<RechargeCredit> getCredit(Long telegramUserId);

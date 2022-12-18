@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -62,14 +60,27 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<Order> addOrUpdateOrder(Order order) {
+    public Order addOrUpdateOrder(Order order) throws GistGuildGenericException {
         DocumentProposition documentProposition = new DocumentProposition();
         documentProposition.setDocumentPropositionType(DocumentPropositionType.ORDER_REGISTRATION);
         documentProposition.setDocumentClass(Order.class.getSimpleName());
         documentProposition.setDocument(order);
         ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
         GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
-        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+        UUID correlationID = distributionMessageResponseEntity.getBody().getCorrelationID();
+        try {
+            order = (Order) documentAsyncService.getUniqueResult(correlationID).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+            if (correlationID != null) {
+                List<? extends GistGuildGenericException> exceptionResult = documentAsyncService.getExceptionResult(correlationID);
+                if (exceptionResult != null && !exceptionResult.isEmpty()) {
+                    throw exceptionResult.iterator().next();
+                }
+            }
+        }
+
+        return order;
     }
 
     @Override
@@ -142,7 +153,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         distributionMessageResponseEntity = documentClient.documentByClass(Payment.class.getSimpleName(), "findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc", params);
         try {
             Payment payment = (Payment) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
-            if(payment != null){
+            if (payment != null) {
                 log.info(String.format("Order ID [%s] has been payed by Payment ID [%s]", order.getId(), payment.getId()));
                 order.setPaid(Boolean.TRUE);
             } else {
@@ -158,7 +169,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         } catch (InterruptedException e) {
             log.error(e.getMessage());
         }
-         return order;
+        return order;
     }
 
     @Override
@@ -180,7 +191,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             documentAsyncService.getUniqueResult(correlationID).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());
-            if(correlationID != null) {
+            if (correlationID != null) {
                 List<? extends GistGuildGenericException> exceptionResult = documentAsyncService.getExceptionResult(correlationID);
                 if (exceptionResult != null && !exceptionResult.isEmpty()) {
                     throw exceptionResult.iterator().next();

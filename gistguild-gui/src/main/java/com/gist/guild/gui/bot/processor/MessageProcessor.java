@@ -1,5 +1,6 @@
 package com.gist.guild.gui.bot.processor;
 
+import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.bot.BotUtils;
 import com.gist.guild.gui.bot.action.entity.Action;
@@ -75,10 +76,15 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
                     order.setProductUrl(product.getUrl());
+                    order.setProductPassword(product.getPassword());
                     order.setQuantity(Long.parseLong(update.getMessage().getText()));
                     order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
-                    resourceManagerService.addOrUpdateOrder(order).get();
-                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                    try {
+                        resourceManagerService.addOrUpdateOrder(order);
+                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                    } catch (GistGuildGenericException e) {
+                        message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                    }
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
@@ -94,11 +100,16 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setProductId(product.getId());
                 order.setProductName(product.getName());
                 order.setProductUrl(product.getUrl());
+                order.setProductPassword(product.getPassword());
                 order.setQuantity(actionInProgress.getQuantity());
                 order.setAddress(update.getMessage().getText());
                 order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
-                resourceManagerService.addOrUpdateOrder(order).get();
-                message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                try {
+                    resourceManagerService.addOrUpdateOrder(order);
+                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                } catch (GistGuildGenericException e) {
+                    message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }

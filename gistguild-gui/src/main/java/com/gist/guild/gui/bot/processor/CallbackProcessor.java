@@ -168,9 +168,14 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
                     order.setProductUrl(product.getUrl());
+                    order.setProductPassword(product.getPassword());
                     order.setAmount(product.getPrice());
-                    order = resourceManagerService.addOrUpdateOrder(order).get();
-                    message = itemFactory.message(chat_id,String.format("Ordine ID[%d] effettuato con successo",order.getExternalShortId()));
+                    try {
+                        order = resourceManagerService.addOrUpdateOrder(order);
+                        message = itemFactory.message(chat_id,String.format("Ordine ID[%d] effettuato con successo",order.getExternalShortId()));
+                    } catch (GistGuildGenericException e) {
+                        message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                    }
                 } else if (product.getAvailableQuantity() != null) {
                     Action action = new Action();
                     action.setActionType(ActionType.SELECT_PRODUCT);
