@@ -192,6 +192,16 @@ public class CallbackProcessor extends UpdateProcessor {
             Long orderExternalShortId = Long.parseLong(split[1]);
             Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
             message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+        }  else if (call_data.startsWith("makePayment#")) {
+            String[] split = call_data.split("#");
+            Long orderExternalShortId = Long.parseLong(split[1]);
+            try{
+                Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+                Order order = resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
+                message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
+            }
         } else if (call_data.equalsIgnoreCase("usermng")) {
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);

@@ -116,8 +116,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
-    @Override
-    public Future<Order> getOrder(Long orderExternalId) {
+    private Future<Order> getOrder(Long orderExternalId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
@@ -158,6 +157,31 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             log.error(e.getMessage());
         }
          return order;
+    }
+
+    @Override
+    public Order payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) {
+        Order order = null;
+        try {
+            order = getOrder(orderExternalId).get();
+            Payment payment = new Payment();
+            payment.setOrderId(order.getId());
+            payment.setAmount(order.getAmount());
+            payment.setCustomerMail(customerMail);
+            payment.setCustomerTelegramUserId(customerTelegramUserId);
+            DocumentProposition documentProposition = new DocumentProposition();
+            documentProposition.setDocumentPropositionType(DocumentPropositionType.ORDER_PAYMENT_CONFIRMATION);
+            documentProposition.setDocumentClass(Payment.class.getSimpleName());
+            documentProposition.setDocument(payment);
+            ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
+            GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
+            documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+            order.setPaid(Boolean.TRUE);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+        }
+
+        return order;
     }
 
     @Override
