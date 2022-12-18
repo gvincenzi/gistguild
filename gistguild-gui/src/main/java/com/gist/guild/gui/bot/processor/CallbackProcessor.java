@@ -197,8 +197,8 @@ public class CallbackProcessor extends UpdateProcessor {
             Long orderExternalShortId = Long.parseLong(split[1]);
             try{
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
-                Order order = resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
-                message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+                resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
+                message = itemFactory.message(chat_id,"Richiesta di pagamento inviata");
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }

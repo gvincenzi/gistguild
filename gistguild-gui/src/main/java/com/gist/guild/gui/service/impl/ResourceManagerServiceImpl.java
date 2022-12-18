@@ -21,6 +21,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -137,6 +139,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
 
         params.clear();
         params.add(new DocumentRepositoryMethodParameter<String>(String.class, order.getId()));
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, order.getCustomerTelegramUserId()));
         distributionMessageResponseEntity = documentClient.documentByClass(Payment.class.getSimpleName(), "findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc", params);
         try {
             Payment payment = (Payment) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
@@ -160,10 +163,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Order payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) {
-        Order order = null;
+    public void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) {
         try {
-            order = getOrder(orderExternalId).get();
+            Order order = getOrder(orderExternalId).get();
             Payment payment = new Payment();
             payment.setOrderId(order.getId());
             payment.setAmount(order.getAmount());
@@ -174,14 +176,11 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             documentProposition.setDocumentClass(Payment.class.getSimpleName());
             documentProposition.setDocument(payment);
             ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
-            GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
-            documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
-            order.setPaid(Boolean.TRUE);
+            //GuiConcurrenceService.getCorrelationIDs().add(distributionMessageResponseEntity.getBody().getCorrelationID());
+            //documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());
         }
-
-        return order;
     }
 
     @Override

@@ -1,10 +1,9 @@
 package com.gist.guild.node.core.service.impl;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
-import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.document.Payment;
-import com.gist.guild.node.core.repository.OrderRepository;
 import com.gist.guild.node.core.repository.PaymentRepository;
+import com.gist.guild.node.core.service.NodeBusinessService;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
 import lombok.Data;
@@ -19,6 +18,9 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
     @Autowired
     PaymentRepository repository;
 
+    @Autowired
+    NodeBusinessService nodeBusinessService;
+
     @Override
     public Payment add(com.gist.guild.commons.message.entity.Payment document) throws GistGuildGenericException {
         if (document == null) {
@@ -30,6 +32,9 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
 
         Payment previous = repository.findTopByOrderByTimestampDesc();
         Payment newItem = getNewItem(document, previous);
+
+        //Validation payment : check if Participant has got credit enough to purchase
+        nodeBusinessService.validatePayment(document);
         return repository.save(newItem);
     }
 

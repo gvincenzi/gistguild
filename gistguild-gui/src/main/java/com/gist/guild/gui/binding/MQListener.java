@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
-import com.gist.guild.commons.message.entity.Order;
-import com.gist.guild.commons.message.entity.Participant;
-import com.gist.guild.commons.message.entity.Product;
-import com.gist.guild.commons.message.entity.RechargeCredit;
+import com.gist.guild.commons.message.entity.*;
 import com.gist.guild.gui.service.GuiConcurrenceService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +31,9 @@ public class MQListener {
 
     @Autowired
     private DocumentAsyncService<RechargeCredit> rechargeCreditAsyncService;
+
+    @Autowired
+    private DocumentAsyncService<Payment> paymentAsyncService;
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
@@ -89,6 +89,15 @@ public class MQListener {
                     // RECHARGE_CREDIT DOCUMENT
                     RechargeCredit rechargeCredit = mapper.readValue(mapper.writeValueAsString(item), RechargeCredit.class);
                     rechargeCreditAsyncService.putInCache(msg.getCorrelationID(), rechargeCredit);
+                }
+            } else if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                if (msg.getContent() == null || msg.getContent().isEmpty()) {
+                    paymentAsyncService.putInCache(msg.getCorrelationID(), null);
+                }
+                for (Object item : msg.getContent()) {
+                    // PAYMENT DOCUMENT
+                    Payment payment = mapper.readValue(mapper.writeValueAsString(item), Payment.class);
+                    paymentAsyncService.putInCache(msg.getCorrelationID(), payment);
                 }
             }
         } catch (JsonProcessingException e) {

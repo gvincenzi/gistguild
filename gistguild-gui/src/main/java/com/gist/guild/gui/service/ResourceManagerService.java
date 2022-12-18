@@ -22,7 +22,7 @@ public interface ResourceManagerService {
     Future<List<Order>> getOrders(Long telegramUserId);
     Future<Order> addOrUpdateOrder(Order order);
     Order getOrderProcessed(Long orderExternalId);
-    Order payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId);
+    void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId);
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);
 }
