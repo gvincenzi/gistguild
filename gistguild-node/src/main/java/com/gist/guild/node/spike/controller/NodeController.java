@@ -5,7 +5,6 @@ import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.service.NodeService;
-import com.gist.guild.node.core.service.impl.ParticipantServiceImpl;
 import com.gist.guild.node.spike.client.SpikeClient;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,19 +32,14 @@ public class NodeController {
 
     @GetMapping("/")
     public String welcome(Model model) throws GistGuildGenericException {
-        List<Participant> items = participantRepository.findAll();
+        spikeClient.integrityVerification();
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
-        model.addAttribute("startup", StartupConfig.getStartupProcessed());
-        model.addAttribute("items", items);
-
         return "welcome"; //view
     }
 
     @GetMapping("/init")
     public String init(Model model) {
-        spikeClient.integrityVerification();
-        model.addAttribute("instanceName", instanceName);
+
         return "afterInit"; //view
     }
 }
