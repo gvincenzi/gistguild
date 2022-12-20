@@ -222,7 +222,7 @@ public class MQListener {
             List<Participant> items = participantNodeService.findAll();
             Boolean validation = participantNodeService.validate(items);
             if (!validation) {
-                corruptionDetected(msg);
+                corruptionDetected(msg, Participant.class);
             }
             DistributionMessage<List<Participant>> responseMessage = new DistributionMessage<>();
             responseMessage.setCorrelationID(msg.getCorrelationID());
@@ -238,7 +238,7 @@ public class MQListener {
             List<Product> productList = productNodeService.findAll();
             Boolean validationProduct = productNodeService.validate(productList);
             if (!validationProduct) {
-                corruptionDetected(msg);
+                corruptionDetected(msg, Product.class);
             }
             DistributionMessage<List<Product>> responseProductMessage = new DistributionMessage<>();
             responseProductMessage.setCorrelationID(msg.getCorrelationID());
@@ -254,7 +254,7 @@ public class MQListener {
             List<Order> orderList = orderNodeService.findAll();
             Boolean validationOrder = orderNodeService.validate(orderList);
             if (!validationOrder) {
-                corruptionDetected(msg);
+                corruptionDetected(msg, Order.class);
             }
             DistributionMessage<List<Order>> responseOrderMessage = new DistributionMessage<>();
             responseOrderMessage.setCorrelationID(msg.getCorrelationID());
@@ -270,7 +270,7 @@ public class MQListener {
             List<RechargeCredit> rechargeCreditList = rechargeCreditNodeService.findAll();
             Boolean validationRechargeCredit = rechargeCreditNodeService.validate(rechargeCreditList);
             if (!validationRechargeCredit) {
-                corruptionDetected(msg);
+                corruptionDetected(msg, RechargeCredit.class);
             }
             DistributionMessage<List<RechargeCredit>> responseRechargeCreditMessage = new DistributionMessage<>();
             responseRechargeCreditMessage.setCorrelationID(msg.getCorrelationID());
@@ -284,9 +284,9 @@ public class MQListener {
 
             // PAYMENT DOCUMENT
             List<Payment> paymentList = paymentNodeService.findAll();
-            Boolean validationPayment = rechargeCreditNodeService.validate(rechargeCreditList);
+            Boolean validationPayment = paymentNodeService.validate(paymentList);
             if (!validationPayment) {
-                corruptionDetected(msg);
+                corruptionDetected(msg, Payment.class);
             }
             DistributionMessage<List<Payment>> responsePaymentMessage = new DistributionMessage<>();
             responsePaymentMessage.setCorrelationID(msg.getCorrelationID());
@@ -313,7 +313,7 @@ public class MQListener {
                         if (participantNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
                             log.info(String.format("New participant with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
                         } else {
-                            corruptionDetected(msg);
+                            corruptionDetected(msg, Participant.class);
                         }
                     }
                 }
@@ -323,7 +323,7 @@ public class MQListener {
                         if (productNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Product.class))) {
                             log.info(String.format("New product with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Product) item).getId()));
                         } else {
-                            corruptionDetected(msg);
+                            corruptionDetected(msg, Product.class);
                         }
                     }
                 }
@@ -333,7 +333,7 @@ public class MQListener {
                         if (orderNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Order.class))) {
                             log.info(String.format("New order with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Order) item).getId()));
                         } else {
-                            corruptionDetected(msg);
+                            corruptionDetected(msg, Order.class);
                         }
                     }
                 }
@@ -343,7 +343,7 @@ public class MQListener {
                         if (rechargeCreditNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.RechargeCredit.class))) {
                             log.info(String.format("New rechargeCredit with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.RechargeCredit) item).getId()));
                         } else {
-                            corruptionDetected(msg);
+                            corruptionDetected(msg, RechargeCredit.class);
                         }
                     }
                 }
@@ -353,7 +353,7 @@ public class MQListener {
                         if (paymentNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Payment.class))) {
                             log.info(String.format("New payment with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Payment) item).getId()));
                         } else {
-                            corruptionDetected(msg);
+                            corruptionDetected(msg, Payment.class);
                         }
                     }
                 }
@@ -362,8 +362,10 @@ public class MQListener {
             }
         } else if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName())) {
             // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
+            Class classProcessing = null;
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Participant.class;
                     List<com.gist.guild.commons.message.entity.Participant> participants = new ArrayList(msg.getContent().size());
                     for (Object document : msg.getContent()) {
                         participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
@@ -371,6 +373,7 @@ public class MQListener {
                     participantNodeService.init(participants);
                     StartupConfig.startupParticipantProcessed = Boolean.TRUE;
                 } else if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Product.class;
                     List<com.gist.guild.commons.message.entity.Product> products = new ArrayList(msg.getContent().size());
                     for (Object document : msg.getContent()) {
                         products.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Product.class));
@@ -378,6 +381,7 @@ public class MQListener {
                     productNodeService.init(products);
                     StartupConfig.startupProductProcessed = Boolean.TRUE;
                 } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Order.class;
                     List<com.gist.guild.commons.message.entity.Order> orders = new ArrayList(msg.getContent().size());
                     for (Object document : msg.getContent()) {
                         orders.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Order.class));
@@ -385,6 +389,7 @@ public class MQListener {
                     orderNodeService.init(orders);
                     StartupConfig.startupOrderProcessed = Boolean.TRUE;
                 } else if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = RechargeCredit.class;
                     List<com.gist.guild.commons.message.entity.RechargeCredit> rechargeCredits = new ArrayList(msg.getContent().size());
                     for (Object document : msg.getContent()) {
                         rechargeCredits.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.RechargeCredit.class));
@@ -392,6 +397,7 @@ public class MQListener {
                     rechargeCreditNodeService.init(rechargeCredits);
                     StartupConfig.startupRechargeCreditProcessed = Boolean.TRUE;
                 } else if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Payment.class;
                     List<com.gist.guild.commons.message.entity.Payment> payments = new ArrayList(msg.getContent().size());
                     for (Object document : msg.getContent()) {
                         payments.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Payment.class));
@@ -404,20 +410,22 @@ public class MQListener {
                     log.info("Startup process for this node has been correctly terminated");
                 }
 
+                StartupConfig.corruptionDetected = Boolean.FALSE;
                 log.info("Integrity verification correctly validated and ingested");
             } catch (GistGuildGenericException | JsonProcessingException e) {
                 log.error(e.getMessage());
-                corruptionDetected(msg);
+                corruptionDetected(msg, classProcessing);
                 log.error("Integrity verification failed");
             }
         } else if (DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType()) && msg.getContent() != null && StartupConfig.getStartupProcessed()) {
-            //FIXNME How ?
+            log.warn(String.format("Corruption detected by instance [%s]",msg.getInstanceName()));
+            StartupConfig.corruptionDetected = Boolean.TRUE;
         }
         log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
-    private void corruptionDetected(DistributionMessage<?> msg) {
-        log.error(String.format("Corruption detected : send message with Correlation ID [%s]", msg.getCorrelationID()));
+    private void corruptionDetected(DistributionMessage<?> msg, Class classDetected) {
+        log.error(String.format("Corruption detected on document [%s]: send message with Correlation ID [%s]", classDetected.getSimpleName(), msg.getCorrelationID()));
         DistributionMessage<List<Document>> responseMessage = new DistributionMessage<>();
         responseMessage.setCorrelationID(msg.getCorrelationID());
         responseMessage.setInstanceName(instanceName);

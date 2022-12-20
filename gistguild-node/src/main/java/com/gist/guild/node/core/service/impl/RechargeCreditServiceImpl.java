@@ -68,6 +68,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
         if (repository.findByIsCorruptionDetectedTrue().size() == 0 && !repository.existsById(document.getId())) {
             RechargeCredit rechargeCredit = new RechargeCredit();
             rechargeCredit.setId(document.getId());
+            rechargeCredit.setTimestamp(document.getTimestamp());
             rechargeCredit.setPreviousId(document.getPreviousId());
             rechargeCredit.setNodeInstanceName(document.getNodeInstanceName());
             rechargeCredit.setCustomerMail(document.getCustomerMail());
@@ -75,6 +76,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
             rechargeCredit.setNewCredit(document.getNewCredit());
             rechargeCredit.setOldCredit(document.getOldCredit());
             rechargeCredit.setRechargeUserCreditType(document.getRechargeUserCreditType());
+            rechargeCredit.setNonce(document.getNonce());
             rechargeCredit.setExternalShortId(document.getExternalShortId());
             repository.save(rechargeCredit);
             return validate(repository.findAllByOrderByTimestampAsc());
@@ -90,8 +92,6 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getCustomerMail() +
-                        document.getCustomerTelegramUserId() +
                         document.getCustomerMail() +
                         document.getCustomerTelegramUserId() +
                         document.getOldCredit() +

@@ -16,6 +16,7 @@ public class StartupConfig {
     public static volatile Boolean startupOrderProcessed = Boolean.FALSE;
     public static volatile Boolean startupRechargeCreditProcessed = Boolean.FALSE;
     public static volatile Boolean startupPaymentProcessed = Boolean.FALSE;
+    public static volatile Boolean corruptionDetected = Boolean.FALSE;
 
     @Autowired
     SpikeClient spikeClient;
@@ -40,6 +41,6 @@ public class StartupConfig {
     }
 
     public static Boolean getStartupProcessed(){
-        return startupParticipantProcessed && startupProductProcessed && startupOrderProcessed && startupRechargeCreditProcessed && startupPaymentProcessed;
+        return startupParticipantProcessed && startupProductProcessed && startupOrderProcessed && startupRechargeCreditProcessed && startupPaymentProcessed && !corruptionDetected;
     }
 }

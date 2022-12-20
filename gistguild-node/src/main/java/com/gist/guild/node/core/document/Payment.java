@@ -15,9 +15,9 @@ public class Payment extends com.gist.guild.commons.message.entity.Payment {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Order)) return false;
+        if (!(o instanceof Payment)) return false;
 
-        Order that = (Order) o;
+        Payment that = (Payment) o;
 
         return getId().equals(that.getId());
     }
