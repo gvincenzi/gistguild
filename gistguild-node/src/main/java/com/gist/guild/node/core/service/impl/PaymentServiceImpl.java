@@ -79,10 +79,9 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
             payment.setNonce(document.getNonce());
             payment.setExternalShortId(document.getExternalShortId());
             repository.save(payment);
-            return validate(repository.findAllByOrderByTimestampAsc());
         }
 
-        return Boolean.TRUE;
+        return validate(repository.findAllByOrderByTimestampAsc());
     }
 
     @Override

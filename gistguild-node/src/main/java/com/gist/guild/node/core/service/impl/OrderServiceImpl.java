@@ -99,16 +99,14 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setExternalShortId(document.getExternalShortId());
             order.setDeleted(document.getDeleted());
             repository.save(order);
-            return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Order order = new Order();
             order.setAddress(document.getAddress());
             order.setDeleted(document.getDeleted());
             repository.save(order);
-            return validate(repository.findAllByOrderByTimestampAsc());
         }
 
-        return Boolean.TRUE;
+        return validate(repository.findAllByOrderByTimestampAsc());
     }
 
     @Override

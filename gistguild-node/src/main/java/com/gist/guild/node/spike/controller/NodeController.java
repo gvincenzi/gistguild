@@ -13,8 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
-
 @Log
 @Controller
 public class NodeController {
@@ -25,7 +23,7 @@ public class NodeController {
     ParticipantRepository participantRepository;
 
     @Autowired
-    NodeService<com.gist.guild.commons.message.entity.Participant,Participant> nodeService;
+    NodeService<com.gist.guild.commons.message.entity.Participant, Participant> nodeService;
 
     @Autowired
     SpikeClient spikeClient;
@@ -34,12 +32,7 @@ public class NodeController {
     public String welcome(Model model) throws GistGuildGenericException {
         spikeClient.integrityVerification();
         model.addAttribute("instanceName", instanceName);
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
         return "welcome"; //view
-    }
-
-    @GetMapping("/init")
-    public String init(Model model) {
-
-        return "afterInit"; //view
     }
 }

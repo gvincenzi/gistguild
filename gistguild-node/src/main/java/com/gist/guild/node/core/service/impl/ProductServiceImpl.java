@@ -99,7 +99,6 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setNonce(document.getNonce());
             product.setExternalShortId(document.getExternalShortId());
             repository.save(product);
-            return validate(repository.findAllByOrderByTimestampAsc());
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Product product = repository.findById(document.getId()).get();
             product.setActive(document.getActive());
@@ -111,10 +110,9 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setUrl(document.getUrl());
             // WE CANNOT MODIFY OWNER AND NAME
             repository.save(product);
-            return validate(repository.findAllByOrderByTimestampAsc());
         }
 
-        return Boolean.TRUE;
+        return validate(repository.findAllByOrderByTimestampAsc());
     }
 
     @Override

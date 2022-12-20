@@ -79,10 +79,9 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
             rechargeCredit.setNonce(document.getNonce());
             rechargeCredit.setExternalShortId(document.getExternalShortId());
             repository.save(rechargeCredit);
-            return validate(repository.findAllByOrderByTimestampAsc());
         }
 
-        return Boolean.TRUE;
+        return validate(repository.findAllByOrderByTimestampAsc());
     }
 
     @Override
