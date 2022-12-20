@@ -54,6 +54,9 @@ public abstract class NodeService<T extends Document, S extends T> {
 			if (!NodeUtils.isHashResolved(currentItem, difficultLevel)) {
 				result = false;
 			}
+			if (currentItem.getIsCorruptionDetected()) {
+				result = false;
+			}
 		}
 
 		return result;

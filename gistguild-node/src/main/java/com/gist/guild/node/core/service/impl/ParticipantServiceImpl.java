@@ -42,6 +42,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participant.setAdministrator(document.getAdministrator());
         participant.setMail(document.getMail());
         participant.setTelegramUserId(document.getTelegramUserId());
+        participant.setIsCorruptionDetected(document.getIsCorruptionDetected());
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();

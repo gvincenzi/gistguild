@@ -33,6 +33,7 @@ public class NodeController {
         spikeClient.integrityVerification();
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        model.addAttribute("validation", nodeService.validate(participantRepository.findAllByOrderByTimestampAsc()));
         return "welcome"; //view
     }
 }

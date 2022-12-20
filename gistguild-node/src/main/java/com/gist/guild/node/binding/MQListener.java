@@ -116,7 +116,7 @@ public class MQListener {
                     case ORDER_PAYMENT_CONFIRMATION:
                         Payment payment = null;
                         documentClass = com.gist.guild.commons.message.entity.Payment.class;
-                        try{
+                        try {
                             payment = paymentNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Payment.class));
                         } catch (GistGuildInsufficientCreditException e) {
                             log.error(e.getMessage());
@@ -361,63 +361,75 @@ public class MQListener {
                 log.error(e.getMessage());
             }
         } else if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName())) {
-                // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
-                Class classProcessing = null;
-                try {
-                    if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
-                        classProcessing = Participant.class;
-                        List<com.gist.guild.commons.message.entity.Participant> participants = new ArrayList(msg.getContent().size());
-                        for (Object document : msg.getContent()) {
-                            participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
-                        }
-                        participantNodeService.init(participants);
-                        StartupConfig.startupParticipantProcessed = Boolean.TRUE;
-                    } else if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
-                        classProcessing = Product.class;
-                        List<com.gist.guild.commons.message.entity.Product> products = new ArrayList(msg.getContent().size());
-                        for (Object document : msg.getContent()) {
-                            products.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Product.class));
-                        }
-                        productNodeService.init(products);
-                        StartupConfig.startupProductProcessed = Boolean.TRUE;
-                    } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
-                        classProcessing = Order.class;
-                        List<com.gist.guild.commons.message.entity.Order> orders = new ArrayList(msg.getContent().size());
-                        for (Object document : msg.getContent()) {
-                            orders.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Order.class));
-                        }
-                        orderNodeService.init(orders);
-                        StartupConfig.startupOrderProcessed = Boolean.TRUE;
-                    } else if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
-                        classProcessing = RechargeCredit.class;
-                        List<com.gist.guild.commons.message.entity.RechargeCredit> rechargeCredits = new ArrayList(msg.getContent().size());
-                        for (Object document : msg.getContent()) {
-                            rechargeCredits.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.RechargeCredit.class));
-                        }
-                        rechargeCreditNodeService.init(rechargeCredits);
-                        StartupConfig.startupRechargeCreditProcessed = Boolean.TRUE;
-                    } else if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
-                        classProcessing = Payment.class;
-                        List<com.gist.guild.commons.message.entity.Payment> payments = new ArrayList(msg.getContent().size());
-                        for (Object document : msg.getContent()) {
-                            payments.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Payment.class));
-                        }
-                        paymentNodeService.init(payments);
-                        StartupConfig.startupPaymentProcessed = Boolean.TRUE;
+            // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
+            Class classProcessing = null;
+            try {
+                if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Participant.class;
+                    List<com.gist.guild.commons.message.entity.Participant> participants = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        participants.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Participant.class));
                     }
-
-                    if (Boolean.TRUE.equals(StartupConfig.getStartupProcessed())) {
-                        log.info("Startup process for this node has been correctly terminated");
+                    participantNodeService.init(participants);
+                    StartupConfig.startupParticipantProcessed = Boolean.TRUE;
+                } else if (Product.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Product.class;
+                    List<com.gist.guild.commons.message.entity.Product> products = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        products.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Product.class));
                     }
-
-                    log.info("Integrity verification correctly validated and ingested");
-                } catch (GistGuildGenericException | JsonProcessingException e) {
-                    log.error(e.getMessage());
-                    corruptionDetected(msg, classProcessing);
-                    log.error("Integrity verification failed");
+                    productNodeService.init(products);
+                    StartupConfig.startupProductProcessed = Boolean.TRUE;
+                } else if (Order.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Order.class;
+                    List<com.gist.guild.commons.message.entity.Order> orders = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        orders.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Order.class));
+                    }
+                    orderNodeService.init(orders);
+                    StartupConfig.startupOrderProcessed = Boolean.TRUE;
+                } else if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = RechargeCredit.class;
+                    List<com.gist.guild.commons.message.entity.RechargeCredit> rechargeCredits = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        rechargeCredits.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.RechargeCredit.class));
+                    }
+                    rechargeCreditNodeService.init(rechargeCredits);
+                    StartupConfig.startupRechargeCreditProcessed = Boolean.TRUE;
+                } else if (Payment.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
+                    classProcessing = Payment.class;
+                    List<com.gist.guild.commons.message.entity.Payment> payments = new ArrayList(msg.getContent().size());
+                    for (Object document : msg.getContent()) {
+                        payments.add(mapper.readValue(mapper.writeValueAsString(document), com.gist.guild.commons.message.entity.Payment.class));
+                    }
+                    paymentNodeService.init(payments);
+                    StartupConfig.startupPaymentProcessed = Boolean.TRUE;
                 }
+
+                if (Boolean.TRUE.equals(StartupConfig.getStartupProcessed())) {
+                    log.info("Startup process for this node has been correctly terminated");
+                }
+
+                log.info("Integrity verification correctly validated and ingested");
+            } catch (GistGuildGenericException | JsonProcessingException e) {
+                log.error(e.getMessage());
+                corruptionDetected(msg, classProcessing);
+                log.error("Integrity verification failed");
+            }
         } else if (DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType()) && msg.getContent() != null && StartupConfig.getStartupProcessed()) {
-            log.warn(String.format("Corruption detected by instance [%s]",msg.getInstanceName()));
+            log.warn(String.format("Corruption detected by instance [%s]", msg.getInstanceName()));
+            try {
+                Document itemCorruption = mapper.readValue(mapper.writeValueAsString(msg.getContent().iterator().next()), com.gist.guild.commons.message.entity.Document.class);
+                Participant participant = new Participant();
+                participant.setId(itemCorruption.getId());
+                participant.setTimestamp(itemCorruption.getTimestamp());
+                participant.setNodeInstanceName(itemCorruption.getNodeInstanceName());
+                participant.setIsCorruptionDetected(itemCorruption.getIsCorruptionDetected());
+
+                participantNodeService.add(participant);
+            } catch (GistGuildGenericException | JsonProcessingException e) {
+                log.error(e.getMessage());
+            }
         }
         log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }

@@ -33,12 +33,13 @@
     <main class="px-3">
         <h1>GIST Guild.</h1>
         <p class="lead">A Telegram BOT Order Management System based on a <b>data distriduted federated universe</b></p>
-        <p class="lead">
+         <p class="lead">
             <a href="https://github.com/gvincenzi/gistguild" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Learn more</a>
         </p>
     </main>
 
     <footer class="mt-auto text-white-50">
+        <p class="less" th:if="${validation} != null" th:style="${validation} ? 'color: green' : 'color: red'">The registry for the instance <i><td th:text="${instanceName}"/></i> is <td th:text="${startup} ? 'valid' : 'not valid'" /></p>
         <p>GIST Guild is a open source poject on <a href="https://getbootstrap.com/" class="text-white">GitHub</a>, developed by <a
                 href="https://www.linkedin.com/in/giuseppevincenzi/?originalSubdomain=fr" class="text-white">Giuseppe Vincenzi</a>.</p>
     </footer>
