@@ -40,7 +40,7 @@
 
         <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="Product" aria-hidden="true">
 
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content bg-dark">
                     <form action="#" th:action="@{/product}" th:object="${newProduct}" method="post" onsubmit="progress()">
                         <input type="hidden" class="form-control" placeholder="ID" aria-label="ID"
@@ -50,15 +50,12 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body row g-3">
-                            <div class="row g-3">
-                                <div class="col">
+                            <div class="col-12">
                                     <input type="text" class="form-control" placeholder="Name" aria-label="Name"
                                            th:field="*{name}"/>
-                                </div>
-                                <div class="col">
-                                    <input type="text" class="form-control" placeholder="Description"
-                                           aria-label="Description" th:field="*{description}"/>
-                                </div>
+                            </div>
+                            <div class="col-12">
+                                <textarea class="form-control" placeholder="Description" aria-label="Description" th:field="*{description}"/>
                             </div>
                             <div class="row g-3">
                                 <div class="col">
@@ -69,7 +66,19 @@
                                     <input type="number" class="form-control" placeholder="Quantity"
                                            aria-label="Quantity" th:field="*{availableQuantity}"/>
                                 </div>
+                            </div>
+                            <div class="row g-3">
                                 <div class="col">
+                                    <input type="url" class="form-control" placeholder="URL" aria-label="URL"
+                                           th:field="*{url}"/>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control" placeholder="Password" aria-label="Password"
+                                           th:field="*{password}"/>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-auto">
                                     <div class="form-check" style="position: absolute;">
                                         <input class="form-check-input" type="checkbox" id="delivery"
                                                th:field="*{delivery}">
@@ -80,13 +89,14 @@
                                 </div>
                             </div>
                             <div class="row g-3">
-                                <div class="col">
-                                    <input type="url" class="form-control" placeholder="URL" aria-label="URL"
-                                           th:field="*{url}"/>
-                                </div>
-                                <div class="col">
-                                    <input type="text" class="form-control" placeholder="Password" aria-label="Password"
-                                           th:field="*{password}"/>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="activationToggle"
+                                               th:field="*{active}">
+                                        <label class="form-check-label" for="activationToggle">
+                                            Visible in Catalog
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row g-3">
@@ -120,6 +130,7 @@
                 <th scope="col">Price</th>
                 <th scope="col">Available quantity</th>
                 <th scope="col">Delivery</th>
+                <th scope="col">Visibility</th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
@@ -132,6 +143,20 @@
                 <td scope="row" th:text="${item.availableQuantity}"></td>
                 <td scope="row" th:text="${item.delivery}"></td>
                 <td scope="row">
+                    <div th:if="${item.active}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </div>
+                    <div th:if="${item.active} == false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16">
+                            <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                            <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+                        </svg>
+                    </div>
+                </td>
+                <td scope="row">
                     <div class="btn-group" role="group" aria-label="Actions">
                         <a role="button" class="btn btn-warning btn-sm" th:href="'/product/'+${item.getId()}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -139,14 +164,6 @@
                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                             </svg>
                         </a>
-                        <button type="button" class="btn btn-danger btn-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash" viewBox="0 0 16 16">
-                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                <path fill-rule="evenodd"
-                                      d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                            </svg>
-                        </button>
                     </div>
                 </td>
             </tr>
