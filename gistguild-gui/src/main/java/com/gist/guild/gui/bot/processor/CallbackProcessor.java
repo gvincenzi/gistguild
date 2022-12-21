@@ -108,11 +108,11 @@ public class CallbackProcessor extends UpdateProcessor {
 
                 InlineKeyboardButton button3 = new InlineKeyboardButton();
                 button3.setText("Modifica URL");
-                button3.setCallbackData(CallbackDataKey.CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.URL.name() + product.getExternalShortId());
+                button3.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.URL.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline1.add(button3);
                 InlineKeyboardButton button4 = new InlineKeyboardButton();
                 button4.setText(product.getActive() ? "Disattiva dal catalogo" : "Attiva nel catalogo");
-                button4.setCallbackData(CallbackDataKey.CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + product.getExternalShortId());
+                button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + product.getExternalShortId());
                 rowInline1.add(button4);
 
                 InlineKeyboardButton button5 = new InlineKeyboardButton();
@@ -133,7 +133,7 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (ExecutionException e) {
                 log.error(e.getMessage());
             }
-        } else if (call_data.startsWith(CallbackDataKey.CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.URL.name() + CallbackDataKey.DELIMITER)) {
+        } else if (call_data.startsWith(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.URL.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long productExternalShortId = Long.parseLong(split[2]);
             Action action = new Action();
@@ -142,7 +142,7 @@ public class CallbackProcessor extends UpdateProcessor {
             action.setTelegramUserId(user_id);
             resourceManagerService.saveAction(action);
             message = itemFactory.productUrlManagement(chat_id);
-        } else if (call_data.startsWith(CallbackDataKey.CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + CallbackDataKey.DELIMITER)) {
+        } else if (call_data.startsWith(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + CallbackDataKey.DELIMITER)) {
             try {
                 String[] split = call_data.split(CallbackDataKey.DELIMITER);
                 Long productExternalShortId = Long.parseLong(split[2]);
