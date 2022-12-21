@@ -40,28 +40,7 @@ public class NodeProductViewController {
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         model.addAttribute("items", items);
 
-        model.addAttribute("product", new com.gist.guild.commons.message.entity.Product());
-
         return "product"; //view
     }
 
-    @PostMapping("/product")
-    public String welcome(@ModelAttribute com.gist.guild.commons.message.entity.Product product, Model model) throws GistGuildGenericException {
-
-
-        List<Product> items = repository.findAll();
-        model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
-        model.addAttribute("startup", StartupConfig.getStartupProcessed());
-        model.addAttribute("items", items);
-
-        return "product"; //view
-    }
-
-    @GetMapping("/product/init")
-    public String init(Model model) {
-        spikeClient.integrityVerification();
-        model.addAttribute("instanceName", instanceName);
-        return "afterInit"; //view
-    }
 }

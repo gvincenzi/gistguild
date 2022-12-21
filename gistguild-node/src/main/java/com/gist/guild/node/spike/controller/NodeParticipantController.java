@@ -40,11 +40,4 @@ public class NodeParticipantController {
 
         return "participant"; //view
     }
-
-    @GetMapping("/participant/init")
-    public String init(Model model) {
-        spikeClient.integrityVerification();
-        model.addAttribute("instanceName", instanceName);
-        return "afterInit"; //view
-    }
 }
