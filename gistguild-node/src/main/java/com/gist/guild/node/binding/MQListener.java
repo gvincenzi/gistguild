@@ -65,6 +65,9 @@ public class MQListener {
     @Autowired
     MessageChannel responseChannel;
 
+    @Autowired
+    CorrelationIdCache correlationIdCache;
+
     @Value("${spring.application.name}")
     private String instanceName;
 
@@ -305,6 +308,10 @@ public class MQListener {
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
         log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+
+        //PUT IN CACHE FOR ADMINISTRATION GUI REQUESTS
+        correlationIdCache.putInCache(msg.getCorrelationID(), msg.getExceptions());
+
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.getStartupProcessed()) {
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
