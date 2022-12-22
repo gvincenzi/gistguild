@@ -309,16 +309,13 @@ public class MQListener {
     public void processDistribution(DistributionMessage<List<?>> msg) {
         log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
 
-        //PUT IN CACHE FOR ADMINISTRATION GUI REQUESTS
-        correlationIdCache.putInCache(msg.getCorrelationID(), msg.getExceptions());
-
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.getStartupProcessed()) {
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     for (Object item : msg.getContent()) {
                         // PARTICIPANT DOCUMENT
                         if (participantNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Participant.class))) {
-                            log.info(String.format("New participant with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Participant) item).getId()));
+                            log.info("New participant correctly validated and ingested");
                         } else {
                             corruptionDetected(msg, Participant.class);
                         }
@@ -328,7 +325,7 @@ public class MQListener {
                     for (Object item : msg.getContent()) {
                         // PRODUCT DOCUMENT
                         if (productNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Product.class))) {
-                            log.info(String.format("New product with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Product) item).getId()));
+                            log.info("New product correctly validated and ingested");
                         } else {
                             corruptionDetected(msg, Product.class);
                         }
@@ -338,7 +335,7 @@ public class MQListener {
                     for (Object item : msg.getContent()) {
                         // ORDER DOCUMENT
                         if (orderNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Order.class))) {
-                            log.info(String.format("New order with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Order) item).getId()));
+                            log.info("New order correctly validated and ingested");
                         } else {
                             corruptionDetected(msg, Order.class);
                         }
@@ -348,7 +345,7 @@ public class MQListener {
                     for (Object item : msg.getContent()) {
                         // RECAHRGE_CREDIT DOCUMENT
                         if (rechargeCreditNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.RechargeCredit.class))) {
-                            log.info(String.format("New rechargeCredit with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.RechargeCredit) item).getId()));
+                            log.info("New rechargeCredit correctly validated and ingested");
                         } else {
                             corruptionDetected(msg, RechargeCredit.class);
                         }
@@ -358,7 +355,7 @@ public class MQListener {
                     for (Object item : msg.getContent()) {
                         // PAYMENT DOCUMENT
                         if (paymentNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.Payment.class))) {
-                            log.info(String.format("New payment with ID [%s] correctly validated and ingested", ((com.gist.guild.commons.message.entity.Payment) item).getId()));
+                            log.info("New payment correctly validated and ingested");
                         } else {
                             corruptionDetected(msg, Payment.class);
                         }
@@ -438,6 +435,10 @@ public class MQListener {
                 log.error(e.getMessage());
             }
         }
+
+        //PUT IN CACHE FOR ADMINISTRATION GUI REQUESTS
+        correlationIdCache.putInCache(msg.getCorrelationID(), msg.getExceptions());
+
         log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
