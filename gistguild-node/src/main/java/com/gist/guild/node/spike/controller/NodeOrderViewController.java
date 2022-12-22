@@ -7,8 +7,10 @@ import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.binding.CorrelationIdCache;
 import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Order;
+import com.gist.guild.node.core.document.Payment;
 import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.OrderRepository;
+import com.gist.guild.node.core.repository.PaymentRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.spike.client.SpikeClient;
@@ -39,6 +41,9 @@ public class NodeOrderViewController {
     OrderRepository repository;
 
     @Autowired
+    PaymentRepository paymentRepository;
+
+    @Autowired
     NodeService<com.gist.guild.commons.message.entity.Order, Order> nodeService;
 
     @Autowired
@@ -50,6 +55,17 @@ public class NodeOrderViewController {
     @GetMapping("/order")
     public String welcome(Model model) throws GistGuildGenericException {
         List<Order> items = repository.findAll();
+        Iterator<Order> orderIterator = items.iterator();
+        while(orderIterator.hasNext()){
+            Order next = orderIterator.next();
+            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
+            if (payments.size() > 0) {
+                next.setPaid(Boolean.TRUE);
+            } else {
+                next.setPaid(Boolean.FALSE);
+            }
+        }
+
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
@@ -99,6 +115,16 @@ public class NodeOrderViewController {
         }
 
         List<Order> items = repository.findAll();
+        Iterator<Order> orderIterator = items.iterator();
+        while(orderIterator.hasNext()){
+            Order next = orderIterator.next();
+            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
+            if (payments.size() > 0) {
+                next.setPaid(Boolean.TRUE);
+            } else {
+                next.setPaid(Boolean.FALSE);
+            }
+        }
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
