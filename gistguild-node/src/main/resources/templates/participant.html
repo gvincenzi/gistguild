@@ -47,7 +47,7 @@
             <tr th:each="item : ${items}">
                 <td scope="row" th:text="${item.mail}"></td>
                 <td scope="row" th:text="${item.telegramUserId}"></td>
-                <td scope="row" th:text="${item.timestamp}+' by '+${item.nodeInstanceName}"></td>
+                <td scope="row" th:text="${item.timestamp}"></td>
                 <td scope="row">
                     <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                         <button type="button" class="btn btn-warning btn-sm">
