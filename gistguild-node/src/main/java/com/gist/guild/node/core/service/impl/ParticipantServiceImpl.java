@@ -96,7 +96,6 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participants.addAll(repository.findByTelegramUserId(document.getTelegramUserId()));
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
-            participant.setMail(document.getMail());
             participant.setActive(document.getActive());
             participant.setAdministrator(document.getAdministrator());
             return repository.save(participant);

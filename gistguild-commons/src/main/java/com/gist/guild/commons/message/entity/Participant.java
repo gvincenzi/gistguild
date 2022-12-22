@@ -8,6 +8,7 @@ public class Participant extends Document {
     private Long telegramUserId;
     private Boolean active = Boolean.TRUE;
     private Boolean administrator = Boolean.FALSE;
+    private transient Long credit;
 
     @Override
     public boolean equals(Object o) {

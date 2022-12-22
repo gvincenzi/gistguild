@@ -155,8 +155,8 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     if ([[${newOrder.id}]] != null) {
-        var productModal = new bootstrap.Modal(document.getElementById("orderModal"), {});
-        productModal.show();
+        var orderModal = new bootstrap.Modal(document.getElementById("orderModal"), {});
+        orderModal.show();
     }
 
     function progress() {

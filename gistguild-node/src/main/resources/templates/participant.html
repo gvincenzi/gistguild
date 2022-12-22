@@ -34,42 +34,155 @@
         <hr/>
         <h2>Participants list</h2>
         <hr/>
+
+        <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="Order" aria-hidden="true">
+
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content bg-dark">
+                    <form action="#" th:action="@{/participant}" th:object="${newParticipant}" method="post" onsubmit="progress()">
+                        <input type="hidden" class="form-control" placeholder="ID" aria-label="ID"
+                               th:field="*{id}"/>
+                        <input type="hidden" class="form-control" placeholder="telegramUserId" aria-label="telegramUserId"
+                               th:field="*{telegramUserId}"/>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Participant details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body row g-3">
+                            <div class="col-12">
+                                <input type="email" class="form-control" placeholder="Mail" aria-label="Mail"
+                                       th:field="*{mail}" disabled/>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input type="number" class="form-control" placeholder="Credit" aria-label="Credit"
+                                           th:field="*{credit}"/>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="administrator"
+                                               th:field="*{administrator}">
+                                        <label class="form-check-label" for="administrator">
+                                            Administrator
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="active"
+                                               th:field="*{active}">
+                                        <label class="form-check-label" for="active">
+                                            Active
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="progress" id="progressbar_div" style="display: none;">
+                                    <div id="progressbar" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                        <span id="current-progress"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <input class="btn btn-primary" type="reset" value="Reset">
+                            <input class="btn btn-success" type="submit" value="Submit">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <table class="table table-dark table-striped table-hover">
             <thead>
             <tr>
                 <th scope="col">Mail</th>
-                <th scope="col">Telegram ID</th>
+                <th scope="col">Credit</th>
                 <th scope="col">Insertion date/time</th>
+                <th scope="col">Visibility</th>
+                <th scope="col">Profile</th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="item : ${items}">
                 <td scope="row" th:text="${item.mail}"></td>
-                <td scope="row" th:text="${item.telegramUserId}"></td>
+                <td scope="row" th:text="${item.credit}"></td>
                 <td scope="row" th:text="${item.timestamp}"></td>
                 <td scope="row">
-                    <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                        <button type="button" class="btn btn-warning btn-sm">
+                    <div th:if="${item.active}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </div>
+                    <div th:if="${item.active} == false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16">
+                            <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                            <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+                        </svg>
+                    </div>
+                </td>
+                <td scope="row">
+                    <div th:if="${item.administrator}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-gear" viewBox="0 0 16 16">
+                            <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm.256 7a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Zm3.63-4.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.15a.64.64 0 0 0-.921-.38l-.136.074c-.561.305-1.175-.309-.87-.87l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382l.045-.148ZM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z"/>
+                        </svg>
+                    </div>
+                    <div th:if="${item.administrator} == false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/>
+                        </svg>
+                    </div>
+                </td>
+                <td scope="row">
+                    <div class="btn-group" role="group" aria-label="Actions">
+                        <a role="button" class="btn btn-warning btn-sm" th:href="'/participant/'+${item.getId()}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-pencil" viewBox="0 0 16 16">
                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                             </svg>
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash" viewBox="0 0 16 16">
-                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                <path fill-rule="evenodd"
-                                      d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                            </svg>
-                        </button>
+                        </a>
                     </div>
+                </td>
                 </td>
             </tr>
             </tbody>
         </table>
     </main>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    if ([[${newParticipant.id}]] != null) {
+        var participantModal = new bootstrap.Modal(document.getElementById("participantModal"), {});
+        participantModal.show();
+    }
+
+    function progress() {
+        var current_progress = 0;
+        var interval = setInterval(function() {
+            if (current_progress > 100) {
+                clearInterval(interval);
+                $("#progressbar_div")
+                    .hide()
+            } else {
+                $("#progressbar")
+                    .css("width", current_progress + "%")
+                    .attr("aria-valuenow", current_progress)
+                    .text(current_progress + "% Complete");
+                $("#progressbar_div")
+                    .show()
+            }
+            current_progress += 10;
+        }, 1000);
+    }
+    /*]]>*/
+</script>
 </body>
 </html>
