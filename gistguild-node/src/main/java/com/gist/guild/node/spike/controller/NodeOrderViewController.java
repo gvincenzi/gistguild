@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -69,6 +70,8 @@ public class NodeOrderViewController {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
 
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
@@ -93,6 +96,8 @@ public class NodeOrderViewController {
 
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
         model.addAttribute("newOrder", toModify);
         return "order"; //view
@@ -128,6 +133,8 @@ public class NodeOrderViewController {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
 
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());

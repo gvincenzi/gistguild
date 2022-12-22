@@ -270,7 +270,7 @@ public class ItemFactoryImpl implements ItemFactory {
 
         if(!StringUtils.isEmpty(order.getProductUrl())){
             InlineKeyboardButton button3 = new InlineKeyboardButton();
-            button3.setText(order.getProductPassword() != null ? "Guarda il contenuto utilizzando la password : "+order.getProductPassword() : "Guarda il contenuto");
+            button3.setText(order.getProductPassword() != null && order.getProductPassword() != "" ? "Guarda il contenuto ("+order.getProductPassword()+")" : "Guarda il contenuto");
             button3.setUrl(order.getProductUrl());
             rowInline3.add(button3);
         }

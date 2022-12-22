@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Collections;
 import java.util.List;
 
 @Log
@@ -36,6 +37,8 @@ public class NodeParticipantController {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
 
         return "participant"; //view

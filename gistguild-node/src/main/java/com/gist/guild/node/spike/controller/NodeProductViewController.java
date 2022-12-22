@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -51,6 +52,8 @@ public class NodeProductViewController {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
 
         model.addAttribute("newProduct", new com.gist.guild.commons.message.entity.Product());
@@ -75,6 +78,8 @@ public class NodeProductViewController {
 
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
         model.addAttribute("newProduct", toModify);
         return "product"; //view
@@ -100,6 +105,8 @@ public class NodeProductViewController {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
         model.addAttribute("items", items);
 
         model.addAttribute("newProduct", new com.gist.guild.commons.message.entity.Product());
