@@ -82,7 +82,9 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
 
         Product product = productOptional.get();
-        product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
+        if(order.getQuantity() != null && product.getAvailableQuantity() != null){
+            product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
+        }
         productRepository.save(product);
     }
 }
