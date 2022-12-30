@@ -22,9 +22,6 @@ public class GistGuildBot extends TelegramLongPollingBot {
     @Value("${gistguild.bot.token}")
     private String botToken;
 
-    @Value("${gistguild.bot.stripe}")
-    private String stripe;
-
     @Autowired
     ResourceManagerService resourceManagerService;
 

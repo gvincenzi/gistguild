@@ -22,6 +22,9 @@ gistguild:
     entryFreeCredit:
       active: true
       amount: 5
+    stripe:
+      active: false
+      token: 0000000:TEST:0000000000000000
 
   spike:
     username: username

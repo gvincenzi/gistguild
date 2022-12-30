@@ -11,6 +11,7 @@ import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,6 +29,9 @@ import java.util.concurrent.ExecutionException;
 public class ItemFactoryImpl implements ItemFactory {
     @Autowired
     ResourceManagerService resourceManagerService;
+
+    @Value("${gistguild.bot.stripe.active}")
+    private Boolean stripeActive;
 
     public SendMessage welcomeMessage(Message update, Long user_id) {
         SendMessage message;
@@ -117,7 +121,7 @@ public class ItemFactoryImpl implements ItemFactory {
             InlineKeyboardButton button6 = new InlineKeyboardButton();
             button6.setText("Ricarica credito");
             button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
-            rowInline3.add(button6);
+            if(stripeActive) rowInline3.add(button6);
             InlineKeyboardButton button4 = new InlineKeyboardButton();
             button4.setText("Cancellazione");
             button4.setCallbackData(CallbackDataKey.CANCELLATION.name());

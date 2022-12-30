@@ -26,8 +26,8 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 public class CallbackProcessor extends UpdateProcessor {
-    @Value("${gistguild.bot.stripe}")
-    private String stripe;
+    @Value("${gistguild.bot.stripe.token}")
+    private String stripeToken;
 
     @Override
     public BotApiMethod process(Update update, BotApiMethod message) {
@@ -242,7 +242,7 @@ public class CallbackProcessor extends UpdateProcessor {
             price.setAmount(Integer.parseInt(split[1])*100);
 
             message = new SendInvoice();
-            ((SendInvoice) message).setProviderToken(stripe);
+            ((SendInvoice) message).setProviderToken(stripeToken);
             List<LabeledPrice> prices = new ArrayList<>();
             prices.add(price);
             ((SendInvoice) message).setPrices(prices);
