@@ -7,10 +7,13 @@ import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.CallbackDataKey;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.invoices.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.payments.LabeledPrice;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -23,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 public class CallbackProcessor extends UpdateProcessor {
+    @Value("${gistguild.bot.stripe}")
+    private String stripe;
 
     @Override
     public BotApiMethod process(Update update, BotApiMethod message) {
@@ -225,6 +230,29 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (GistGuildGenericException e) {
                 message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
             }
+        } else if (call_data.equalsIgnoreCase(CallbackDataKey.ADD_CREDIT.name())) {
+            message = itemFactory.userCredit(chat_id);
+        } else if(call_data.startsWith(CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER)) {
+            String[] split = call_data.split(CallbackDataKey.DELIMITER);
+            StringBuilder payload = new StringBuilder();
+            payload.append(user_id);
+            payload.append(split[1]);
+            LabeledPrice price = new LabeledPrice();
+            price.setLabel("Ricarica credito");
+            price.setAmount(Integer.parseInt(split[1])*100);
+
+            message = new SendInvoice();
+            ((SendInvoice) message).setProviderToken(stripe);
+            List<LabeledPrice> prices = new ArrayList<>();
+            prices.add(price);
+            ((SendInvoice) message).setPrices(prices);
+            ((SendInvoice) message).setTitle("GIST Guild - Credito");
+            ((SendInvoice) message).setDescription("Ricarica del conto prepagato");
+            ((SendInvoice) message).setCurrency("EUR");
+            ((SendInvoice) message).setChatId(chat_id);
+            ((SendInvoice) message).setPayload(payload.toString());
+            ((SendInvoice) message).setStartParameter("pay");
+
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name())) {
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);

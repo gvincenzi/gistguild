@@ -8,6 +8,7 @@ import com.gist.guild.gui.bot.action.entity.ActionType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -25,6 +26,23 @@ public class MessageProcessor extends UpdateProcessor {
 
     @Override
     public BotApiMethod process(Update update, BotApiMethod message) {
+        if(message instanceof AnswerPreCheckoutQuery){
+            try {
+                RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(update.getPreCheckoutQuery().getFrom().getId()).get();
+                Participant participant = resourceManagerService.findParticipantByTelegramId(update.getPreCheckoutQuery().getFrom().getId()).get();
+                RechargeCredit rechargeCredit = new RechargeCredit();
+                rechargeCredit.setCustomerMail(participant.getMail());
+                rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
+                rechargeCredit.setNewCredit(rechargeCreditLast.getNewCredit() + update.getPreCheckoutQuery().getTotalAmount()/100);
+                rechargeCredit.setOldCredit(rechargeCreditLast.getNewCredit());
+                rechargeCredit.setRechargeUserCreditType(RechargeCreditType.INVOICE);
+                resourceManagerService.addCredit(rechargeCredit);
+                return message;
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
+            }
+        }
+
         Long user_id = update.getMessage().getFrom().getId();
         Long chat_id = update.getMessage().getChatId();
 

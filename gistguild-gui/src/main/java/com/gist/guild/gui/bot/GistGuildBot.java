@@ -1,8 +1,5 @@
 package com.gist.guild.gui.bot;
 
-import com.gist.guild.commons.message.entity.*;
-import com.gist.guild.gui.bot.action.entity.Action;
-import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.bot.processor.UpdateProcessor;
 import com.gist.guild.gui.service.ResourceManagerService;
@@ -11,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -25,6 +21,9 @@ public class GistGuildBot extends TelegramLongPollingBot {
 
     @Value("${gistguild.bot.token}")
     private String botToken;
+
+    @Value("${gistguild.bot.stripe}")
+    private String stripe;
 
     @Autowired
     ResourceManagerService resourceManagerService;
@@ -42,7 +41,12 @@ public class GistGuildBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         BotApiMethod message = null;
 
-        if (update.hasCallbackQuery()) {
+        if(update.hasPreCheckoutQuery()){
+            /* CHECK PAYLOAD */
+            message = new AnswerPreCheckoutQuery();
+            ((AnswerPreCheckoutQuery)message).setOk(true);
+            ((AnswerPreCheckoutQuery)message).setPreCheckoutQueryId(update.getPreCheckoutQuery().getId());
+        } else if (update.hasCallbackQuery()) {
             message = callbackProcessor.process(update, message);
         } else if (update.hasMessage()) {
             message = messageProcessor.process(update, message);
@@ -50,6 +54,10 @@ public class GistGuildBot extends TelegramLongPollingBot {
 
         try {
             execute(message); // Call method to send the message
+
+            if(message instanceof AnswerPreCheckoutQuery){
+                messageProcessor.process(update, message);
+            }
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

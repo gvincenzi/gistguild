@@ -114,7 +114,10 @@ public class ItemFactoryImpl implements ItemFactory {
             button3.setText("Credito residuo");
             button3.setCallbackData(CallbackDataKey.CREDIT.name());
             rowInline2.add(button3);
-//            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData(CallbackDataKey.ADD_CREDIT.name()));
+            InlineKeyboardButton button6 = new InlineKeyboardButton();
+            button6.setText("Ricarica credito");
+            button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
+            rowInline3.add(button6);
             InlineKeyboardButton button4 = new InlineKeyboardButton();
             button4.setText("Cancellazione");
             button4.setCallbackData(CallbackDataKey.CANCELLATION.name());
@@ -188,6 +191,45 @@ public class ItemFactoryImpl implements ItemFactory {
         rowInline2.add(button3);
 
         // Set the keyboard to the markup
+        rowsInline.add(rowInline1);
+        rowsInline.add(rowInline2);
+
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        return message;
+    }
+
+    @Override
+    public SendMessage userCredit(Long chat_id) {
+        SendMessage message;
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        message = message(chat_id, "Ricarica il credito scegliendo tra le seguenti opzioni:");
+
+        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+        button1.setText("5 €");
+        button1.setCallbackData(CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"5");
+        rowInline1.add(button1);
+
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
+        button2.setText("10 €");
+        button2.setCallbackData(CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"10");
+        rowInline1.add(button2);
+
+        InlineKeyboardButton button3 = new InlineKeyboardButton();
+        button3.setText("20 €");
+        button3.setCallbackData(CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"20");
+        rowInline2.add(button3);
+
+        InlineKeyboardButton button4 = new InlineKeyboardButton();
+        button4.setText("50 €");
+        button4.setCallbackData(CallbackDataKey.ADD_CREDIT.name()+CallbackDataKey.DELIMITER+"50");
+        rowInline2.add(button4);
+
         rowsInline.add(rowInline1);
         rowsInline.add(rowInline2);
 
