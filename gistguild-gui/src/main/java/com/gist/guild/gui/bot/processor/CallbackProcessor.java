@@ -31,14 +31,13 @@ public class CallbackProcessor extends UpdateProcessor {
 
     @Override
     public BotApiMethod process(Update update, BotApiMethod message) {
-        Long user_id;// Set variables
+        Long user_id = update.getCallbackQuery().getFrom().getId();
         String call_data = update.getCallbackQuery().getData();
-        user_id = update.getCallbackQuery().getFrom().getId();
         Long chat_id = update.getCallbackQuery().getMessage().getChatId();
 
         if (call_data.equals(CallbackDataKey.REGISTRATION.name())) {
             message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nSarete iscritti al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
-        } else if (call_data.equals(CallbackDataKey.CANCELLATION)) {
+        } else if (call_data.equals(CallbackDataKey.CANCELLATION.name())) {
             try {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
                 participant.setActive(Boolean.FALSE);

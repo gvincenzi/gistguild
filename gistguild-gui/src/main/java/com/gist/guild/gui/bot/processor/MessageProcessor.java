@@ -54,7 +54,7 @@ public class MessageProcessor extends UpdateProcessor {
             Participant participant = null;
             try {
                 participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getMessage().getFrom(), update.getMessage().getText())).get();
-                message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo %s.\nClicca su /start per iniziare.", participant.getMail()));
+                message = itemFactory.message(chat_id, String.format("Nuovo utente [%s] iscritto correttamente.\nClicca su /start per iniziare.", participant.getMail()));
                 if (entryFreeCredit) {
                     RechargeCredit rechargeCredit = new RechargeCredit();
                     rechargeCredit.setCustomerMail(participant.getMail());
@@ -63,9 +63,9 @@ public class MessageProcessor extends UpdateProcessor {
                     rechargeCredit.setOldCredit(0L);
                     rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
                     resourceManagerService.addCredit(rechargeCredit).get();
-                    message = itemFactory.message(chat_id, String.format("Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nRiceverai anche un credito di %s € in regalo da utilizzare da subito per gli acquisti di prodotti dal catalogo.\nClicca su /start per iniziare.", entryFreeCreditAmount));
+                    message = itemFactory.message(chat_id, String.format("Nuovo utente [%s] iscritto correttamente.\nRiceverai anche un credito di %s € in regalo da utilizzare da subito per gli acquisti di prodotti dal catalogo.\nClicca su /start per iniziare.", participant.getMail(), entryFreeCreditAmount));
                 } else {
-                    message = itemFactory.message(chat_id, "Nuovo utente iscritto correttamente : una mail di conferma è stata inviata all'indirizzo specificato.\nClicca su /start per iniziare.");
+                    message = itemFactory.message(chat_id, "Nuovo utente iscritto correttamente.\nClicca su /start per iniziare.");
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
