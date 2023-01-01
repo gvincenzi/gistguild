@@ -12,6 +12,9 @@ public abstract class UpdateProcessor {
     protected static final int CURRENCY_DIVISOR = 100;
     protected static final String START_TOKEN = "/start";
     protected static final long ZERO = 0L;
+    protected static final String PLUS = "+";
+    protected static final String MINUS = "-";
+    protected static final String EMPTY_STRING = "";
 
     @Autowired
     ResourceManagerService resourceManagerService;

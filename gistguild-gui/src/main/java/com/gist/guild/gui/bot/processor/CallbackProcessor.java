@@ -36,23 +36,23 @@ public class CallbackProcessor extends UpdateProcessor {
         Long chat_id = update.getCallbackQuery().getMessage().getChatId();
 
         if (call_data.equals(CallbackDataKey.REGISTRATION.name())) {
-            message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nSarete iscritti al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
+            message = itemFactory.message(chat_id, messageProperties.getMessage12());
         } else if (call_data.equals(CallbackDataKey.CANCELLATION.name())) {
             try {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
                 participant.setActive(Boolean.FALSE);
                 resourceManagerService.addOrUpdateParticipant(participant).get();
-                message = itemFactory.message(chat_id, "Utente rimosso correttamente");
+                message = itemFactory.message(chat_id, messageProperties.getMessage13());
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }
         } else if (call_data.equals(CallbackDataKey.CREDIT.name())) {
             try {
                 RechargeCredit rechargeCredit = resourceManagerService.getCredit(user_id).get();
-                message = itemFactory.message(chat_id, String.format("Il tuo credito residuo : %s €", rechargeCredit.getNewCredit()));
+                message = itemFactory.message(chat_id, String.format(messageProperties.getMessage14(), rechargeCredit.getNewCredit()));
             } catch (ExecutionException e) {
                 if (NoSuchElementException.class == e.getCause().getClass()) {
-                    message = itemFactory.message(chat_id, "Non hai credito residuo");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage15());
                 } else {
                     log.error(e.getMessage());
                 }
@@ -66,7 +66,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
                 List<Product> products = resourceManagerService.getProducts(participant.getAdministrator()).get();
                 if (products.isEmpty()) {
-                    message = itemFactory.message(chat_id, "Non ci sono elementi nel catalogo");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage16());
                 } else {
                     InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                     List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -74,14 +74,14 @@ public class CallbackProcessor extends UpdateProcessor {
                     for (Product product : products) {
                         List<InlineKeyboardButton> rowInline = new ArrayList<>();
                         InlineKeyboardButton button = new InlineKeyboardButton();
-                        button.setText((participant.getAdministrator() ? (product.getActive() ? "+" : "-") : "") + product.getName() + (product.getAvailableQuantity() != null ? String.format(" (disponibilità: %d)", product.getAvailableQuantity().intValue()) : ""));
+                        button.setText((participant.getAdministrator() ? (product.getActive() ? PLUS : MINUS) : EMPTY_STRING) + product.getName() + (product.getAvailableQuantity() != null ? String.format(messageProperties.getMessage17(), product.getAvailableQuantity().intValue()) : EMPTY_STRING));
                         button.setCallbackData(CallbackDataKey.PRODUCT_DETAILS.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                         rowInline.add(button);
                         rowsInline.add(rowInline);
                     }
 
                     markupInline.setKeyboard(rowsInline);
-                    message = itemFactory.message(chat_id, "Qui di seguito la lista dei documenti in catalogo, selezionane uno per ordinarlo :\n");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage18());
 
                     ((SendMessage) message).setReplyMarkup(markupInline);
                 }
@@ -102,25 +102,25 @@ public class CallbackProcessor extends UpdateProcessor {
                 List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
                 InlineKeyboardButton button = new InlineKeyboardButton();
-                button.setText("Ordina questo prodotto");
+                button.setText(messageProperties.getMenuItem14());
                 button.setCallbackData(CallbackDataKey.PRODUCT_SELECT.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline.add(button);
                 InlineKeyboardButton button2 = new InlineKeyboardButton();
-                button2.setText("Torna alla lista dei prodotti");
+                button2.setText(messageProperties.getMenuItem15());
                 button2.setCallbackData(CallbackDataKey.CATALOG.name());
                 rowInline.add(button2);
 
                 InlineKeyboardButton button3 = new InlineKeyboardButton();
-                button3.setText("Modifica URL");
+                button3.setText(messageProperties.getMenuItem16());
                 button3.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.URL.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline1.add(button3);
                 InlineKeyboardButton button4 = new InlineKeyboardButton();
-                button4.setText(product.getActive() ? "Disattiva dal catalogo" : "Attiva nel catalogo");
+                button4.setText(product.getActive() ? messageProperties.getMenuItem17() : messageProperties.getMenuItem18());
                 button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + product.getExternalShortId());
                 rowInline1.add(button4);
 
                 InlineKeyboardButton button5 = new InlineKeyboardButton();
-                button5.setText("Torna al menù principale");
+                button5.setText(messageProperties.getMenuItem13());
                 button5.setCallbackData(CallbackDataKey.WELCOME.name());
                 rowInline2.add(button5);
                 // Set the keyboard to the markup
@@ -153,7 +153,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 Product product = resourceManagerService.getProduct(productExternalShortId).get();
                 product.setActive(!product.getActive());
                 product = resourceManagerService.updateProduct(product).get();
-                message = itemFactory.message(chat_id, String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.", product.getName()));
+                message = itemFactory.message(chat_id, String.format(messageProperties.getMessage19(), product.getName()));
             } catch (InterruptedException e) {
                 log.error(e.getMessage());
             } catch (ExecutionException e) {
@@ -177,9 +177,9 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setAmount(product.getPrice());
                     try {
                         order = resourceManagerService.addOrUpdateOrder(order);
-                        message = itemFactory.message(chat_id,String.format("Ordine ID[%d] effettuato con successo",order.getExternalShortId()));
+                        message = itemFactory.message(chat_id,String.format(messageProperties.getMessage20(),order.getExternalShortId()));
                     } catch (GistGuildGenericException e) {
-                        message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                        message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                     }
                 } else if (product.getAvailableQuantity() != null) {
                     Action action = new Action();
@@ -211,9 +211,9 @@ public class CallbackProcessor extends UpdateProcessor {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
                 try {
                     resourceManagerService.payOrder(orderExternalShortId, participant.getMail(), participant.getTelegramUserId());
-                    message = itemFactory.message(chat_id,"Pagamento effettuato con successo");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage22());
                 } catch (GistGuildGenericException e) {
-                    message = itemFactory.message(chat_id,String.format("Errore nel pagamento [%s]",e.getMessage()));
+                    message = itemFactory.message(chat_id,String.format(messageProperties.getError2(),e.getMessage()));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
@@ -225,9 +225,9 @@ public class CallbackProcessor extends UpdateProcessor {
                 Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
                 order.setDeleted(Boolean.TRUE);
                 order = resourceManagerService.addOrUpdateOrder(order);
-                message = itemFactory.message(chat_id,String.format("Ordine ID[%d] annullato con successo",order.getExternalShortId()));
+                message = itemFactory.message(chat_id,String.format(messageProperties.getMessage21(),order.getExternalShortId()));
             } catch (GistGuildGenericException e) {
-                message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
             }
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.ADD_CREDIT.name())) {
             message = itemFactory.userCredit(chat_id);
@@ -237,32 +237,32 @@ public class CallbackProcessor extends UpdateProcessor {
             payload.append(user_id);
             payload.append(split[1]);
             LabeledPrice price = new LabeledPrice();
-            price.setLabel("Ricarica credito");
-            price.setAmount(Integer.parseInt(split[1])*100);
+            price.setLabel(messageProperties.getMenuItem5());
+            price.setAmount(Integer.parseInt(split[1])*CURRENCY_DIVISOR);
 
             message = new SendInvoice();
             ((SendInvoice) message).setProviderToken(stripeToken);
             List<LabeledPrice> prices = new ArrayList<>();
             prices.add(price);
             ((SendInvoice) message).setPrices(prices);
-            ((SendInvoice) message).setTitle("GIST Guild - Credito");
-            ((SendInvoice) message).setDescription("Ricarica del conto prepagato");
-            ((SendInvoice) message).setCurrency("EUR");
+            ((SendInvoice) message).setTitle(messageProperties.getInvoiceTitle());
+            ((SendInvoice) message).setDescription(messageProperties.getInvoiceDescription());
+            ((SendInvoice) message).setCurrency(messageProperties.getInvoiceCurrency());
             ((SendInvoice) message).setChatId(chat_id);
             ((SendInvoice) message).setPayload(payload.toString());
-            ((SendInvoice) message).setStartParameter("pay");
+            ((SendInvoice) message).setStartParameter(messageProperties.getInvoiceStartParameter());
 
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name())) {
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);
             action.setTelegramUserId(user_id);
             resourceManagerService.saveAction(action);
-            message = itemFactory.message(chat_id, "Scrivi la mail dell'utente che vuoi gestire");
+            message = itemFactory.message(chat_id, messageProperties.getMessage23());
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.END.name())) {
             Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
             if (actionInProgress != null && actionInProgress.getTelegramUserIdToManage() != null) {
                 resourceManagerService.deleteActionInProgress(actionInProgress);
-                message = itemFactory.message(chat_id, "Modifica terminata.\nClicca su /start per tornare al menu principale.");
+                message = itemFactory.message(chat_id, messageProperties.getMessage24());
             }
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION.name())) {
             Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
@@ -277,7 +277,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 }
 
                 resourceManagerService.deleteActionInProgress(actionInProgress);
-                message = itemFactory.message(chat_id, "Utente rimosso correttamente\nClicca su /start per tornare al menu principale.");
+                message = itemFactory.message(chat_id, messageProperties.getMessage25());
             }
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name())) {
             Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
@@ -308,7 +308,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     rechargeCredit.setOldCredit(rechargeCreditLast.getNewCredit());
                     rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
                     resourceManagerService.addCredit(rechargeCredit).get();
-                    message = itemFactory.message(chat_id, "Credito aggiornato correttamente\nClicca su /start per tornare al menu principale.");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage26());
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }

@@ -20,6 +20,21 @@ public class MessageProperties {
     String message9;
     String message10;
     String message11;
+    String message12;
+    String message13;
+    String message14;
+    String message15;
+    String message16;
+    String message17;
+    String message18;
+    String message19;
+    String message20;
+    String message21;
+    String message22;
+    String message23;
+    String message24;
+    String message25;
+    String message26;
 
     String menuItem1;
     String menuItem2;
@@ -34,6 +49,17 @@ public class MessageProperties {
     String menuItem11;
     String menuItem12;
     String menuItem13;
+    String menuItem14;
+    String menuItem15;
+    String menuItem16;
+    String menuItem17;
+    String menuItem18;
 
     String error1;
+    String error2;
+
+    String invoiceTitle;
+    String invoiceDescription;
+    String invoiceCurrency;
+    String invoiceStartParameter;
 }
