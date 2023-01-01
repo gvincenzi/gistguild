@@ -126,7 +126,7 @@ public class MQListenerTest {
         item.setPreviousId(UUID.randomUUID().toString());
         item.setNonce(new Random().nextInt());
         Participant owner = new Participant();
-        owner.setMail("test@test.com");
+        owner.setNickname("test");
         return item;
     }
 

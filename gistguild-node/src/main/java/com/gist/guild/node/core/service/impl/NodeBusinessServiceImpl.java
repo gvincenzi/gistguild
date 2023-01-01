@@ -52,7 +52,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         if(actualCredit<payment.getAmount()) throw new GistGuildInsufficientCreditException(participant, messageProperties.getError4());
 
         RechargeCredit rechargeCredit = new RechargeCredit();
-        rechargeCredit.setCustomerMail(payment.getCustomerMail());
+        rechargeCredit.setCustomerNickname(payment.getCustomerNickname());
         rechargeCredit.setCustomerTelegramUserId(payment.getCustomerTelegramUserId());
         rechargeCredit.setNewCredit(actualCredit-payment.getAmount());
         rechargeCredit.setOldCredit(actualCredit);

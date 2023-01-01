@@ -5,6 +5,7 @@ import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.gui.bot.factory.CallbackDataKey;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
+import net.bytebuddy.utility.RandomString;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -20,9 +21,9 @@ import java.util.regex.Pattern;
 public class BotUtils {
     private static Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 
-    public static Participant createParticipant(User from, String mail) {
+    public static Participant createParticipant(User from) {
         Participant participant = new Participant();
-        participant.setMail(mail);
+        participant.setNickname(from.getUserName() != null ? from.getUserName() : from.getFirstName() != null ? from.getFirstName() : from.getLastName() != null ? from.getLastName() : RandomString.make());
         participant.setTelegramUserId(from.getId());
 
         return participant;

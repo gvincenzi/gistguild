@@ -5,6 +5,8 @@ import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.repository.DocumentRepository;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 public abstract class NodeService<T extends Document, S extends T> {
 	protected static final String GENESIS = "GENESIS";
 
@@ -48,18 +51,23 @@ public abstract class NodeService<T extends Document, S extends T> {
 			currentItem = items.get(i);
 			if (!currentItem.getId().equals(calculateHash(currentItem))) {
 				result = false;
+				log.error("Corruption detected in ID");
 			}
 			if (previousItem != null && !previousItem.getId().equals(currentItem.getPreviousId())) {
 				result = false;
+				log.error("Corruption detected in PreviousId");
 			}
 			if (previousItem == null && !GENESIS.equals(currentItem.getPreviousId())) {
 				result = false;
+				log.error("Corruption detected in previousItem for non GENESIS block");
 			}
 			if (!NodeUtils.isHashResolved(currentItem, difficultLevel)) {
 				result = false;
+				log.error("Corruption detected in hash resolving");
 			}
 			if (currentItem.getIsCorruptionDetected()) {
 				result = false;
+				log.error("Corruption detected by another node");
 			}
 		}
 

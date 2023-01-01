@@ -55,8 +55,8 @@
                                        th:field="*{productName}" disabled/>
                             </div>
                             <div class="col-12">
-                                <input type="email" class="form-control" placeholder="Customer mail" aria-label="Customer mail"
-                                       th:field="*{customerMail}" disabled/>
+                                <input type="email" class="form-control" placeholder="Customer nickname" aria-label="Customer nickname"
+                                       th:field="*{customerNickname}" disabled/>
                             </div>
                             <div class="row g-3">
                                 <div class="col">
@@ -107,7 +107,7 @@
             <thead>
             <tr>
                 <th scope="col">Product name</th>
-                <th scope="col">Customer mail</th>
+                <th scope="col">Customer nickname</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Amount</th>
                 <th scope="col">Address</th>
@@ -119,7 +119,7 @@
             <tbody>
             <tr th:each="item : ${items}">
                 <td scope="row" th:text="${item.productName}"></td>
-                <td scope="row" th:text="${item.customerMail}"></td>
+                <td scope="row" th:text="${item.customerNickname}"></td>
                 <td scope="row" th:text="${item.quantity}"></td>
                 <td scope="row" th:text="${item.amount}"></td>
                 <td scope="row" th:text="${item.address}"></td>

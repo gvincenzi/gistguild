@@ -72,7 +72,7 @@ public class MQListenerTest {
                 "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
-                "      \"mail\":\"test@test.it\",\n" +
+                "      \"nickname\":\"test\",\n" +
                 "      \"telegramUserId\":\"478956\"\n" +
                 "      }\n" +
                 "    }\n" +
@@ -86,7 +86,7 @@ public class MQListenerTest {
                 "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
-                "      \"mail\":\"test@test.it\",\n" +
+                "      \"nickname\":\"test\",\n" +
                 "      \"telegramUserId\":\"478956\",\n" +
                 "      \"active\":\"false\"\n" +
                 "      }\n" +
@@ -106,7 +106,7 @@ public class MQListenerTest {
         Participant participant = new Participant();
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
-        participant.setMail("test@test.it");
+        participant.setNickname("test");
         participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());
@@ -145,7 +145,7 @@ public class MQListenerTest {
         Participant participant = new Participant();
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
-        participant.setMail("test@test.it");
+        participant.setNickname("test");
         participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());

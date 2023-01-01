@@ -41,14 +41,6 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<Participant> findParticipantByMail(String participant_mail) {
-        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
-        params.add(new DocumentRepositoryMethodParameter<String>(String.class, participant_mail));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Participant.class.getSimpleName(), "findByMail", params);
-        return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
-    }
-
-    @Override
     public Future<Participant> addOrUpdateParticipant(Participant participant) {
         DocumentProposition documentProposition = new DocumentProposition();
         documentProposition.setDocumentPropositionType(DocumentPropositionType.USER_REGISTRATION);
@@ -173,14 +165,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException {
+    public void payOrder(Long orderExternalId, String customerNickname, Long customerTelegramUserId) throws GistGuildGenericException {
         UUID correlationID = null;
         try {
             Order order = getOrder(orderExternalId).get();
             Payment payment = new Payment();
             payment.setOrderId(order.getId());
             payment.setAmount(order.getAmount());
-            payment.setCustomerMail(customerMail);
+            payment.setCustomerNickname(customerNickname);
             payment.setCustomerTelegramUserId(customerTelegramUserId);
             DocumentProposition documentProposition = new DocumentProposition();
             documentProposition.setDocumentPropositionType(DocumentPropositionType.ORDER_PAYMENT_CONFIRMATION);

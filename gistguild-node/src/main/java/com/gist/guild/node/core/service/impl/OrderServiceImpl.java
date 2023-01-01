@@ -55,7 +55,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         order.setNodeInstanceName(instanceName);
         order.setAddress(document.getAddress());
         order.setAmount(document.getAmount());
-        order.setCustomerMail(document.getCustomerMail());
+        order.setCustomerNickname(document.getCustomerNickname());
         order.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
         order.setProductName(document.getProductName());
         order.setProductId(document.getProductId());
@@ -87,7 +87,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setNodeInstanceName(document.getNodeInstanceName());
             order.setAddress(document.getAddress());
             order.setAmount(document.getAmount());
-            order.setCustomerMail(document.getCustomerMail());
+            order.setCustomerNickname(document.getCustomerNickname());
             order.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
             order.setProductName(document.getProductName());
             order.setProductId(document.getProductId());
@@ -116,7 +116,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getCustomerMail() +
+                        document.getCustomerNickname() +
                         document.getCustomerTelegramUserId() +
                         document.getProductName() +
                         document.getQuantity() +

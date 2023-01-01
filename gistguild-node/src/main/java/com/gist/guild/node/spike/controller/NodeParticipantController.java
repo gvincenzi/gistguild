@@ -119,7 +119,7 @@ public class NodeParticipantController {
                     RechargeCredit newRechargeCredit = new RechargeCredit();
                     newRechargeCredit.setOldCredit(actualCredit);
                     newRechargeCredit.setNewCredit(newParticipant.getCredit());
-                    newRechargeCredit.setCustomerMail(newParticipant.getMail());
+                    newRechargeCredit.setCustomerNickname(newParticipant.getNickname());
                     newRechargeCredit.setCustomerTelegramUserId(newParticipant.getTelegramUserId());
                     newRechargeCredit.setRechargeUserCreditType(RechargeCreditType.ADMIN);
 
