@@ -148,6 +148,7 @@ public class ItemFactoryImpl implements ItemFactory {
         // Add it to the message
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
+        message.enableHtml(Boolean.TRUE);
         return message;
     }
 
@@ -156,6 +157,7 @@ public class ItemFactoryImpl implements ItemFactory {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chat_id);
         sendMessage.setText(text);
+        sendMessage.enableHtml(Boolean.TRUE);
         return sendMessage;
     }
 
@@ -351,7 +353,7 @@ public class ItemFactoryImpl implements ItemFactory {
         // Add it to the message
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
-
+        message.enableHtml(Boolean.TRUE);
         return message;
     }
 }
