@@ -33,7 +33,7 @@ public class MessageProcessor extends UpdateProcessor {
                 RechargeCredit rechargeCredit = new RechargeCredit();
                 rechargeCredit.setCustomerMail(participant.getMail());
                 rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
-                rechargeCredit.setNewCredit(rechargeCreditLast.getNewCredit() + update.getPreCheckoutQuery().getTotalAmount()/100);
+                rechargeCredit.setNewCredit(rechargeCreditLast.getNewCredit() + update.getPreCheckoutQuery().getTotalAmount()/ CURRENCY_DIVISOR);
                 rechargeCredit.setOldCredit(rechargeCreditLast.getNewCredit());
                 rechargeCredit.setRechargeUserCreditType(RechargeCreditType.INVOICE);
                 resourceManagerService.addCredit(rechargeCredit);
@@ -48,31 +48,31 @@ public class MessageProcessor extends UpdateProcessor {
 
         Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
 
-        if (update.getMessage().getText() != null && update.getMessage().getText().equalsIgnoreCase("/start")) {
+        if (update.getMessage().getText() != null && update.getMessage().getText().equalsIgnoreCase(START_TOKEN)) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
-        } else if (update.getMessage().getText() != null && update.getMessage().getText().contains("@") && actionInProgress == null) {
+        } else if (update.getMessage().getText() != null && update.getMessage().getText().contains(MAIL_TOKEN) && actionInProgress == null) {
             Participant participant = null;
             try {
                 participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getMessage().getFrom(), update.getMessage().getText())).get();
-                message = itemFactory.message(chat_id, String.format("Nuovo utente [%s] iscritto correttamente.\nClicca su /start per iniziare.", participant.getMail()));
+                message = itemFactory.message(chat_id, String.format(messageProperties.getMessage10(), participant.getMail()));
                 if (entryFreeCredit) {
                     RechargeCredit rechargeCredit = new RechargeCredit();
                     rechargeCredit.setCustomerMail(participant.getMail());
                     rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
                     rechargeCredit.setNewCredit(entryFreeCreditAmount);
-                    rechargeCredit.setOldCredit(0L);
+                    rechargeCredit.setOldCredit(ZERO);
                     rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
                     resourceManagerService.addCredit(rechargeCredit).get();
-                    message = itemFactory.message(chat_id, String.format("Nuovo utente [%s] iscritto correttamente.\nRiceverai anche un credito di %s € in regalo da utilizzare da subito per gli acquisti di prodotti dal catalogo.\nClicca su /start per iniziare.", participant.getMail(), entryFreeCreditAmount));
+                    message = itemFactory.message(chat_id, String.format(messageProperties.getMessage11(), participant.getMail(), entryFreeCreditAmount));
                 } else {
-                    message = itemFactory.message(chat_id, "Nuovo utente iscritto correttamente.\nClicca su /start per iniziare.");
+                    message = itemFactory.message(chat_id, messageProperties.getMessage10());
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }
-        } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains("@") && actionInProgress != null && !(ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType()))) {
+        } else if (update.getMessage().getText() != null && !update.getMessage().getText().contains(MAIL_TOKEN) && actionInProgress != null && !(ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType()))) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
-        } else if (update.getMessage().getText().contains("@") && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
+        } else if (update.getMessage().getText().contains(MAIL_TOKEN) && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
         } else if (update.getMessage().getText() != null && BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress != null && ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType())) {
             resourceManagerService.deleteActionInProgress(actionInProgress);
@@ -101,7 +101,7 @@ public class MessageProcessor extends UpdateProcessor {
                         resourceManagerService.addOrUpdateOrder(order);
                         message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
                     } catch (GistGuildGenericException e) {
-                        message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                        message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -126,7 +126,7 @@ public class MessageProcessor extends UpdateProcessor {
                     resourceManagerService.addOrUpdateOrder(order);
                     message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
                 } catch (GistGuildGenericException e) {
-                    message = itemFactory.message(chat_id,String.format("Errore nella registrazione dell'ordine [%s]",e.getMessage()));
+                    message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
