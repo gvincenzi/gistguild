@@ -1,5 +1,7 @@
 package com.gist.guild.gui.bot.configuration;
 
+import com.gist.guild.commons.message.entity.Order;
+import com.gist.guild.commons.message.entity.Product;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "gistguild.bot.message")
 public class MessageProperties {
+    protected static final String EMPTY_STRING = "";
+
     String welcome;
     String message1;
     String message2;
@@ -62,4 +66,30 @@ public class MessageProperties {
     String invoiceDescription;
     String invoiceCurrency;
     String invoiceStartParameter;
+
+    String orderDetails1;
+    String orderDetails2;
+    String orderDetails3;
+    String orderDetails4;
+    String orderDetails5;
+
+    String productDetails1;
+    String productDetails2;
+    String productDetails3;
+    String productDetails4;
+
+    public String toString(Order order) {
+        return String.format(getOrderDetails1(),order.getExternalShortId()) +
+                (order.getQuantity()!=null ? String.format(getOrderDetails2(), order.getQuantity()) : EMPTY_STRING) +
+                (order.getAddress()!=null ? String.format(getOrderDetails3(),order.getAddress()) : EMPTY_STRING) +
+                (order.getAmount()!=null ? String.format(getOrderDetails4(),order.getAmount()) : EMPTY_STRING ) +
+                String.format(getOrderDetails5(), order.getProductName());
+    }
+
+    public String toString(Product product) {
+        return  String.format(getProductDetails1(), product.getName()) +
+                String.format(getProductDetails2(), product.getDescription()) +
+                String.format(getProductDetails3(), product.getPrice()) +
+                (product.getDelivery()!=null && product.getDelivery() ? getProductDetails4() : EMPTY_STRING);
+    }
 }

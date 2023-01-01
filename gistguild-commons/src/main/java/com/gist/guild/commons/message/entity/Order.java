@@ -15,13 +15,4 @@ public class Order extends Document {
     private Long customerTelegramUserId;
     private Boolean deleted = Boolean.FALSE;
     private transient Boolean paid;
-
-    @Override
-    public String toString() {
-        return "\nID : " + externalShortId +
-                (quantity!=null ? "\nQuantità : " + quantity : "" ) +
-                (address!=null ? "\nIndirizzo di spedizione : " + address : "" ) +
-                (amount!=null ? String.format("\nImporto totale : %s €",amount) : "" ) +
-                "\n\n**** Dettagli del prodotto ****\n" + productName;
-    }
 }

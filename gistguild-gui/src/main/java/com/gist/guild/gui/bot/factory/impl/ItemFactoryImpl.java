@@ -298,7 +298,7 @@ public class ItemFactoryImpl implements ItemFactory {
 
     @Override
     public SendMessage orderDetailsMessageBuilder(Long chat_id, Order order) {
-        SendMessage message = message(chat_id, order.toString());
+        SendMessage message = message(chat_id, messageProperties.toString(order));
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();

@@ -38,12 +38,4 @@ public class Product extends Document {
     public int hashCode() {
         return Objects.hash(id, name, description, active, delivery);
     }
-
-    @Override
-    public String toString() {
-        return  "Nome :'" + name + '\'' +
-                "\nDescrizione :'" + description + '\''+
-                String.format("\nPrezzo : %s €", price) +
-                (delivery!=null && delivery ? " (con consegna a domicilio)" : "");
-    }
 }

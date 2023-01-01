@@ -95,7 +95,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 String[] split = call_data.split(CallbackDataKey.DELIMITER);
                 Long productExternalShortId = Long.parseLong(split[1]);
                 Product product = resourceManagerService.getProduct(productExternalShortId).get();
-                message = itemFactory.message(chat_id, product.toString());
+                message = itemFactory.message(chat_id, messageProperties.toString(product));
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline = new ArrayList<>();
