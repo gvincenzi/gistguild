@@ -24,10 +24,10 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
     @Override
     public Payment add(com.gist.guild.commons.message.entity.Payment document) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         if (repository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
+            throw new GistGuildGenericException(messageProperties.getError2());
         }
 
         Payment previous = repository.findTopByOrderByTimestampDesc();
@@ -40,7 +40,7 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
 
     protected Payment getNewItem(com.gist.guild.commons.message.entity.Payment document, Payment previous) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document are mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         Payment payment = new Payment();
         payment.setPreviousId(previous != null ? previous.getId() : GENESIS);

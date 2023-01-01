@@ -33,7 +33,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
 
     protected Participant getNewItem(com.gist.guild.commons.message.entity.Participant document, Participant previous) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document are mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         Participant participant = new Participant();
         participant.setPreviousId(previous != null ? previous.getId() : GENESIS);
@@ -86,10 +86,10 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
     @Override
     public Participant add(com.gist.guild.commons.message.entity.Participant document) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         if (repository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
+            throw new GistGuildGenericException(messageProperties.getError2());
         }
 
         List<Participant> participants = repository.findByMail(document.getMail());

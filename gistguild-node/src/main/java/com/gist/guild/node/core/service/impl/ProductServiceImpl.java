@@ -22,10 +22,10 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
     @Override
     public Product add(com.gist.guild.commons.message.entity.Product document) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         if (repository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
+            throw new GistGuildGenericException(messageProperties.getError2());
         }
 
         if(document.getId() != null && getRepository().findById(document.getId()).isPresent()){
@@ -48,7 +48,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
 
     protected Product getNewItem(com.gist.guild.commons.message.entity.Product document, Product previous) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document are mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         Product product = new Product();
         product.setPreviousId(previous != null ? previous.getId() : GENESIS);

@@ -3,6 +3,7 @@ package com.gist.guild.node.core.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gist.guild.commons.exception.GistGuildGenericException;
 import com.gist.guild.commons.message.entity.Document;
+import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,9 @@ public abstract class NodeService<T extends Document, S extends T> {
 
 	@Value("${spring.application.name}")
 	protected String instanceName;
+
+	@Autowired
+	protected MessageProperties messageProperties;
 
 	protected abstract DocumentRepository<S> getRepository();
 

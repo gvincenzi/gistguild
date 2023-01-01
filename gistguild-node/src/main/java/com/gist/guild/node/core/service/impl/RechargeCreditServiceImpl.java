@@ -21,10 +21,10 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
     @Override
     public RechargeCredit add(com.gist.guild.commons.message.entity.RechargeCredit document) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         if (repository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
+            throw new GistGuildGenericException(messageProperties.getError2());
         }
 
         if(document.getId() == null || !getRepository().findById(document.getId()).isPresent()){
@@ -38,7 +38,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
 
     protected RechargeCredit getNewItem(com.gist.guild.commons.message.entity.RechargeCredit document, RechargeCredit previous) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document are mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         RechargeCredit rechargeCredit = new RechargeCredit();
         rechargeCredit.setPreviousId(previous != null ? previous.getId() : GENESIS);

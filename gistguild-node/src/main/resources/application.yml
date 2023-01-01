@@ -37,3 +37,10 @@ gistguild:
     level: 1
   spike:
     url: http://localhost:8882/spike
+  message:
+    error1: "Document is mandatory"
+    error2: "Gist Guild registry is corrupted"
+    error3: "Participant does not exist"
+    error4: "Participant has insufficient credit to finalize this payment"
+    error5: "Product does not exist"
+    error6: "Not enough quantity available"

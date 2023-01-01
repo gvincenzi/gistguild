@@ -7,6 +7,7 @@ import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Payment;
 import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.commons.message.entity.RechargeCreditType;
+import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.ParticipantRepository;
@@ -34,18 +35,21 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
     @Autowired
     NodeService<RechargeCredit, com.gist.guild.node.core.document.RechargeCredit> rechargeCreditNodeService;
 
+    @Autowired
+    protected MessageProperties messageProperties;
+
     @Override
     public void validatePayment(Payment payment) throws GistGuildGenericException {
         List<Participant> byTelegramUserId = participantRepository.findByTelegramUserId(payment.getCustomerTelegramUserId());
-        if(byTelegramUserId.isEmpty()) throw new GistGuildGenericException("Participant does not exist");
+        if(byTelegramUserId.isEmpty()) throw new GistGuildGenericException(messageProperties.getError3());
         Participant participant = byTelegramUserId.iterator().next();
 
         List<com.gist.guild.node.core.document.RechargeCredit> topByCustomerTelegramUserIdOrderByTimestampDesc = rechargeCreditRepository.findTopByCustomerTelegramUserIdOrderByTimestampDesc(payment.getCustomerTelegramUserId());
 
-        if(topByCustomerTelegramUserIdOrderByTimestampDesc.isEmpty()) throw new GistGuildInsufficientCreditException(participant, "Participant has insufficient credit to finalize this payment");
+        if(topByCustomerTelegramUserIdOrderByTimestampDesc.isEmpty()) throw new GistGuildInsufficientCreditException(participant, messageProperties.getError4());
 
         Long actualCredit = topByCustomerTelegramUserIdOrderByTimestampDesc.iterator().next().getNewCredit();
-        if(actualCredit<payment.getAmount()) throw new GistGuildInsufficientCreditException(participant, "Participant has insufficient credit to finalize this payment");
+        if(actualCredit<payment.getAmount()) throw new GistGuildInsufficientCreditException(participant, messageProperties.getError4());
 
         RechargeCredit rechargeCredit = new RechargeCredit();
         rechargeCredit.setCustomerMail(payment.getCustomerMail());
@@ -60,15 +64,15 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
     @Override
     public void validateOrder(Order order) throws GistGuildGenericException {
         List<Participant> byTelegramUserId = participantRepository.findByTelegramUserId(order.getCustomerTelegramUserId());
-        if(byTelegramUserId.isEmpty()) throw new GistGuildGenericException("Participant does not exist");
+        if(byTelegramUserId.isEmpty()) throw new GistGuildGenericException(messageProperties.getError3());
         Participant participant = byTelegramUserId.iterator().next();
 
         Optional<Product> productOptional = productRepository.findById(order.getProductId());
-        if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
+        if(productOptional.isEmpty()) throw new GistGuildGenericException(messageProperties.getError5());
 
         Product product = productOptional.get();
         if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()<order.getQuantity()){
-            throw new GistGuildInsufficientQuantityException(participant, "Not enough quantity available");
+            throw new GistGuildInsufficientQuantityException(participant, messageProperties.getError6());
         } else if(product.getAvailableQuantity()!=null && product.getAvailableQuantity()>=order.getQuantity()){
             product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
         }
@@ -79,7 +83,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
     @Override
     public void deleteOrder(Order order) throws GistGuildGenericException {
         Optional<Product> productOptional = productRepository.findById(order.getProductId());
-        if(productOptional.isEmpty()) throw new GistGuildGenericException("Product does not exist");
+        if(productOptional.isEmpty()) throw new GistGuildGenericException(messageProperties.getError5());
 
         Product product = productOptional.get();
         if(order.getQuantity() != null && product.getAvailableQuantity() != null){

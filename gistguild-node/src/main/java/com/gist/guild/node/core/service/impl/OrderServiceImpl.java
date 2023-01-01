@@ -24,10 +24,10 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
     @Override
     public Order add(com.gist.guild.commons.message.entity.Order document) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document is mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         if (repository.findByIsCorruptionDetectedTrue().size() > 0) {
-            throw new GistGuildGenericException("Gist Guild registry is corrupted");
+            throw new GistGuildGenericException(messageProperties.getError2());
         }
 
         if(document.getId() != null && getRepository().findById(document.getId()).isPresent()){
@@ -48,7 +48,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
 
     protected Order getNewItem(com.gist.guild.commons.message.entity.Order document, Order previous) throws GistGuildGenericException {
         if (document == null) {
-            throw new GistGuildGenericException("Document are mandatory");
+            throw new GistGuildGenericException(messageProperties.getError1());
         }
         Order order = new Order();
         order.setPreviousId(previous != null ? previous.getId() : GENESIS);
