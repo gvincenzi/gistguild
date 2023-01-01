@@ -6,6 +6,7 @@ import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.commons.message.entity.RechargeCredit;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
+import com.gist.guild.gui.bot.configuration.MessageProperties;
 import com.gist.guild.gui.bot.factory.CallbackDataKey;
 import com.gist.guild.gui.bot.factory.ItemFactory;
 import com.gist.guild.gui.service.ResourceManagerService;
@@ -33,6 +34,9 @@ public class ItemFactoryImpl implements ItemFactory {
     @Value("${gistguild.bot.stripe.active}")
     private Boolean stripeActive;
 
+    @Autowired
+    private MessageProperties messageProperties;
+
     public SendMessage welcomeMessage(Message update, Long user_id) {
         SendMessage message;
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -53,12 +57,12 @@ public class ItemFactoryImpl implements ItemFactory {
                     Product product = resourceManagerService.getProduct(actionInProgress.getProductIdToManage()).get();
                     resourceManagerService.deleteActionInProgress(actionInProgress);
                     if (product == null) {
-                        return message(update.getChatId(), "Nessun prodotto con questo ID in catalogo\nClicca su /start per tornare al menu principale.");
+                        return message(update.getChatId(), messageProperties.getMessage1());
                     } else {
 
                         product.setUrl(update.getText());
                         product = resourceManagerService.updateProduct(product).get();
-                        return message(update.getChatId(), String.format("Modifica del prodotto [%s] terminata.\nClicca su /start per tornare al menu principale.", product.getName()));
+                        return message(update.getChatId(), String.format(messageProperties.getMessage2(), product.getName()));
 
                     }
                 } catch (InterruptedException | ExecutionException e) {
@@ -71,7 +75,7 @@ public class ItemFactoryImpl implements ItemFactory {
                     participantByMail = resourceManagerService.findParticipantByMail(update.getText()).get();
                 } catch (ExecutionException e) {
                     if (NoSuchElementException.class == e.getCause().getClass()) {
-                        return message(update.getChatId(), "Nessun iscritto con questa mail\nClicca su /start per tornare al menu principale.");
+                        return message(update.getChatId(), messageProperties.getMessage3());
                     } else {
                         log.error(e.getMessage());
                     }
@@ -80,7 +84,7 @@ public class ItemFactoryImpl implements ItemFactory {
                 }
 
                 if(!participantByMail.getActive()){
-                    return message(update.getChatId(), "Nessun iscritto con questa mail\nClicca su /start per tornare al menu principale.");
+                    return message(update.getChatId(), messageProperties.getMessage3());
                 }
 
                 Action action = new Action();
@@ -93,7 +97,7 @@ public class ItemFactoryImpl implements ItemFactory {
 
         }
 
-        message = message(update.getChatId(), String.format("%s,\nScegli tra le seguenti opzioni:", participant == null ? "Benvenuto nel sistema GIST Guild" : "Bentornato nel sistema GIST Guild"));
+        message = message(update.getChatId(), messageProperties.getWelcome());
 
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
@@ -102,32 +106,32 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline5 = new ArrayList<>();
         if (participant == null) {
             InlineKeyboardButton button = new InlineKeyboardButton();
-            button.setText("Iscrizione");
+            button.setText(messageProperties.getMenuItem1());
             button.setCallbackData(CallbackDataKey.REGISTRATION.name());
             rowInline1.add(button);
         } else {
             InlineKeyboardButton button1 = new InlineKeyboardButton();
-            button1.setText("Catalogo");
+            button1.setText(messageProperties.getMenuItem2());
             button1.setCallbackData(CallbackDataKey.CATALOG.name());
             rowInline1.add(button1);
             InlineKeyboardButton button2 = new InlineKeyboardButton();
-            button2.setText("I tuoi ordini");
+            button2.setText(messageProperties.getMenuItem3());
             button2.setCallbackData(CallbackDataKey.ORDER_LIST.name());
             rowInline2.add(button2);
             InlineKeyboardButton button3 = new InlineKeyboardButton();
-            button3.setText("Credito residuo");
+            button3.setText(messageProperties.getMenuItem4());
             button3.setCallbackData(CallbackDataKey.CREDIT.name());
             rowInline2.add(button3);
             InlineKeyboardButton button6 = new InlineKeyboardButton();
-            button6.setText("Ricarica credito");
+            button6.setText(messageProperties.getMenuItem5());
             button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
             if(stripeActive) rowInline3.add(button6);
             InlineKeyboardButton button4 = new InlineKeyboardButton();
-            button4.setText("Cancellazione");
+            button4.setText(messageProperties.getMenuItem6());
             button4.setCallbackData(CallbackDataKey.CANCELLATION.name());
             rowInline4.add(button4);
             InlineKeyboardButton button5 = new InlineKeyboardButton();
-            button5.setText("Gestione iscritti");
+            button5.setText(messageProperties.getMenuItem7());
             button5.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name());
             rowInline5.add(button5);
         }
@@ -157,7 +161,7 @@ public class ItemFactoryImpl implements ItemFactory {
 
     @Override
     public SendMessage productUrlManagement(Long chat_id) {
-        return message(chat_id, "Inviare un ulteriore messaggio indicando l'URL da associare al prodotto");
+        return message(chat_id, messageProperties.getMessage4());
     }
 
     @Override
@@ -171,26 +175,26 @@ public class ItemFactoryImpl implements ItemFactory {
             credit = resourceManagerService.getCredit(participantToManage.getTelegramUserId()).get();
         } catch (ExecutionException e) {
             if (NoSuchElementException.class == e.getCause().getClass()) {
-                message = message(chat_id, String.format("Utente : %s\nNon ha credito residuo", participantToManage.getMail(), credit.getNewCredit()));
+                message = message(chat_id, String.format(messageProperties.getMessage5(), participantToManage.getMail(), credit.getNewCredit()));
             } else {
                 log.error(e.getMessage());
             }
         } catch (InterruptedException e) {
             log.error(e.getMessage());
         }
-        message = message(chat_id, String.format("Utente : %s\nCredito residuo : %s €", participantToManage.getMail(), credit.getNewCredit()));
+        message = message(chat_id, String.format(messageProperties.getMessage6(), participantToManage.getMail(), credit.getNewCredit()));
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
         InlineKeyboardButton button1 = new InlineKeyboardButton();
-        button1.setText("Ricarica credito");
+        button1.setText(messageProperties.getMenuItem5());
         button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name());
         rowInline1.add(button1);
         InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText("Cancellazione");
+        button2.setText(messageProperties.getMenuItem6());
         button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION);
         rowInline1.add(button2);
         InlineKeyboardButton button3 = new InlineKeyboardButton();
-        button3.setText("Modifica terminata");
+        button3.setText(messageProperties.getMenuItem8());
         button3.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.END.name());
         rowInline2.add(button3);
 
@@ -209,7 +213,7 @@ public class ItemFactoryImpl implements ItemFactory {
         SendMessage message;
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        message = message(chat_id, "Ricarica il credito scegliendo tra le seguenti opzioni:");
+        message = message(chat_id, messageProperties.getMessage7());
 
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
@@ -248,7 +252,7 @@ public class ItemFactoryImpl implements ItemFactory {
         SendMessage message;
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        message = message(chat_id, "Ricarica il credito dell'utente scegliendo tra le seguenti opzioni:");
+        message = message(chat_id,  messageProperties.getMessage7());
 
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
@@ -284,12 +288,12 @@ public class ItemFactoryImpl implements ItemFactory {
 
     @Override
     public SendMessage selectProductQuantity(Long chat_id) {
-        return message(chat_id, "Inviare ora un messaggio indicando la quantità desiderata (solo il valore numerico) per finalizzare l'ordine");
+        return message(chat_id, messageProperties.getMessage8());
     }
 
     @Override
     public SendMessage selectAddress(Long chat_id) {
-        return message(chat_id, "Inviare un ulteriore messaggio indicando l'indirizzo di spedizione per finalizzare l'ordine");
+        return message(chat_id, messageProperties.getMessage9());
     }
 
     @Override
@@ -305,29 +309,29 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline5 = new ArrayList<>();
 
         InlineKeyboardButton button1 = new InlineKeyboardButton();
-        button1.setText(String.format("Paga questo ordine : %s €",order.getAmount()));
+        button1.setText(String.format(messageProperties.getMenuItem9(),order.getAmount()));
         button1.setCallbackData(CallbackDataKey.PAYMENT.name()+CallbackDataKey.DELIMITER + order.getExternalShortId());
         rowInline1.add(button1);
 
         InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText("Annulla questo ordine");
+        button2.setText(messageProperties.getMenuItem10());
         button2.setCallbackData(CallbackDataKey.ORDER_DELETE.name() + CallbackDataKey.DELIMITER + order.getExternalShortId());
         rowInline2.add(button2);
 
         if(!StringUtils.isEmpty(order.getProductUrl())){
             InlineKeyboardButton button3 = new InlineKeyboardButton();
-            button3.setText(order.getProductPassword() != null && order.getProductPassword() != "" ? "Guarda il contenuto ("+order.getProductPassword()+")" : "Guarda il contenuto");
+            button3.setText(order.getProductPassword() != null && order.getProductPassword() != "" ? messageProperties.getMenuItem11()+"\nPassword: "+order.getProductPassword() : messageProperties.getMenuItem11());
             button3.setUrl(order.getProductUrl());
             rowInline3.add(button3);
         }
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
-        button4.setText("Torna alla lista degli ordini");
+        button4.setText(messageProperties.getMenuItem12());
         button4.setCallbackData(CallbackDataKey.ORDER_LIST.name());
         rowInline4.add(button4);
 
         InlineKeyboardButton button3 = new InlineKeyboardButton();
-        button3.setText("Torna al menù principale");
+        button3.setText(messageProperties.getMenuItem13());
         button3.setCallbackData(CallbackDataKey.WELCOME.name());
         rowInline5.add(button3);
 
