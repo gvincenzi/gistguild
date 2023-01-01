@@ -320,7 +320,7 @@ public class ItemFactoryImpl implements ItemFactory {
 
         if(!StringUtils.isEmpty(order.getProductUrl())){
             InlineKeyboardButton button3 = new InlineKeyboardButton();
-            button3.setText(order.getProductPassword() != null && order.getProductPassword() != "" ? messageProperties.getMenuItem11()+"\nPassword: "+order.getProductPassword() : messageProperties.getMenuItem11());
+            button3.setText(messageProperties.getMenuItem11());
             button3.setUrl(order.getProductUrl());
             rowInline3.add(button3);
         }
