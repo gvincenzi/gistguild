@@ -46,7 +46,7 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
         payment.setPreviousId(previous != null ? previous.getId() : GENESIS);
         payment.setNodeInstanceName(instanceName);
         payment.setAmount(document.getAmount());
-        payment.setCustomerMail(document.getCustomerMail());
+        payment.setCustomerNickname(document.getCustomerNickname());
         payment.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
         payment.setOrderId(document.getOrderId());
 
@@ -72,7 +72,7 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
             payment.setPreviousId(document.getPreviousId());
             payment.setNodeInstanceName(document.getNodeInstanceName());
             payment.setAmount(document.getAmount());
-            payment.setCustomerMail(document.getCustomerMail());
+            payment.setCustomerNickname(document.getCustomerNickname());
             payment.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
             payment.setOrderId(document.getOrderId());
             payment.setTimestamp(document.getTimestamp());
@@ -91,7 +91,7 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getCustomerMail() +
+                        document.getCustomerNickname() +
                         document.getCustomerTelegramUserId() +
                         document.getOrderId() +
                         document.getAmount()

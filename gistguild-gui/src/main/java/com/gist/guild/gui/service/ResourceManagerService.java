@@ -12,7 +12,6 @@ import java.util.concurrent.Future;
 
 public interface ResourceManagerService {
     Future<Participant> findParticipantByTelegramId(Long participant_id);
-    Future<Participant> findParticipantByMail(String participant_mail);
     Future<Participant> addOrUpdateParticipant(Participant participant);
     Action getActionInProgress(Long telegramUserId);
     void saveAction(Action action);

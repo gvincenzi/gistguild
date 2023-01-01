@@ -27,7 +27,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getMail()
+                        document.getTelegramUserId()
         );
     }
 
@@ -40,7 +40,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participant.setNodeInstanceName(instanceName);
         participant.setActive(document.getActive());
         participant.setAdministrator(document.getAdministrator());
-        participant.setMail(document.getMail());
+        participant.setNickname(document.getNickname());
         participant.setTelegramUserId(document.getTelegramUserId());
         participant.setIsCorruptionDetected(document.getIsCorruptionDetected());
 
@@ -68,7 +68,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                 participant.setNodeInstanceName(document.getNodeInstanceName());
                 participant.setActive(document.getActive());
                 participant.setAdministrator(document.getAdministrator());
-                participant.setMail(document.getMail());
+                participant.setNickname(document.getNickname());
                 participant.setTelegramUserId(document.getTelegramUserId());
                 participant.setNonce(document.getNonce());
                 participant.setExternalShortId(document.getExternalShortId());
@@ -92,8 +92,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             throw new GistGuildGenericException(messageProperties.getError2());
         }
 
-        List<Participant> participants = repository.findByMail(document.getMail());
-        participants.addAll(repository.findByTelegramUserId(document.getTelegramUserId()));
+        List<Participant> participants = repository.findByTelegramUserId(document.getTelegramUserId());
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());

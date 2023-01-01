@@ -53,7 +53,7 @@ public class DistributionControllerGetDocumentClassTest {
     @WithMockUser(value = "test")
     @Test
     public void entryOk() throws Exception {
-        String method = "findByMail";
+        String method = "findByTelegramUserId";
         String documentClass = "Participant";
         List<DocumentRepositoryMethodParameter> params = new ArrayList<>(1);
         params.add(getParam());
@@ -78,7 +78,7 @@ public class DistributionControllerGetDocumentClassTest {
     @WithMockUser(value = "test")
     @Test
     public void entryKo() throws Exception {
-        String method = "findByMail";
+        String method = "findByTelegramUserId";
         String documentClass = "UnknownDocumentClass";
         List<DocumentRepositoryMethodParameter> params = new ArrayList<>(1);
         params.add(getParam());
@@ -103,7 +103,7 @@ public class DistributionControllerGetDocumentClassTest {
     @WithAnonymousUser
     @Test
     public void entryNoUser() throws Exception {
-        String method = "findByMail";
+        String method = "findByTelegramUserId";
         String documentClass = "Participant";
         List<DocumentRepositoryMethodParameter> params = new ArrayList<>(1);
         params.add(getParam());

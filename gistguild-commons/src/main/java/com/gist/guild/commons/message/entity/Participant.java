@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class Participant extends Document {
-    private String mail;
     private Long telegramUserId;
+    private String nickname;
     private Boolean active = Boolean.TRUE;
     private Boolean administrator = Boolean.FALSE;
     private transient Long credit;
@@ -17,11 +17,11 @@ public class Participant extends Document {
 
         Participant that = (Participant) o;
 
-        return getMail().equals(that.getMail());
+        return getTelegramUserId().equals(that.getTelegramUserId());
     }
 
     @Override
     public int hashCode() {
-        return getMail().hashCode();
+        return getTelegramUserId().hashCode();
     }
 }

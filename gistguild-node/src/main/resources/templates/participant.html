@@ -50,8 +50,8 @@
                         </div>
                         <div class="modal-body row g-3">
                             <div class="col-12">
-                                <input type="email" class="form-control" placeholder="Mail" aria-label="Mail"
-                                       th:field="*{mail}" disabled/>
+                                <input type="text" class="form-control" placeholder="Nickname" aria-label="Nickname"
+                                       th:field="*{nickname}"/>
                             </div>
                             <div class="row g-3">
                                 <div class="col">
@@ -102,7 +102,7 @@
         <table class="table table-dark table-striped table-hover">
             <thead>
             <tr>
-                <th scope="col">Mail</th>
+                <th scope="col">Nickname</th>
                 <th scope="col">Credit</th>
                 <th scope="col">Insertion date/time</th>
                 <th scope="col">Visibility</th>
@@ -112,7 +112,7 @@
             </thead>
             <tbody>
             <tr th:each="item : ${items}">
-                <td scope="row" th:text="${item.mail}"></td>
+                <td scope="row" th:text="${item.nickname}"></td>
                 <td scope="row" th:text="${item.credit}"></td>
                 <td scope="row" th:text="${item.timestamp}"></td>
                 <td scope="row">

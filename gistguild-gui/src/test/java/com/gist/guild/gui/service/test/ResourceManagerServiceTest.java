@@ -24,7 +24,7 @@ public class ResourceManagerServiceTest {
     public void addOrUpdateParticipantTest1(){
         Participant participant = new Participant();
         participant.setTelegramUserId(123456L);
-        participant.setMail("test@test.com");
+        participant.setNickname("test");
 
         resourceManagerService.addOrUpdateParticipant(participant);
     }
@@ -33,7 +33,7 @@ public class ResourceManagerServiceTest {
     public void addOrUpdateParticipantTest2(){
         Participant participant = new Participant();
         participant.setTelegramUserId(123456L);
-        participant.setMail("test@test.com");
+        participant.setNickname("test");
         participant.setActive(Boolean.FALSE);
 
         resourceManagerService.addOrUpdateParticipant(participant);
@@ -43,7 +43,7 @@ public class ResourceManagerServiceTest {
     public void addOrUpdateParticipantTest3(){
         Participant participant = new Participant();
         participant.setTelegramUserId(123456L);
-        participant.setMail("test@test.com");
+        participant.setNickname("test");
         participant.setActive(Boolean.FALSE);
         participant.setAdministrator(Boolean.TRUE);
 

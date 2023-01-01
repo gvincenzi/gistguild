@@ -56,7 +56,7 @@ public class DistributionControllerPropositionTest {
                 "    \"description\" : \"GIST Item\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
-                "      \"mail\":\"test@test.it\",\n" +
+                "      \"nickname\":\"test\",\n" +
                 "      \"telegramUserId\":\"478956\"\n" +
                 "      }\n" +
                 "    }\n" +

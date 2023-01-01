@@ -80,7 +80,7 @@ public class NodeServiceImplTest {
 		List<Participant> items = new ArrayList<>(1);
 		items.add(getDocumentMock("Genesis block"));
 		Mockito.when(participantRepository.findTopByOrderByTimestampDesc()).thenReturn(null);
-		Mockito.when(participantRepository.findByMail(getDocumentMock("Genesis block").getMail())).thenReturn(items);
+		Mockito.when(participantRepository.findByTelegramUserId(getDocumentMock("Genesis block").getTelegramUserId())).thenReturn(items);
 		Participant item = serviceUnderTest.add(null);
 	}
 
@@ -202,7 +202,7 @@ public class NodeServiceImplTest {
 
 	public Participant getDocumentMock(String title){
 		Participant participant = new Participant();
-		participant.setMail("test@test.it");
+		participant.setNickname("test");
 		participant.setTelegramUserId(478956L);
 		return participant;
 	}

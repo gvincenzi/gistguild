@@ -43,7 +43,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
         RechargeCredit rechargeCredit = new RechargeCredit();
         rechargeCredit.setPreviousId(previous != null ? previous.getId() : GENESIS);
         rechargeCredit.setNodeInstanceName(instanceName);
-        rechargeCredit.setCustomerMail(document.getCustomerMail());
+        rechargeCredit.setCustomerNickname(document.getCustomerNickname());
         rechargeCredit.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
         rechargeCredit.setNewCredit(document.getNewCredit());
         rechargeCredit.setOldCredit(document.getOldCredit());
@@ -71,7 +71,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
             rechargeCredit.setTimestamp(document.getTimestamp());
             rechargeCredit.setPreviousId(document.getPreviousId());
             rechargeCredit.setNodeInstanceName(document.getNodeInstanceName());
-            rechargeCredit.setCustomerMail(document.getCustomerMail());
+            rechargeCredit.setCustomerNickname(document.getCustomerNickname());
             rechargeCredit.setCustomerTelegramUserId(document.getCustomerTelegramUserId());
             rechargeCredit.setNewCredit(document.getNewCredit());
             rechargeCredit.setOldCredit(document.getOldCredit());
@@ -91,7 +91,7 @@ public class RechargeCreditServiceImpl extends NodeService<com.gist.guild.common
                         document.getTimestamp().toEpochMilli() +
                         document.getNonce() +
                         document.getNodeInstanceName() +
-                        document.getCustomerMail() +
+                        document.getCustomerNickname() +
                         document.getCustomerTelegramUserId() +
                         document.getOldCredit() +
                         document.getNewCredit()

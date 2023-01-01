@@ -64,7 +64,7 @@ public class DeliveryValenceServiceTest {
                 "    \"description\" : \"GIST Item\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
-                "      \"mail\":\"test@test.it\",\n" +
+                "      \"nickname\":\"test\",\n" +
                 "      \"telegramUserId\":\"478956\"\n" +
                 "      }\n" +
                 "    }\n" +
@@ -102,7 +102,7 @@ public class DeliveryValenceServiceTest {
 
     @Test
     public void getDocumentClass() throws JsonProcessingException, DistributionException, ClassNotFoundException {
-        String method = "findByMail";
+        String method = "findByTelegramUserId";
         List<DocumentRepositoryMethodParameter> params = new ArrayList<>(1);
         params.add(getParam());
         Mockito.when(requestChannel.send(Mockito.any(Message.class))).thenReturn(Boolean.TRUE);

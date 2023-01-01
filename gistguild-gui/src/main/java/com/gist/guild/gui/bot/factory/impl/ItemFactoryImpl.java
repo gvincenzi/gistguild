@@ -70,9 +70,9 @@ public class ItemFactoryImpl implements ItemFactory {
                 }
             } else if (actionInProgress != null && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
                 resourceManagerService.deleteActionInProgress(actionInProgress);
-                Participant participantByMail = null;
+                Participant participantByTelegramId = null;
                 try {
-                    participantByMail = resourceManagerService.findParticipantByMail(update.getText()).get();
+                    participantByTelegramId = resourceManagerService.findParticipantByTelegramId(Long.valueOf(update.getText())).get();
                 } catch (ExecutionException e) {
                     if (NoSuchElementException.class == e.getCause().getClass()) {
                         return message(update.getChatId(), messageProperties.getMessage3());
@@ -83,16 +83,16 @@ public class ItemFactoryImpl implements ItemFactory {
                     log.error(e.getMessage());
                 }
 
-                if(!participantByMail.getActive()){
+                if(!participantByTelegramId.getActive()){
                     return message(update.getChatId(), messageProperties.getMessage3());
                 }
 
                 Action action = new Action();
                 action.setActionType(ActionType.USER_MANAGEMENT);
-                action.setTelegramUserIdToManage(participantByMail.getTelegramUserId());
+                action.setTelegramUserIdToManage(participantByTelegramId.getTelegramUserId());
                 action.setTelegramUserId(participant.getTelegramUserId());
                 resourceManagerService.saveAction(action);
-                return userManagementMenu(update.getChatId(), participantByMail);
+                return userManagementMenu(update.getChatId(), participantByTelegramId);
             }
 
         }
@@ -175,14 +175,14 @@ public class ItemFactoryImpl implements ItemFactory {
             credit = resourceManagerService.getCredit(participantToManage.getTelegramUserId()).get();
         } catch (ExecutionException e) {
             if (NoSuchElementException.class == e.getCause().getClass()) {
-                message = message(chat_id, String.format(messageProperties.getMessage5(), participantToManage.getMail(), credit.getNewCredit()));
+                message = message(chat_id, String.format(messageProperties.getMessage5(), participantToManage.getNickname(), credit.getNewCredit()));
             } else {
                 log.error(e.getMessage());
             }
         } catch (InterruptedException e) {
             log.error(e.getMessage());
         }
-        message = message(chat_id, String.format(messageProperties.getMessage6(), participantToManage.getMail(), credit.getNewCredit()));
+        message = message(chat_id, String.format(messageProperties.getMessage6(), participantToManage.getNickname(), credit.getNewCredit()));
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
         InlineKeyboardButton button1 = new InlineKeyboardButton();

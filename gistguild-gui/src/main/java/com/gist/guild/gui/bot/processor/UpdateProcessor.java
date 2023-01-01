@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public abstract class UpdateProcessor {
-    protected static final String MAIL_TOKEN = "@";
     protected static final int CURRENCY_DIVISOR = 100;
     protected static final String START_TOKEN = "/start";
     protected static final long ZERO = 0L;
