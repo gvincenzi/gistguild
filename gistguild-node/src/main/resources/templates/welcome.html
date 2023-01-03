@@ -39,7 +39,7 @@
     </main>
 
     <footer class="mt-auto text-white-50">
-        <p class="less" th:if="${validation} != null" th:style="${validation} ? 'color: green' : 'color: red'">The registry for the instance <i><td th:text="${instanceName}"/></i> is <td th:text="${startup} ? 'valid' : 'not valid'" /></p>
+        <p class="less" th:if="${validation} != null" th:style="${validation} ? 'color: green' : 'color: red'">The registry for the instance <i><td th:text="${instanceName}"/></i> is <td th:text="${validation} ? 'valid' : 'not valid'" /></p>
         <p>GIST Guild is a open source poject on <a href="https://getbootstrap.com/" class="text-white">GitHub</a>, developed by <a
                 href="https://www.linkedin.com/in/giuseppevincenzi/?originalSubdomain=fr" class="text-white">Giuseppe Vincenzi</a>.</p>
     </footer>
