@@ -10,7 +10,9 @@ import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.binding.MQListener;
 import com.gist.guild.node.core.document.Participant;
-import com.gist.guild.node.core.repository.ParticipantRepository;
+import com.gist.guild.node.core.document.Order;
+import com.gist.guild.node.core.repository.OrderRepository;
+import com.gist.guild.node.core.service.NodeBusinessService;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
 import lombok.extern.java.Log;
@@ -38,19 +40,22 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class MQListenerTest {
+public class MQListenerOrderRegistrationTest {
     @Autowired
     MQListener mqListener;
 
     @MockBean
-    ParticipantRepository participantRepository;
+    OrderRepository orderRepository;
 
     @MockBean
     @Qualifier("responseChannel")
     MessageChannel responseChannel;
 
     @Autowired
-    NodeService<com.gist.guild.commons.message.entity.Participant, Participant> participantNodeService;
+    NodeService<com.gist.guild.commons.message.entity.Order, Order> orderNodeService;
+
+    @MockBean
+    NodeBusinessService nodeBusinessService;
 
     @Value("${spring.application.name}")
     private String instanceName;
@@ -68,13 +73,17 @@ public class MQListenerTest {
         return documentProposition;
     }
 
-    private DocumentProposition getDocumentPropositionUserRegistration() throws JsonProcessingException {
+    private DocumentProposition getDocumentPropositionOrderRegistration() throws JsonProcessingException {
         String json = "{\n" +
-                "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
-                "    \"documentClass\" : \"Participant\",\n" +
+                "    \"documentPropositionType\" : \"ORDER_REGISTRATION\",\n" +
+                "    \"documentClass\" : \"Order\",\n" +
                 "    \"document\" : {\n" +
-                "      \"nickname\":\"test\",\n" +
-                "      \"telegramUserId\":\"478956\"\n" +
+                "      \"amount\":\"15\",\n" +
+                "      \"quantity\":\"3\",\n" +
+                "      \"productName\":\"test\",\n" +
+                "      \"productId\":\"100\",\n" +
+                "      \"customerNickname\":\"test\",\n" +
+                "      \"customerTelegramUserId\":\"478956\"\n" +
                 "      }\n" +
                 "    }\n" +
                 "}";
@@ -82,14 +91,18 @@ public class MQListenerTest {
         return proposition;
     }
 
-    private DocumentProposition getDocumentPropositionUserCancellation() throws JsonProcessingException {
+    private DocumentProposition getDocumentPropositionOrderCancellation() throws JsonProcessingException {
         String json = "{\n" +
-                "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
-                "    \"documentClass\" : \"Participant\",\n" +
+                "    \"documentPropositionType\" : \"ORDER_REGISTRATION\",\n" +
+                "    \"documentClass\" : \"Order\",\n" +
                 "    \"document\" : {\n" +
-                "      \"nickname\":\"test\",\n" +
-                "      \"telegramUserId\":\"478956\",\n" +
-                "      \"active\":\"false\"\n" +
+                "      \"amount\":\"15\",\n" +
+                "      \"quantity\":\"3\",\n" +
+                "      \"productName\":\"test\",\n" +
+                "      \"productId\":\"100\",\n" +
+                "      \"customerNickname\":\"test\",\n" +
+                "      \"customerTelegramUserId\":\"478956\",\n" +
+                "      \"deleted\":\"true\"\n" +
                 "      }\n" +
                 "    }\n" +
                 "}";
@@ -102,36 +115,40 @@ public class MQListenerTest {
         DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_PROPOSITION);
         msg.setCorrelationID(UUID.randomUUID());
-        msg.setContent(getDocumentPropositionUserRegistration());
+        msg.setContent(getDocumentPropositionOrderRegistration());
 
-        Participant participant = new Participant();
-        participant.setPreviousId("GENESIS");
-        participant.setNodeInstanceName(instanceName);
-        participant.setNickname("test");
-        participant.setTelegramUserId(478956L);
+        Order order = new Order();
+        order.setPreviousId("GENESIS");
+        order.setNodeInstanceName(instanceName);
+        order.setProductName("test");
+        order.setProductId("1010");
+        order.setAmount(15L);
+        order.setQuantity(3L);
+        order.setCustomerNickname("test");
+        order.setCustomerTelegramUserId(478956L);
 
-        Random random = new Random(participant.getTimestamp().toEpochMilli());
+        Random random = new Random(order.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
-        participant.setNonce(nonce);
-        participant.setId(participantNodeService.calculateHash(participant));
-        while (!NodeUtils.isHashResolved(participant, difficultLevel)) {
+        order.setNonce(nonce);
+        order.setId(orderNodeService.calculateHash(order));
+        while (!NodeUtils.isHashResolved(order, difficultLevel)) {
             nonce = random.nextInt();
-            participant.setNonce(nonce);
-            participant.setId(participantNodeService.calculateHash(participant));
+            order.setNonce(nonce);
+            order.setId(orderNodeService.calculateHash(order));
         }
 
         List<Document> items = new ArrayList<>();
-        items.add(participant);
+        items.add(order);
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
         responseMessage.setCorrelationID(msg.getCorrelationID());
         responseMessage.setInstanceName(instanceName);
         responseMessage.setType(DistributionEventType.ENTRY_RESPONSE);
-        responseMessage.setDocumentClass(Participant.class);
+        responseMessage.setDocumentClass(Order.class);
         responseMessage.setContent(items);
 
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
 
-        Mockito.when(participantRepository.save(ArgumentMatchers.any(Participant.class))).thenReturn(participant);
+        Mockito.when(orderRepository.save(ArgumentMatchers.any(Order.class))).thenReturn(order);
         Mockito.when(responseChannel.send(responseMsg)).thenReturn(Boolean.TRUE);
         mqListener.processDocumentProposition(msg);
     }
@@ -141,28 +158,32 @@ public class MQListenerTest {
         DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_PROPOSITION);
         msg.setCorrelationID(UUID.randomUUID());
-        msg.setContent(getDocumentPropositionUserCancellation());
+        msg.setContent(getDocumentPropositionOrderCancellation());
 
-        Participant participant = new Participant();
-        participant.setPreviousId("GENESIS");
-        participant.setNodeInstanceName(instanceName);
-        participant.setNickname("test");
-        participant.setTelegramUserId(478956L);
+        Order order = new Order();
+        order.setPreviousId("GENESIS");
+        order.setNodeInstanceName(instanceName);
+        order.setProductName("test");
+        order.setProductId("1010");
+        order.setAmount(15L);
+        order.setQuantity(3L);
+        order.setCustomerNickname("test");
+        order.setCustomerTelegramUserId(478956L);
 
-        Random random = new Random(participant.getTimestamp().toEpochMilli());
+        Random random = new Random(order.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
-        participant.setNonce(nonce);
-        participant.setId(participantNodeService.calculateHash(participant));
-        while (!NodeUtils.isHashResolved(participant, difficultLevel)) {
+        order.setNonce(nonce);
+        order.setId(orderNodeService.calculateHash(order));
+        while (!NodeUtils.isHashResolved(order, difficultLevel)) {
             nonce = random.nextInt();
-            participant.setNonce(nonce);
-            participant.setId(participantNodeService.calculateHash(participant));
+            order.setNonce(nonce);
+            order.setId(orderNodeService.calculateHash(order));
         }
 
-        participant.setActive(Boolean.FALSE);
+        order.setDeleted(Boolean.TRUE);
 
         List<Document> items = new ArrayList<>();
-        items.add(participant);
+        items.add(order);
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
         responseMessage.setCorrelationID(msg.getCorrelationID());
         responseMessage.setInstanceName(instanceName);
@@ -172,11 +193,8 @@ public class MQListenerTest {
 
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
 
-        Mockito.when(participantRepository.save(ArgumentMatchers.any(Participant.class))).thenReturn(participant);
+        Mockito.when(orderRepository.save(ArgumentMatchers.any(Order.class))).thenReturn(order);
         Mockito.when(responseChannel.send(responseMsg)).thenReturn(Boolean.TRUE);
         mqListener.processDocumentProposition(msg);
     }
-
-    //TODO INTEGRITY_VERIFICATION
-    //TODO GET_DOCUMENT
 }

@@ -28,7 +28,7 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { GistGuildNodeApplication.class })
 @ActiveProfiles("test")
-public class NodeServiceImplTest {
+public class NodeServiceTest {
 	@Autowired
 	NodeService<com.gist.guild.commons.message.entity.Participant, Participant> serviceUnderTest;
 	
