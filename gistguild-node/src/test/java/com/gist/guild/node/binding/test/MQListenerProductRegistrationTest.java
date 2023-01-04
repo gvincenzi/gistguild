@@ -11,7 +11,6 @@ import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.binding.MQListener;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
-import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
@@ -79,7 +78,7 @@ public class MQListenerProductRegistrationTest {
                 "      \"description\":\"test\",\n" +
                 "      \"price\":\"10\",\n" +
                 "      \"availableQuantity\":\"15\",\n" +
-                "      \"ownerMail\":\"test\",\n" +
+                "      \"ownerNickname\":\"test\",\n" +
                 "      \"ownerTelegramUserId\":\"478956\"\n" +
                 "      }\n" +
                 "    }\n" +
@@ -97,7 +96,7 @@ public class MQListenerProductRegistrationTest {
                 "      \"description\":\"test\",\n" +
                 "      \"price\":\"10\",\n" +
                 "      \"availableQuantity\":\"15\",\n" +
-                "      \"ownerMail\":\"test\",\n" +
+                "      \"ownerNickname\":\"test\",\n" +
                 "      \"ownerTelegramUserId\":\"478956\",\n" +
                 "      \"active\":\"false\"\n" +
                 "      }\n" +
@@ -121,7 +120,7 @@ public class MQListenerProductRegistrationTest {
         product.setDescription("test");
         product.setAvailableQuantity(15L);
         product.setPrice(10L);
-        product.setOwnerMail("test");
+        product.setOwnerNickname("test");
         product.setOwnerTelegramUserId(478956L);
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
@@ -164,7 +163,7 @@ public class MQListenerProductRegistrationTest {
         product.setDescription("test");
         product.setAvailableQuantity(15L);
         product.setPrice(10L);
-        product.setOwnerMail("test");
+        product.setOwnerNickname("test");
         product.setOwnerTelegramUserId(478956L);
 
         Random random = new Random(product.getTimestamp().toEpochMilli());

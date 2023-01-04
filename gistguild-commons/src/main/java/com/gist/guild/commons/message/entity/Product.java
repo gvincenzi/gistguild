@@ -14,7 +14,7 @@ public class Product extends Document {
     private Long availableQuantity;
     private Boolean active = Boolean.TRUE;
     private Boolean delivery = Boolean.FALSE;
-    private String ownerMail;
+    private String ownerNickname;
     private Long ownerTelegramUserId;
 
     @Override
@@ -23,7 +23,7 @@ public class Product extends Document {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
         return id.equals(product.id) &&
-                ownerMail.equals(product.ownerMail) &&
+                ownerNickname.equals(product.ownerNickname) &&
                 ownerTelegramUserId.equals(product.ownerTelegramUserId) &&
                 name.equals(product.name) &&
                 description.equals(product.description) &&

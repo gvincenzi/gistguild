@@ -1,7 +1,6 @@
 package com.gist.guild.node.core.service.impl;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
-import com.gist.guild.node.core.document.Order;
 import com.gist.guild.node.core.document.Product;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
@@ -10,7 +9,6 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
 
 @Data
@@ -61,7 +59,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setName(document.getName());
         product.setPassword(document.getPassword());
         product.setUrl(document.getUrl());
-        product.setOwnerMail(document.getOwnerMail());
+        product.setOwnerNickname(document.getOwnerNickname());
         product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
@@ -94,7 +92,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
             product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
-            product.setOwnerMail(document.getOwnerMail());
+            product.setOwnerNickname(document.getOwnerNickname());
             product.setTimestamp(document.getTimestamp());
             product.setNonce(document.getNonce());
             product.setExternalShortId(document.getExternalShortId());
@@ -123,7 +121,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
                         document.getNonce() +
                         document.getNodeInstanceName() +
                         document.getName() +
-                        document.getOwnerMail()+
+                        document.getOwnerNickname()+
                         document.getOwnerTelegramUserId()
         );
     }
