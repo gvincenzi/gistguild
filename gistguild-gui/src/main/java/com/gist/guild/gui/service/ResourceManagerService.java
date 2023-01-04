@@ -22,7 +22,7 @@ public interface ResourceManagerService {
     Future<List<Order>> getOrders(Long telegramUserId);
     Order addOrUpdateOrder(Order order) throws GistGuildGenericException;
     Order getOrderProcessed(Long orderExternalId);
-    void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException;
+    void payOrder(Long orderExternalId, String customerNickname, Long customerTelegramUserId) throws GistGuildGenericException;
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);
 }

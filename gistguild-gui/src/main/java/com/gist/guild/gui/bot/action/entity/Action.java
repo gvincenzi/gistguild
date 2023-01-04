@@ -14,8 +14,6 @@ public class Action {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column
-    private String userMailFilter;
-    @Column
     private Long telegramUserIdToManage;
     @Column
     private Long productIdToManage;
