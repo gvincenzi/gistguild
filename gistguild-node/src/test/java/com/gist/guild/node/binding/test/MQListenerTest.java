@@ -16,6 +16,7 @@ import com.gist.guild.node.core.service.NodeUtils;
 import lombok.extern.java.Log;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,7 +49,7 @@ public class MQListenerTest {
     @Qualifier("responseChannel")
     MessageChannel responseChannel;
 
-    @MockBean
+    @Autowired
     NodeService<com.gist.guild.commons.message.entity.Participant, Participant> participantNodeService;
 
     @Value("${spring.application.name}")
@@ -130,7 +131,7 @@ public class MQListenerTest {
 
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
 
-        Mockito.when(participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class))).thenReturn(participant);
+        Mockito.when(participantRepository.save(ArgumentMatchers.any(Participant.class))).thenReturn(participant);
         Mockito.when(responseChannel.send(responseMsg)).thenReturn(Boolean.TRUE);
         mqListener.processDocumentProposition(msg);
     }
@@ -171,7 +172,7 @@ public class MQListenerTest {
 
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
 
-        Mockito.when(participantNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.Participant.class))).thenReturn(participant);
+        Mockito.when(participantRepository.save(ArgumentMatchers.any(Participant.class))).thenReturn(participant);
         Mockito.when(responseChannel.send(responseMsg)).thenReturn(Boolean.TRUE);
         mqListener.processDocumentProposition(msg);
     }
