@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: gistguild-node-test
+  rabbitmq:
+    addresses: amqp://test
+  cloud:
+    stream:
+      bindings:
+        requestChannel:
+          destination: requestChannel
+          group: nodeGroup
+        responseChannel:
+          producer:
+            routingKeyExpression: "'gistGuildResponseChannel'"
+        distributionChannel:
+          destination: distributionChannel
+  data:
+    mongodb:
+      uri: mongodb+srv://username:password@cluster0.zbsduyi.mongodb.net/?retryWrites=true&w=majority
+      database: gistguild-test
+
+server:
+  port: 8884
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8880/eureka
+
+gistguild:
+  startup: false
+  difficult:
+    level: 1
+  spike:
+    username: test
+    password: test
+    url: http://localhost:8882/spike
+  message:
+    error1: "Il documento è obbligatorio"
+    error2: "Il registro della Gist Guild è corrotto"
+    error3: "Il partecipante non esiste"
+    error4: "Il partecipante non ha credito sufficiente per finalizzare il pagamento"
+    error5: "Il prodotto non esiste"
+    error6: "Quantità dispoinibile insufficiente"
+

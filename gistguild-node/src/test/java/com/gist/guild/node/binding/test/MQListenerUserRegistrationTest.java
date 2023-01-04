@@ -9,7 +9,7 @@ import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.binding.MQListener;
-import com.gist.guild.node.core.document.Participant;
+import com.gist.guild.node.core.document.*;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.core.service.NodeUtils;
@@ -38,27 +38,21 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class MQListenerUserRegistrationTest {
-    @Autowired
-    MQListener mqListener;
+public class MQListenerUserRegistrationTest extends MQListenerTest {
+    @MockBean
+    NodeService<com.gist.guild.commons.message.entity.Product, Product> productNodeService;
 
     @MockBean
-    ParticipantRepository participantRepository;
+    NodeService<com.gist.guild.commons.message.entity.RechargeCredit, RechargeCredit> rechargeCreditNodeService;
 
     @MockBean
-    @Qualifier("responseChannel")
-    MessageChannel responseChannel;
+    NodeService<com.gist.guild.commons.message.entity.Payment, Payment> paymentNodeService;
+
+    @MockBean
+    NodeService<com.gist.guild.commons.message.entity.Order, Order> orderNodeService;
 
     @Autowired
     NodeService<com.gist.guild.commons.message.entity.Participant, Participant> participantNodeService;
-
-    @Value("${spring.application.name}")
-    private String instanceName;
-
-    @Value("${gistguild.difficult.level}")
-    private Integer difficultLevel;
-
-    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     protected static DocumentProposition getNewDocument(String json) throws JsonProcessingException {
         log.info(json);
