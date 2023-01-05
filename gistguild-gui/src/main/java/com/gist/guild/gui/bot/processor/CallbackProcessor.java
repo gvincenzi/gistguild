@@ -277,6 +277,10 @@ public class CallbackProcessor extends UpdateProcessor {
             ((SendInvoice) message).setStartParameter(messageProperties.getInvoiceStartParameter());
 
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name())) {
+            Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
+            if (actionInProgress != null) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+            }
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);
             action.setTelegramUserId(user_id);
