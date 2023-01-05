@@ -32,6 +32,9 @@ eureka:
       defaultZone: http://localhost:8880/eureka
 
 gistguild:
+  admin:
+    username: username
+    password: password
   startup: false
   difficult:
     level: 1
