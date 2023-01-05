@@ -192,7 +192,7 @@ public class ItemFactoryImpl implements ItemFactory {
         button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name());
         rowInline1.add(button1);
         InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText(messageProperties.getMenuItem6());
+        button2.setText(String.format(messageProperties.getMenuItem6(), participantToManage.getNickname(), participantToManage.getTelegramUserId()));
         button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION);
         rowInline1.add(button2);
         InlineKeyboardButton button3 = new InlineKeyboardButton();
