@@ -327,7 +327,7 @@ public class CallbackProcessor extends UpdateProcessor {
 
                 Participant participantToRecharge = null;
                 try {
-                    RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(user_id).get();
+                    RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(actionInProgress.getTelegramUserIdToManage()).get();
                     participantToRecharge = resourceManagerService.findParticipantByTelegramId(actionInProgress.getTelegramUserIdToManage()).get();
                     RechargeCredit rechargeCredit = new RechargeCredit();
                     rechargeCredit.setCustomerNickname(participantToRecharge.getNickname());
