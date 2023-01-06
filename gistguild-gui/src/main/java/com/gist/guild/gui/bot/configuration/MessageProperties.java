@@ -79,6 +79,8 @@ public class MessageProperties {
     String productDetails3;
     String productDetails4;
 
+    String loadingMessage;
+
     public String toString(Order order) {
         return String.format(getOrderDetails1(),order.getExternalShortId()) +
                 (order.getQuantity()!=null ? String.format(getOrderDetails2(), order.getQuantity()) : EMPTY_STRING) +
