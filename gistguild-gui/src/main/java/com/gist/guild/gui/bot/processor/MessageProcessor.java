@@ -66,6 +66,7 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                     order.setProductUrl(product.getUrl());
                     order.setProductPassword(product.getPassword());
                     order.setQuantity(Long.parseLong(update.getMessage().getText()));
@@ -90,6 +91,7 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setCustomerTelegramUserId(participant.getTelegramUserId());
                 order.setProductId(product.getId());
                 order.setProductName(product.getName());
+                order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                 order.setProductUrl(product.getUrl());
                 order.setProductPassword(product.getPassword());
                 order.setQuantity(actionInProgress.getQuantity());

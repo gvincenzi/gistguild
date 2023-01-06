@@ -196,6 +196,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                     order.setProductUrl(product.getUrl());
                     order.setProductPassword(product.getPassword());
                     order.setAmount(product.getPrice());

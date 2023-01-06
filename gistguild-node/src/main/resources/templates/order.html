@@ -44,6 +44,8 @@
                     <form action="#" th:action="@{/order}" th:object="${newOrder}" method="post" onsubmit="progress()">
                         <input type="hidden" class="form-control" placeholder="ID" aria-label="ID"
                                th:field="*{id}"/>
+                        <input type="hidden" class="form-control" placeholder="productOwnerTelegramUserId" aria-label="productOwnerTelegramUserId"
+                               th:field="*{productOwnerTelegramUserId}"/>
                         <input type="hidden" class="form-control" placeholder="productId" aria-label="productId"
                                th:field="*{productId}"/>
                         <div class="modal-header">

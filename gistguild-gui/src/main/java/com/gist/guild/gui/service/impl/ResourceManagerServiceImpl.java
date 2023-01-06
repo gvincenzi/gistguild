@@ -118,7 +118,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public Future<List<Order>> getOrders(Long telegramUserId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalse", params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampAsc", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 

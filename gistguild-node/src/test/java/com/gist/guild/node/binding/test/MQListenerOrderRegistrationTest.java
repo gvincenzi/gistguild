@@ -111,6 +111,7 @@ public class MQListenerOrderRegistrationTest extends MQListenerTest{
         order.setPreviousId("GENESIS");
         order.setNodeInstanceName(instanceName);
         order.setProductName("test");
+        order.setProductOwnerTelegramUserId(123456L);
         order.setProductId("1010");
         order.setAmount(15L);
         order.setQuantity(3L);
@@ -154,6 +155,7 @@ public class MQListenerOrderRegistrationTest extends MQListenerTest{
         order.setPreviousId("GENESIS");
         order.setNodeInstanceName(instanceName);
         order.setProductName("test");
+        order.setProductOwnerTelegramUserId(123456L);
         order.setProductId("1010");
         order.setAmount(15L);
         order.setQuantity(3L);
