@@ -55,7 +55,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participant.setPreviousId(previous != null ? previous.getId() : GENESIS);
         participant.setNodeInstanceName(instanceName);
         participant.setActive(document.getActive());
-        participant.setAdministrator(document.getAdministrator());
+        participant.setAdministrator(previous != null ? document.getAdministrator() : Boolean.TRUE);
         participant.setNickname(document.getNickname());
         participant.setTelegramUserId(document.getTelegramUserId());
         participant.setIsCorruptionDetected(document.getIsCorruptionDetected());
@@ -119,25 +119,29 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         }
 
         List<Participant> participants = repository.findByTelegramUserId(document.getTelegramUserId());
+        Participant newParticipant = null;
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
-            participant.setAdministrator(document.getAdministrator());
-            if(participant.getAdministrator() && !userDetailsService.userExists(participant.getTelegramUserId().toString())){
-                UserDetails admin = User.withUsername(participant.getTelegramUserId().toString())
-                        .password(passwordEncoder.encode(password))
-                        .roles(ADMIN)
-                        .build();
-                userDetailsService.createUser(admin);
-            } else if(!participant.getAdministrator() && userDetailsService.userExists(participant.getTelegramUserId().toString())){
-                userDetailsService.deleteUser(participant.getTelegramUserId().toString());
-            }
-            return repository.save(participant);
+            participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
+            newParticipant = repository.save(participant);
         } else {
             Participant previous = repository.findTopByOrderByTimestampDesc();
             Participant newItem = getNewItem(document, previous);
-            return repository.save(newItem);
+            newParticipant = repository.save(newItem);
         }
+
+        if(newParticipant.getAdministrator() && !userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+            UserDetails admin = User.withUsername(newParticipant.getTelegramUserId().toString())
+                    .password(passwordEncoder.encode(password))
+                    .roles(ADMIN)
+                    .build();
+            userDetailsService.createUser(admin);
+        } else if(!newParticipant.getAdministrator() && userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+            userDetailsService.deleteUser(newParticipant.getTelegramUserId().toString());
+        }
+
+        return newParticipant;
     }
 
 }

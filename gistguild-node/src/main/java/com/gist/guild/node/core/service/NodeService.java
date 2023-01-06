@@ -81,9 +81,9 @@ public abstract class NodeService<T extends Document, S extends T> {
 			if (i < documents.size()) {
 				if (!documents.get(i).getId().equals(content.get(i).getId())) {
 					throw new GistGuildGenericException("Guild registry has been corrupted");
+				} else {
+					updateLocal(content.get(i));
 				}
-			} else {
-				updateLocal(content.get(i));
 			}
 		}
 	}
