@@ -8,6 +8,11 @@ import com.gist.guild.node.core.service.NodeUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +24,17 @@ import java.util.Random;
 public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.message.entity.Participant,Participant> {
     @Autowired
     private ParticipantRepository repository;
+
+    @Autowired
+    private InMemoryUserDetailsManager userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Value("${gistguild.admin.password}")
+    private String password;
+
+    protected static final String ADMIN = "ADMIN";
 
     @Override
     public String calculateHash(Participant document) throws GistGuildGenericException {
@@ -80,6 +96,16 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             repository.save(participant);
         }
 
+        if(document.getAdministrator() && !userDetailsService.userExists(document.getTelegramUserId().toString())){
+            UserDetails admin = User.withUsername(document.getTelegramUserId().toString())
+                    .password(passwordEncoder.encode(password))
+                    .roles(ADMIN)
+                    .build();
+            userDetailsService.createUser(admin);
+        } else if(!document.getAdministrator() && userDetailsService.userExists(document.getTelegramUserId().toString())){
+            userDetailsService.deleteUser(document.getTelegramUserId().toString());
+        }
+
         return validate(repository.findAllByOrderByTimestampAsc());
     }
 
@@ -97,6 +123,15 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
             participant.setAdministrator(document.getAdministrator());
+            if(participant.getAdministrator() && !userDetailsService.userExists(participant.getTelegramUserId().toString())){
+                UserDetails admin = User.withUsername(participant.getTelegramUserId().toString())
+                        .password(passwordEncoder.encode(password))
+                        .roles(ADMIN)
+                        .build();
+                userDetailsService.createUser(admin);
+            } else if(!participant.getAdministrator() && userDetailsService.userExists(participant.getTelegramUserId().toString())){
+                userDetailsService.deleteUser(participant.getTelegramUserId().toString());
+            }
             return repository.save(participant);
         } else {
             Participant previous = repository.findTopByOrderByTimestampDesc();
