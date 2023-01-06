@@ -88,7 +88,7 @@ public class CallbackProcessor extends UpdateProcessor {
         } else if (call_data.startsWith(CallbackDataKey.CATALOG.name())) {
             try {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
-                List<Product> products = resourceManagerService.getProducts(participant.getAdministrator()).get();
+                List<Product> products = resourceManagerService.getProducts(participant.getAdministrator(), participant.getTelegramUserId()).get();
                 if (products.isEmpty()) {
                     message = itemFactory.message(chat_id, messageProperties.getMessage16());
                 } else {

@@ -46,6 +46,8 @@
                     <form action="#" th:action="@{/product}" th:object="${newProduct}" method="post" onsubmit="progress()">
                         <input type="hidden" class="form-control" placeholder="ID" aria-label="ID"
                                th:field="*{id}"/>
+                        <input type="hidden" class="form-control" placeholder="ownerTelegramUserId" aria-label="ownerTelegramUserId"
+                               th:field="*{ownerTelegramUserId}"/>
                         <div class="modal-header">
                             <h5 class="modal-title">Product details</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -96,6 +98,17 @@
                                                th:field="*{active}">
                                         <label class="form-check-label" for="activationToggle">
                                             Visible in Catalog
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="deletedToggle"
+                                               th:field="*{deleted}">
+                                        <label class="form-check-label" for="deletedToggle">
+                                            Marked as deleted
                                         </label>
                                     </div>
                                 </div>

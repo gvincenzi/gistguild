@@ -113,7 +113,6 @@ public class MQListenerProductRegistrationTest extends MQListenerTest{
         product.setDescription("test");
         product.setAvailableQuantity(15L);
         product.setPrice(10L);
-        product.setOwnerNickname("test");
         product.setOwnerTelegramUserId(478956L);
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
@@ -156,7 +155,6 @@ public class MQListenerProductRegistrationTest extends MQListenerTest{
         product.setDescription("test");
         product.setAvailableQuantity(15L);
         product.setPrice(10L);
-        product.setOwnerNickname("test");
         product.setOwnerTelegramUserId(478956L);
 
         Random random = new Random(product.getTimestamp().toEpochMilli());

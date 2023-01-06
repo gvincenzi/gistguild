@@ -32,6 +32,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
+            product.setDeleted(document.getDeleted());
             product.setName(document.getName());
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
@@ -55,11 +56,11 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setPrice(document.getPrice());
         product.setAvailableQuantity(document.getAvailableQuantity());
         product.setDelivery(document.getDelivery());
+        product.setDeleted(document.getDeleted());
         product.setDescription(document.getDescription());
         product.setName(document.getName());
         product.setPassword(document.getPassword());
         product.setUrl(document.getUrl());
-        product.setOwnerNickname(document.getOwnerNickname());
         product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
@@ -87,12 +88,12 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
+            product.setDeleted(document.getDeleted());
             product.setDescription(document.getDescription());
             product.setName(document.getName());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
             product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
-            product.setOwnerNickname(document.getOwnerNickname());
             product.setTimestamp(document.getTimestamp());
             product.setNonce(document.getNonce());
             product.setExternalShortId(document.getExternalShortId());
@@ -103,6 +104,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
             product.setDelivery(document.getDelivery());
+            product.setDeleted(document.getDeleted());
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
@@ -121,7 +123,6 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
                         document.getNonce() +
                         document.getNodeInstanceName() +
                         document.getName() +
-                        document.getOwnerNickname()+
                         document.getOwnerTelegramUserId()
         );
     }
