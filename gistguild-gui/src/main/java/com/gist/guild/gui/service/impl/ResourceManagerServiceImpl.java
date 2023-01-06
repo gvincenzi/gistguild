@@ -180,6 +180,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             documentProposition.setDocument(payment);
             ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
             correlationID = distributionMessageResponseEntity.getBody().getCorrelationID();
+            GuiConcurrenceService.getCorrelationIDs().add(correlationID);
             documentAsyncService.getUniqueResult(correlationID).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());
