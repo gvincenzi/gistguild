@@ -6,5 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface OrderRepository extends DocumentRepository<Order>, MongoRepository<Order, String> {
-    List<Order> findByCustomerTelegramUserIdAndDeletedIsFalse(Long telegramUserId);
+    List<Order> findByDeletedIsFalseAndDeliveredIsFalse();
+    List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalse(Long telegramUserId);
 }
