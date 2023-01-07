@@ -88,7 +88,7 @@ public class CallbackProcessor extends UpdateProcessor {
         } else if (call_data.startsWith(CallbackDataKey.CATALOG.name())) {
             try {
                 Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
-                List<Product> products = resourceManagerService.getProducts(participant.getAdministrator()).get();
+                List<Product> products = resourceManagerService.getProducts(participant.getAdministrator(), participant.getTelegramUserId()).get();
                 if (products.isEmpty()) {
                     message = itemFactory.message(chat_id, messageProperties.getMessage16());
                 } else {
@@ -196,6 +196,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                     order.setProductUrl(product.getUrl());
                     order.setProductPassword(product.getPassword());
                     order.setAmount(product.getPrice());

@@ -8,6 +8,11 @@ import com.gist.guild.node.core.service.NodeUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +24,17 @@ import java.util.Random;
 public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.message.entity.Participant,Participant> {
     @Autowired
     private ParticipantRepository repository;
+
+    @Autowired
+    private InMemoryUserDetailsManager userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Value("${gistguild.admin.password}")
+    private String password;
+
+    protected static final String ADMIN = "ADMIN";
 
     @Override
     public String calculateHash(Participant document) throws GistGuildGenericException {
@@ -39,7 +55,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participant.setPreviousId(previous != null ? previous.getId() : GENESIS);
         participant.setNodeInstanceName(instanceName);
         participant.setActive(document.getActive());
-        participant.setAdministrator(document.getAdministrator());
+        participant.setAdministrator(previous != null ? document.getAdministrator() : Boolean.TRUE);
         participant.setNickname(document.getNickname());
         participant.setTelegramUserId(document.getTelegramUserId());
         participant.setIsCorruptionDetected(document.getIsCorruptionDetected());
@@ -80,6 +96,16 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             repository.save(participant);
         }
 
+        if(document.getAdministrator() && !userDetailsService.userExists(document.getTelegramUserId().toString())){
+            UserDetails admin = User.withUsername(document.getTelegramUserId().toString())
+                    .password(passwordEncoder.encode(password))
+                    .roles(ADMIN)
+                    .build();
+            userDetailsService.createUser(admin);
+        } else if(!document.getAdministrator() && userDetailsService.userExists(document.getTelegramUserId().toString())){
+            userDetailsService.deleteUser(document.getTelegramUserId().toString());
+        }
+
         return validate(repository.findAllByOrderByTimestampAsc());
     }
 
@@ -93,16 +119,29 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         }
 
         List<Participant> participants = repository.findByTelegramUserId(document.getTelegramUserId());
+        Participant newParticipant = null;
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
-            participant.setAdministrator(document.getAdministrator());
-            return repository.save(participant);
+            participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
+            newParticipant = repository.save(participant);
         } else {
             Participant previous = repository.findTopByOrderByTimestampDesc();
             Participant newItem = getNewItem(document, previous);
-            return repository.save(newItem);
+            newParticipant = repository.save(newItem);
         }
+
+        if(newParticipant.getAdministrator() && !userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+            UserDetails admin = User.withUsername(newParticipant.getTelegramUserId().toString())
+                    .password(passwordEncoder.encode(password))
+                    .roles(ADMIN)
+                    .build();
+            userDetailsService.createUser(admin);
+        } else if(!newParticipant.getAdministrator() && userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+            userDetailsService.deleteUser(newParticipant.getTelegramUserId().toString());
+        }
+
+        return newParticipant;
     }
 
 }

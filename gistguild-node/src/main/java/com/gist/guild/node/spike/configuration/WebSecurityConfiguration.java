@@ -1,5 +1,8 @@
 package com.gist.guild.node.spike.configuration;
 
+import com.gist.guild.node.core.document.Participant;
+import com.gist.guild.node.core.repository.ParticipantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,23 +13,33 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration {
     protected static final String ADMIN = "ADMIN";
 
-    @Value("${gistguild.admin.username}")
-    private String username;
+    @Autowired
+    ParticipantRepository participantRepository;
+
     @Value("${gistguild.admin.password}")
     private String password;
 
     @Bean
     public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails admin = User.withUsername(username)
-                .password(passwordEncoder().encode(password))
-                .roles(ADMIN)
-                .build();
-        return new InMemoryUserDetailsManager(admin);
+        List<Participant> administrators = participantRepository.findByAdministratorTrue();
+        Set<UserDetails> admins = new HashSet<>(administrators.size());
+        for(Participant administrator : administrators) {
+            UserDetails admin = User.withUsername(administrator.getTelegramUserId().toString())
+                    .password(passwordEncoder().encode(password))
+                    .roles(ADMIN)
+                    .build();
+            admins.add(admin);
+        }
+        return new InMemoryUserDetailsManager(admins);
     }
 
     @Bean

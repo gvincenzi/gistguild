@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -47,8 +48,8 @@ public class NodeProductViewController {
     CorrelationIdCache correlationIdCache;
 
     @GetMapping("/product")
-    public String welcome(Model model) throws GistGuildGenericException {
-        List<Product> items = repository.findAll();
+    public String welcome(Principal principal, Model model) throws GistGuildGenericException {
+        List<Product> items = repository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(Long.parseLong(principal.getName()));
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
@@ -56,14 +57,16 @@ public class NodeProductViewController {
         Collections.reverse(items);
         model.addAttribute("items", items);
 
-        model.addAttribute("newProduct", new com.gist.guild.commons.message.entity.Product());
+        com.gist.guild.commons.message.entity.Product newProduct = new com.gist.guild.commons.message.entity.Product();
+        newProduct.setOwnerTelegramUserId(Long.parseLong(principal.getName()));
+        model.addAttribute("newProduct", newProduct);
 
         return "product"; //view
     }
 
     @GetMapping("/product/{id}")
-    public String prepareModifyProduct(Model model, @PathVariable String id) throws GistGuildGenericException {
-        List<Product> items = repository.findAll();
+    public String prepareModifyProduct(Principal principal, Model model, @PathVariable String id) throws GistGuildGenericException {
+        List<Product> items = repository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(Long.parseLong(principal.getName()));
         com.gist.guild.commons.message.entity.Product toModify = new com.gist.guild.commons.message.entity.Product();
         model.addAttribute("instanceName", instanceName);
         Iterator<Product> productIterator = items.iterator();
@@ -101,7 +104,7 @@ public class NodeProductViewController {
             log.severe(e.getMessage());
         }
 
-        List<Product> items = repository.findAll();
+        List<Product> items = repository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(newProduct.getOwnerTelegramUserId());
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
