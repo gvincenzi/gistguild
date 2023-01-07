@@ -73,7 +73,7 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                     try {
                         resourceManagerService.addOrUpdateOrder(order);
-                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
                     } catch (GistGuildGenericException e) {
                         message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                     }
@@ -99,7 +99,7 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                 try {
                     resourceManagerService.addOrUpdateOrder(order);
-                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
                 } catch (GistGuildGenericException e) {
                     message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                 }
