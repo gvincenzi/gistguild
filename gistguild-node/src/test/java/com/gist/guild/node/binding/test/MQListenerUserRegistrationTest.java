@@ -102,6 +102,7 @@ public class MQListenerUserRegistrationTest extends MQListenerTest {
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
         participant.setNickname("test");
+        participant.setAdminPasswordEncoded("pass");
         participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());
@@ -141,6 +142,7 @@ public class MQListenerUserRegistrationTest extends MQListenerTest {
         participant.setPreviousId("GENESIS");
         participant.setNodeInstanceName(instanceName);
         participant.setNickname("test");
+        participant.setAdminPasswordEncoded("pass");
         participant.setTelegramUserId(478956L);
 
         Random random = new Random(participant.getTimestamp().toEpochMilli());

@@ -6,6 +6,7 @@ import lombok.Data;
 public class Participant extends Document {
     private Long telegramUserId;
     private String nickname;
+    private String adminPasswordEncoded;
     private Boolean active = Boolean.TRUE;
     private Boolean administrator = Boolean.FALSE;
     private transient Long credit;

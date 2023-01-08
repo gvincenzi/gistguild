@@ -207,6 +207,7 @@ public class NodeServiceTest {
 	public Participant getDocumentMock(String title){
 		Participant participant = new Participant();
 		participant.setNickname("test");
+		participant.setAdminPasswordEncoded("pass");
 		participant.setTelegramUserId(478956L);
 		return participant;
 	}
