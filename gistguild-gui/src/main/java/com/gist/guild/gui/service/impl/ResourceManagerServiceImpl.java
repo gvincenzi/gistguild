@@ -86,12 +86,10 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<List<Product>> getProducts(Boolean all, Long ownerTelegramUserId) {
+    public Future<List<Product>> getProducts() {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
-        List<DocumentRepositoryMethodParameter<?>> paramsAll = new ArrayList<>(1);
-        paramsAll.add(new DocumentRepositoryMethodParameter<Long>(Long.class, ownerTelegramUserId));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc" : "findByActiveTrueAndDeletedFalseAndAvailableQuantityIsNullOrAvailableQuantityGreaterThan", all ? paramsAll : params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findCatalog", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
