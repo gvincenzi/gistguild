@@ -25,16 +25,13 @@ public class WebSecurityConfiguration {
     @Autowired
     ParticipantRepository participantRepository;
 
-    @Value("${gistguild.admin.password}")
-    private String password;
-
     @Bean
     public InMemoryUserDetailsManager userDetailsService() {
         List<Participant> administrators = participantRepository.findByAdministratorTrue();
         Set<UserDetails> admins = new HashSet<>(administrators.size());
         for(Participant administrator : administrators) {
             UserDetails admin = User.withUsername(administrator.getTelegramUserId().toString())
-                    .password(passwordEncoder().encode(password))
+                    .password(administrator.getAdminPasswordEncoded())
                     .roles(ADMIN)
                     .build();
             admins.add(admin);

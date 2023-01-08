@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Data
 @Slf4j
@@ -30,9 +31,6 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Value("${gistguild.admin.password}")
-    private String password;
 
     protected static final String ADMIN = "ADMIN";
 
@@ -56,6 +54,10 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         participant.setNodeInstanceName(instanceName);
         participant.setActive(document.getActive());
         participant.setAdministrator(previous != null ? document.getAdministrator() : Boolean.TRUE);
+        if(previous == null){
+            participant.setAdminPasswordEncoded(getDefaultAdminPassword(participant));
+        }
+
         participant.setNickname(document.getNickname());
         participant.setTelegramUserId(document.getTelegramUserId());
         participant.setIsCorruptionDetected(document.getIsCorruptionDetected());
@@ -76,8 +78,9 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
 
     @Override
     public Boolean updateLocal(com.gist.guild.commons.message.entity.Participant document) throws GistGuildGenericException {
+        Participant participant = null;
         if (repository.findByIsCorruptionDetectedTrue().size() == 0 && !repository.existsById(document.getId())) {
-                Participant participant = new Participant();
+                participant = new Participant();
                 participant.setId(document.getId());
                 participant.setTimestamp(document.getTimestamp());
                 participant.setPreviousId(document.getPreviousId());
@@ -85,23 +88,29 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                 participant.setActive(document.getActive());
                 participant.setAdministrator(document.getAdministrator());
                 participant.setNickname(document.getNickname());
+                participant.setAdminPasswordEncoded(document.getAdminPasswordEncoded());
                 participant.setTelegramUserId(document.getTelegramUserId());
                 participant.setNonce(document.getNonce());
                 participant.setExternalShortId(document.getExternalShortId());
                 repository.save(participant);
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
-            Participant participant = repository.findById(document.getId()).get();
+            participant = repository.findById(document.getId()).get();
             participant.setActive(document.getActive());
             participant.setAdministrator(document.getAdministrator());
+            participant.setAdminPasswordEncoded(document.getAdminPasswordEncoded());
             repository.save(participant);
         }
 
-        if(document.getAdministrator() && !userDetailsService.userExists(document.getTelegramUserId().toString())){
+        if(document.getAdministrator()){
             UserDetails admin = User.withUsername(document.getTelegramUserId().toString())
-                    .password(passwordEncoder.encode(password))
+                    .password(document.getAdminPasswordEncoded())
                     .roles(ADMIN)
                     .build();
-            userDetailsService.createUser(admin);
+            if (!userDetailsService.userExists(document.getTelegramUserId().toString())) {
+                userDetailsService.createUser(admin);
+            } else {
+                userDetailsService.updateUser(admin);
+            }
         } else if(!document.getAdministrator() && userDetailsService.userExists(document.getTelegramUserId().toString())){
             userDetailsService.deleteUser(document.getTelegramUserId().toString());
         }
@@ -123,7 +132,11 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
+            if(!participant.getAdministrator() && document.getAdministrator()){
+                participant.setAdminPasswordEncoded(getDefaultAdminPassword(participant));
+            }
             participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
+
             newParticipant = repository.save(participant);
         } else {
             Participant previous = repository.findTopByOrderByTimestampDesc();
@@ -131,17 +144,36 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             newParticipant = repository.save(newItem);
         }
 
-        if(newParticipant.getAdministrator() && !userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+        if(newParticipant.getAdministrator()){
             UserDetails admin = User.withUsername(newParticipant.getTelegramUserId().toString())
-                    .password(passwordEncoder.encode(password))
+                    .password(newParticipant.getAdminPasswordEncoded())
                     .roles(ADMIN)
                     .build();
-            userDetailsService.createUser(admin);
+            if (!userDetailsService.userExists(newParticipant.getTelegramUserId().toString())) {
+                userDetailsService.createUser(admin);
+            } else {
+                userDetailsService.updateUser(admin);
+            }
         } else if(!newParticipant.getAdministrator() && userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
             userDetailsService.deleteUser(newParticipant.getTelegramUserId().toString());
         }
 
         return newParticipant;
+    }
+
+    private String getDefaultAdminPassword(Participant participant) {
+        int leftLimit = 33; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 8;
+        Random random = new Random();
+
+        String pass = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        participant.setNewAdministratorTempPassword(pass);
+        return passwordEncoder.encode(pass);
     }
 
 }

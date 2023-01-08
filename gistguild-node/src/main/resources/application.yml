@@ -32,13 +32,12 @@ eureka:
       defaultZone: http://localhost:8880/eureka
 
 gistguild:
-  admin:
-    username: username
-    password: password
   startup: false
   difficult:
     level: 1
   spike:
+    username: username
+    password: password
     url: http://localhost:8882/spike
   message:
     error1: "Document is mandatory"
@@ -47,3 +46,4 @@ gistguild:
     error4: "Participant has insufficient credit to finalize this payment"
     error5: "Product does not exist"
     error6: "Not enough quantity available"
+    adminPasswordMessage: "Sei stato designato Amministratore del sistema. Prendi nota di queste credenziali per accedere ad un nodo della GIST Guild:\n\nusername > <b>[%d]</b>\npassword > <b>[%s]</b>\n\n<b>Non ti sarà più possibile richiederle</b>."

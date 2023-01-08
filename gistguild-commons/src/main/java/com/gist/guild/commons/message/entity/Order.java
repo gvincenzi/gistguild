@@ -16,5 +16,5 @@ public class Order extends Document {
     private Long customerTelegramUserId;
     private Boolean deleted = Boolean.FALSE;
     private Boolean delivered = Boolean.FALSE;
-    private transient Boolean paid;
+    private Boolean paid;
 }
