@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.*;
+import com.gist.guild.gui.bot.GistGuildBot;
 import com.gist.guild.gui.service.GuiConcurrenceService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,9 @@ public class MQListener {
     @Autowired
     private DocumentAsyncService<Payment> paymentAsyncService;
 
+    @Autowired
+    GistGuildBot gistGuildBot;
+
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
         log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
@@ -52,6 +56,17 @@ public class MQListener {
             log.info(String.format("Correlation ID [%s] processed with exception", msg.getCorrelationID()));
             GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
             putInCache(msg);
+        } else if (DistributionEventType.COMMUNICATION.equals(msg.getType()) && msg.getContent() != null) {
+            for (Object item : msg.getContent()) {
+                Communication communication = null;
+                try {
+                    communication = mapper.readValue(mapper.writeValueAsString(item), Communication.class);
+                    gistGuildBot.sendMessage(communication.getRecipient().getTelegramUserId(),communication.getMessage());
+                } catch (JsonProcessingException e) {
+                    log.error(e.getMessage());
+                }
+
+            }
         }
         log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }

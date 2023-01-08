@@ -80,8 +80,12 @@ public class GistGuildBot extends TelegramLongPollingBot {
     }
 
     public Message loadingMessage(Long chat_id){
+        return sendMessage(chat_id,messageProperties.getLoadingMessage());
+    }
+
+    public Message sendMessage(Long chat_id, String text){
         try {
-            return execute(itemFactory.message(chat_id, messageProperties.getLoadingMessage())); // Call method to send the message
+            return execute(itemFactory.message(chat_id, text)); // Call method to send the message
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

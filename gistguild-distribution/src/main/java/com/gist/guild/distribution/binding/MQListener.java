@@ -23,19 +23,9 @@ public class MQListener {
 
     @StreamListener(target = "responseChannel")
     public void processEntryResponse(DistributionMessage<List<?>> msg) {
-        log.info(String.format("START >> Message received in Response Channel with Correlation ID [%s]",msg.getCorrelationID()));
-        if(DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null){
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
-            DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
-            distributionChannel.send(message);
-        } else if(DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType()) && msg.getContent() != null){
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
-            DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
-            distributionChannel.send(message);
-        } else if(DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType())){
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
+        log.info(String.format("START >> Message received in Response Channel with Correlation ID [%s] Type [%s]",msg.getCorrelationID(), msg.getType().name()));
+        if(DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType())){
+            log.info(String.format("Correlation ID [%s] Type [%s] processed",msg.getCorrelationID(), msg.getType().name()));
             DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
 
             List<Document> documents = new ArrayList<>();
@@ -43,17 +33,16 @@ public class MQListener {
             msg.setContent(documents);
             Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
             distributionChannel.send(message);
-        } else if(DistributionEventType.GET_DOCUMENT.equals(msg.getType())){
-            log.info(String.format("Correlation ID [%s] processed",msg.getCorrelationID()));
-            DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
-            distributionChannel.send(message);
-        } else if(DistributionEventType.BUSINESS_EXCEPTION.equals(msg.getType()) && msg.getContent() != null){
-            log.info(String.format("Correlation ID [%s] processed with exception",msg.getCorrelationID()));
-            DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
-            Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
-            distributionChannel.send(message);
+        } else {
+            process(msg);
         }
         log.info(String.format("END >> Message received in Response Channel with Correlation ID [%s]",msg.getCorrelationID()));
+    }
+
+    private void process(DistributionMessage<List<?>> msg) {
+        log.info(String.format("Correlation ID [%s] Type [%s] processed", msg.getCorrelationID(), msg.getType().name()));
+        DistributionConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
+        Message<DistributionMessage<List<?>>> message = MessageBuilder.withPayload(msg).build();
+        distributionChannel.send(message);
     }
 }

@@ -9,8 +9,10 @@ import com.gist.guild.commons.exception.GistGuildInsufficientQuantityException;
 import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
+import com.gist.guild.commons.message.entity.Communication;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
+import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.*;
 import com.gist.guild.node.core.repository.*;
@@ -28,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @EnableBinding(MQBinding.class)
@@ -68,6 +71,9 @@ public class MQListener {
     @Autowired
     CorrelationIdCache correlationIdCache;
 
+    @Autowired
+    MessageProperties messageProperties;
+
     @Value("${spring.application.name}")
     private String instanceName;
 
@@ -86,6 +92,9 @@ public class MQListener {
                         documentClass = com.gist.guild.commons.message.entity.Participant.class;
                         items.add(participant);
                         log.info(String.format("New participant with ID [%s] correctly validated and ingested", participant.getId()));
+                        if(participant.getNewAdministratorTempPassword() != null && participant.getNewAdministratorTempPassword() != "") {
+                            sendNewAdministratorCommunication(participant);
+                        }
                         sendResponseMessage(msg, items, documentClass);
                         break;
                     case PRODUCT_REGISTRATION:
@@ -146,6 +155,26 @@ public class MQListener {
             }
         }
         log.info(String.format("END >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
+    }
+
+    private void sendNewAdministratorCommunication(Participant participant) {
+        Communication communication = new Communication();
+        communication.setMessage(String.format(messageProperties.getAdminPasswordMessage(),participant.getTelegramUserId(),participant.getNewAdministratorTempPassword()));
+        communication.setRecipient(participant);
+
+        List<Communication> items = new ArrayList<>(1);
+        items.add(communication);
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(UUID.randomUUID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.COMMUNICATION);
+        responseMessage.setDocumentClass(Communication.class);
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
+
+        participant.setNewAdministratorTempPassword(null);
     }
 
     private void sendResponseMessage(DistributionMessage<DocumentProposition> msg, List<Document> items, Class documentClass) {

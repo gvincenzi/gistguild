@@ -14,4 +14,6 @@ public class MessageProperties {
     String error4;
     String error5;
     String error6;
+
+    String adminPasswordMessage;
 }

@@ -32,9 +32,6 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${gistguild.admin.password}")
-    private String password;
-
     protected static final String ADMIN = "ADMIN";
 
     @Override
@@ -104,12 +101,16 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             repository.save(participant);
         }
 
-        if(document.getAdministrator() && !userDetailsService.userExists(document.getTelegramUserId().toString())){
+        if(document.getAdministrator()){
             UserDetails admin = User.withUsername(document.getTelegramUserId().toString())
-                    .password(participant.getAdminPasswordEncoded())
+                    .password(document.getAdminPasswordEncoded())
                     .roles(ADMIN)
                     .build();
-            userDetailsService.createUser(admin);
+            if (!userDetailsService.userExists(document.getTelegramUserId().toString())) {
+                userDetailsService.createUser(admin);
+            } else {
+                userDetailsService.updateUser(admin);
+            }
         } else if(!document.getAdministrator() && userDetailsService.userExists(document.getTelegramUserId().toString())){
             userDetailsService.deleteUser(document.getTelegramUserId().toString());
         }
@@ -131,11 +132,10 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
-            participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
-
             if(!participant.getAdministrator() && document.getAdministrator()){
                 participant.setAdminPasswordEncoded(getDefaultAdminPassword(participant));
             }
+            participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
 
             newParticipant = repository.save(participant);
         } else {
@@ -144,12 +144,16 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             newParticipant = repository.save(newItem);
         }
 
-        if(newParticipant.getAdministrator() && !userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
+        if(newParticipant.getAdministrator()){
             UserDetails admin = User.withUsername(newParticipant.getTelegramUserId().toString())
                     .password(newParticipant.getAdminPasswordEncoded())
                     .roles(ADMIN)
                     .build();
-            userDetailsService.createUser(admin);
+            if (!userDetailsService.userExists(newParticipant.getTelegramUserId().toString())) {
+                userDetailsService.createUser(admin);
+            } else {
+                userDetailsService.updateUser(admin);
+            }
         } else if(!newParticipant.getAdministrator() && userDetailsService.userExists(newParticipant.getTelegramUserId().toString())){
             userDetailsService.deleteUser(newParticipant.getTelegramUserId().toString());
         }
@@ -158,7 +162,17 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
     }
 
     private String getDefaultAdminPassword(Participant participant) {
-        String pass = UUID.randomUUID().toString();
+        int leftLimit = 33; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 8;
+        Random random = new Random();
+
+        String pass = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        participant.setNewAdministratorTempPassword(pass);
         return passwordEncoder.encode(pass);
     }
 
