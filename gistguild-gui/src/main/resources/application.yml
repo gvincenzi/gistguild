@@ -18,7 +18,6 @@ gistguild:
   bot:
     username: gist_it_bot
     token: TOKEN
-    channelId: gist_it
     entryFreeCredit:
       active: true
       amount: 5

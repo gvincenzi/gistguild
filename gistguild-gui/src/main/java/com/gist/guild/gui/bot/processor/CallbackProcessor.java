@@ -84,11 +84,10 @@ public class CallbackProcessor extends UpdateProcessor {
                 log.error(e.getMessage());
             }
         } else if (call_data.startsWith(CallbackDataKey.ORDER_LIST.name())) {
-            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
         } else if (call_data.startsWith(CallbackDataKey.CATALOG.name())) {
             try {
-                Participant participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
-                List<Product> products = resourceManagerService.getProducts(participant.getAdministrator()).get();
+                List<Product> products = resourceManagerService.getProducts().get();
                 if (products.isEmpty()) {
                     message = itemFactory.message(chat_id, messageProperties.getMessage16());
                 } else {
@@ -98,7 +97,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     for (Product product : products) {
                         List<InlineKeyboardButton> rowInline = new ArrayList<>();
                         InlineKeyboardButton button = new InlineKeyboardButton();
-                        button.setText((participant.getAdministrator() ? (product.getActive() ? PLUS : MINUS) : EMPTY_STRING) + product.getName() + (product.getAvailableQuantity() != null ? String.format(messageProperties.getMessage17(), product.getAvailableQuantity().intValue()) : EMPTY_STRING));
+                        button.setText((user_id.equals(product.getOwnerTelegramUserId()) ? (product.getActive() ? PLUS : MINUS) : EMPTY_STRING) + product.getName() + (product.getAvailableQuantity() != null ? String.format(messageProperties.getMessage17(), product.getAvailableQuantity().intValue()) : EMPTY_STRING));
                         button.setCallbackData(CallbackDataKey.PRODUCT_DETAILS.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                         rowInline.add(button);
                         rowsInline.add(rowInline);
@@ -140,7 +139,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 rowInline1.add(button3);
                 InlineKeyboardButton button4 = new InlineKeyboardButton();
                 button4.setText(product.getActive() ? messageProperties.getMenuItem17() : messageProperties.getMenuItem18());
-                button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + product.getExternalShortId());
+                button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline1.add(button4);
 
                 InlineKeyboardButton button5 = new InlineKeyboardButton();
@@ -196,6 +195,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                     order.setProductUrl(product.getUrl());
                     order.setProductPassword(product.getPassword());
                     order.setAmount(product.getPrice());
@@ -277,6 +277,10 @@ public class CallbackProcessor extends UpdateProcessor {
             ((SendInvoice) message).setStartParameter(messageProperties.getInvoiceStartParameter());
 
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.USER_MANAGEMENT.name())) {
+            Action actionInProgress = resourceManagerService.getActionInProgress(user_id);
+            if (actionInProgress != null) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+            }
             Action action = new Action();
             action.setActionType(ActionType.USER_SEARCH);
             action.setTelegramUserId(user_id);
@@ -323,7 +327,7 @@ public class CallbackProcessor extends UpdateProcessor {
 
                 Participant participantToRecharge = null;
                 try {
-                    RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(user_id).get();
+                    RechargeCredit rechargeCreditLast = resourceManagerService.getCredit(actionInProgress.getTelegramUserIdToManage()).get();
                     participantToRecharge = resourceManagerService.findParticipantByTelegramId(actionInProgress.getTelegramUserIdToManage()).get();
                     RechargeCredit rechargeCredit = new RechargeCredit();
                     rechargeCredit.setCustomerNickname(participantToRecharge.getNickname());

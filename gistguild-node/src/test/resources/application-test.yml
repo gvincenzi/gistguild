@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gistguild-node-A
+    name: gistguild-node-test
   rabbitmq:
     addresses: amqp://test
   cloud:
@@ -16,8 +16,8 @@ spring:
           destination: distributionChannel
   data:
     mongodb:
-      uri: mongodb+srv://gistguild
-      database: gistguild-A
+      uri: mongodb+srv://username:password@cluster0.zbsduyi.mongodb.net/?retryWrites=true&w=majority
+      database: gistguild-test
 
 server:
   port: 8884
@@ -36,14 +36,14 @@ gistguild:
   difficult:
     level: 1
   spike:
-    username: username
-    password: password
+    username: test
+    password: test
     url: http://localhost:8882/spike
   message:
-    error1: "Document is mandatory"
-    error2: "Gist Guild registry is corrupted"
-    error3: "Participant does not exist"
-    error4: "Participant has insufficient credit to finalize this payment"
-    error5: "Product does not exist"
-    error6: "Not enough quantity available"
-    adminPasswordMessage: "Sei stato designato Amministratore del sistema. Prendi nota di queste credenziali per accedere ad un nodo della GIST Guild:\n\nusername > <b>[%d]</b>\npassword > <b>[%s]</b>\n\n<b>Non ti sarà più possibile richiederle</b>."
+    error1: "Il documento è obbligatorio"
+    error2: "Il registro della Gist Guild è corrotto"
+    error3: "Il partecipante non esiste"
+    error4: "Il partecipante non ha credito sufficiente per finalizzare il pagamento"
+    error5: "Il prodotto non esiste"
+    error6: "Quantità dispoinibile insufficiente"
+

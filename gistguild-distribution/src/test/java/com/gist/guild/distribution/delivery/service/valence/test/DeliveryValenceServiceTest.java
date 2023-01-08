@@ -61,7 +61,6 @@ public class DeliveryValenceServiceTest {
     private DocumentProposition getDocumentProposition() throws JsonProcessingException {
         String json = "{\n" +
                 "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
-                "    \"description\" : \"GIST Item\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
                 "      \"nickname\":\"test\",\n" +

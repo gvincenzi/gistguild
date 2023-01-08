@@ -16,13 +16,13 @@ public interface ResourceManagerService {
     Action getActionInProgress(Long telegramUserId);
     void saveAction(Action action);
     void deleteActionInProgress(Action action);
-    Future<List<Product>> getProducts(Boolean all);
+    Future<List<Product>> getProducts();
     Future<Product> getProduct(Long productExternalShortId);
     Future<Product> updateProduct(Product product);
     Future<List<Order>> getOrders(Long telegramUserId);
     Order addOrUpdateOrder(Order order) throws GistGuildGenericException;
     Order getOrderProcessed(Long orderExternalId);
-    void payOrder(Long orderExternalId, String customerMail, Long customerTelegramUserId) throws GistGuildGenericException;
+    void payOrder(Long orderExternalId, String customerNickname, Long customerTelegramUserId) throws GistGuildGenericException;
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);
 }

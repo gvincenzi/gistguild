@@ -6,12 +6,12 @@ import com.gist.guild.gui.bot.BotUtils;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -45,7 +45,7 @@ public class MessageProcessor extends UpdateProcessor {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
         } else if (update.getMessage().getText() != null && actionInProgress != null && !(ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType()))) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
-        } else if (ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
+        } else if (actionInProgress != null && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
         } else if (update.getMessage().getText() != null && BotUtils.isNumeric(update.getMessage().getText()) && actionInProgress != null && ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType())) {
             resourceManagerService.deleteActionInProgress(actionInProgress);
@@ -66,13 +66,14 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setCustomerTelegramUserId(participant.getTelegramUserId());
                     order.setProductId(product.getId());
                     order.setProductName(product.getName());
+                    order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                     order.setProductUrl(product.getUrl());
                     order.setProductPassword(product.getPassword());
                     order.setQuantity(Long.parseLong(update.getMessage().getText()));
                     order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                     try {
                         resourceManagerService.addOrUpdateOrder(order);
-                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
                     } catch (GistGuildGenericException e) {
                         message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                     }
@@ -90,6 +91,7 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setCustomerTelegramUserId(participant.getTelegramUserId());
                 order.setProductId(product.getId());
                 order.setProductName(product.getName());
+                order.setProductOwnerTelegramUserId(product.getOwnerTelegramUserId());
                 order.setProductUrl(product.getUrl());
                 order.setProductPassword(product.getPassword());
                 order.setQuantity(actionInProgress.getQuantity());
@@ -97,11 +99,24 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                 try {
                     resourceManagerService.addOrUpdateOrder(order);
-                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory);
+                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
                 } catch (GistGuildGenericException e) {
                     message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                 }
             } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
+            }
+        } else if (update.getMessage() != null && update.getMessage().hasSuccessfulPayment()){
+            try {
+                RechargeCredit rechargeCredit = resourceManagerService.getCredit(user_id).get();
+                message = itemFactory.message(chat_id, String.format(messageProperties.getMessage14(), rechargeCredit.getNewCredit()));
+            } catch (ExecutionException e) {
+                if (NoSuchElementException.class == e.getCause().getClass()) {
+                    message = itemFactory.message(chat_id, messageProperties.getMessage15());
+                } else {
+                    log.error(e.getMessage());
+                }
+            } catch (InterruptedException e) {
                 log.error(e.getMessage());
             }
         }

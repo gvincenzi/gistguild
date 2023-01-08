@@ -14,7 +14,7 @@ public class Product extends Document {
     private Long availableQuantity;
     private Boolean active = Boolean.TRUE;
     private Boolean delivery = Boolean.FALSE;
-    private String ownerMail;
+    private Boolean deleted = Boolean.FALSE;
     private Long ownerTelegramUserId;
 
     @Override
@@ -23,11 +23,11 @@ public class Product extends Document {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
         return id.equals(product.id) &&
-                ownerMail.equals(product.ownerMail) &&
                 ownerTelegramUserId.equals(product.ownerTelegramUserId) &&
                 name.equals(product.name) &&
                 description.equals(product.description) &&
                 url.equals(product.url) &&
+                ((deleted==null && product.deleted==null) || (deleted!=null && deleted.equals(product.deleted))) &&
                 ((delivery==null && product.delivery==null) || (delivery!=null && delivery.equals(product.delivery))) &&
                 ((price==null && product.price==null) || (price!=null && price.equals(product.price))) &&
                 ((availableQuantity==null && product.availableQuantity==null) || (availableQuantity!=null && availableQuantity.equals(product.availableQuantity))) &&
@@ -36,6 +36,6 @@ public class Product extends Document {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, active, delivery);
+        return Objects.hash(id, name, description, active, delivery, deleted);
     }
 }

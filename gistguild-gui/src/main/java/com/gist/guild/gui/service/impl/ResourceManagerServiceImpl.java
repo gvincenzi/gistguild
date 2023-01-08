@@ -86,10 +86,10 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public Future<List<Product>> getProducts(Boolean all) {
+    public Future<List<Product>> getProducts() {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), all ? "findAllByOrderByTimestampAsc" : "findByActiveTrueAndAvailableQuantityIsNullOrAvailableQuantityGreaterThan", all ? new ArrayList<>(0) : params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findCatalog", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
@@ -116,7 +116,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public Future<List<Order>> getOrders(Long telegramUserId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalse", params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampAsc", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
@@ -180,6 +180,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             documentProposition.setDocument(payment);
             ResponseEntity<DistributionMessage<DocumentProposition>> distributionMessageResponseEntity = documentClient.itemProposition(documentProposition);
             correlationID = distributionMessageResponseEntity.getBody().getCorrelationID();
+            GuiConcurrenceService.getCorrelationIDs().add(correlationID);
             documentAsyncService.getUniqueResult(correlationID).get();
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());

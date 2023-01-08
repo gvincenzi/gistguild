@@ -3,6 +3,7 @@ package com.gist.guild.node.core.document;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -11,6 +12,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Participant extends com.gist.guild.commons.message.entity.Participant {
     @Id
     private String id;
+
+    @Transient
+    private Long credit;
+
+    @Transient
+    private String newAdministratorTempPassword;
 
     @Override
     public boolean equals(Object o) {

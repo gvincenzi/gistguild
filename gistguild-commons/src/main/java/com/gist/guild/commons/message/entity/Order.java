@@ -11,8 +11,10 @@ public class Order extends Document {
     private String productId;
     private String productUrl;
     private String productPassword;
+    private Long productOwnerTelegramUserId;
     private String customerNickname;
     private Long customerTelegramUserId;
     private Boolean deleted = Boolean.FALSE;
-    private transient Boolean paid;
+    private Boolean delivered = Boolean.FALSE;
+    private Boolean paid;
 }

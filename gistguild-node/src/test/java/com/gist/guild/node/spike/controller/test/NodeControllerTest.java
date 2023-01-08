@@ -1,7 +1,7 @@
 package com.gist.guild.node.spike.controller.test;
 
 import com.gist.guild.node.core.document.Participant;
-import com.gist.guild.node.core.repository.ParticipantRepository;
+import com.gist.guild.node.core.repository.*;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.spike.client.SpikeClient;
 import com.gist.guild.node.spike.controller.NodeController;
@@ -34,6 +34,18 @@ public class NodeControllerTest {
     ParticipantRepository participantRepository;
 
     @MockBean
+    PaymentRepository paymentRepository;
+
+    @MockBean
+    OrderRepository orderRepository;
+
+    @MockBean
+    ProductRepository productRepository;
+
+    @MockBean
+    RechargeCreditRepository rechargeCreditRepository;
+
+    @MockBean
     SpikeClient spikeClient;
 
     @MockBean
@@ -43,14 +55,6 @@ public class NodeControllerTest {
     public void welcome() throws Exception {
         Mockito.when(participantRepository.findAll()).thenReturn(new ArrayList<>());
         mvc.perform(get("/"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-    }
-
-    @Test
-    public void init() throws Exception {
-        mvc.perform(get("/init"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();

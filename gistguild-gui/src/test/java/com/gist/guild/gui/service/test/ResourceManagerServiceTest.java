@@ -25,6 +25,7 @@ public class ResourceManagerServiceTest {
         Participant participant = new Participant();
         participant.setTelegramUserId(123456L);
         participant.setNickname("test");
+        participant.setAdminPasswordEncoded("pass");
 
         resourceManagerService.addOrUpdateParticipant(participant);
     }
@@ -34,6 +35,7 @@ public class ResourceManagerServiceTest {
         Participant participant = new Participant();
         participant.setTelegramUserId(123456L);
         participant.setNickname("test");
+        participant.setAdminPasswordEncoded("pass");
         participant.setActive(Boolean.FALSE);
 
         resourceManagerService.addOrUpdateParticipant(participant);

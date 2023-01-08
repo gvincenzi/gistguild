@@ -52,8 +52,7 @@ public class DistributionControllerPropositionTest {
 
     private DocumentProposition getEntryProposition() throws JsonProcessingException {
         String json = "{\n" +
-                "    \"documentPropositionType\" : \"USER_CANCELLATION\",\n" +
-                "    \"description\" : \"GIST Item\",\n" +
+                "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
                 "    \"documentClass\" : \"Participant\",\n" +
                 "    \"document\" : {\n" +
                 "      \"nickname\":\"test\",\n" +

@@ -7,6 +7,7 @@ import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.spike.client.SpikeClient;
+import com.mongodb.MongoClient;
 import lombok.extern.java.Log;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +29,10 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { GistGuildNodeApplication.class })
 @ActiveProfiles("test")
-public class NodeServiceImplTest {
+public class NodeServiceTest {
+	@MockBean
+	MongoClient mongo;
+
 	@Autowired
 	NodeService<com.gist.guild.commons.message.entity.Participant, Participant> serviceUnderTest;
 	
@@ -203,6 +207,7 @@ public class NodeServiceImplTest {
 	public Participant getDocumentMock(String title){
 		Participant participant = new Participant();
 		participant.setNickname("test");
+		participant.setAdminPasswordEncoded("pass");
 		participant.setTelegramUserId(478956L);
 		return participant;
 	}

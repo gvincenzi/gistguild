@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -54,8 +55,8 @@ public class NodeOrderViewController {
     CorrelationIdCache correlationIdCache;
 
     @GetMapping("/order")
-    public String welcome(Model model) throws GistGuildGenericException {
-        List<Order> items = repository.findAll();
+    public String welcome(Principal principal, Model model) throws GistGuildGenericException {
+        List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
         Iterator<Order> orderIterator = items.iterator();
         while(orderIterator.hasNext()){
             Order next = orderIterator.next();
@@ -73,6 +74,34 @@ public class NodeOrderViewController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
+        model.addAttribute("inProgress", Boolean.FALSE);
+
+        model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
+
+        return "order"; //view
+    }
+
+    @GetMapping("/orderInProgress")
+    public String orderInProgress(Principal principal, Model model) throws GistGuildGenericException {
+        List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        Iterator<Order> orderIterator = items.iterator();
+        while(orderIterator.hasNext()){
+            Order next = orderIterator.next();
+            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
+            if (payments.size() > 0) {
+                next.setPaid(Boolean.TRUE);
+            } else {
+                next.setPaid(Boolean.FALSE);
+            }
+        }
+
+        model.addAttribute("instanceName", instanceName);
+        model.addAttribute("validation", nodeService.validate(items));
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
+        model.addAttribute("items", items);
+        model.addAttribute("inProgress", Boolean.TRUE);
 
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
 
@@ -80,8 +109,8 @@ public class NodeOrderViewController {
     }
 
     @GetMapping("/order/{id}")
-    public String prepareModifyProduct(Model model, @PathVariable String id) throws GistGuildGenericException {
-        List<Order> items = repository.findAll();
+    public String prepareModifyProduct(Principal principal, Model model, @PathVariable String id) throws GistGuildGenericException {
+        List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
         com.gist.guild.commons.message.entity.Order toModify = new com.gist.guild.commons.message.entity.Order();
         model.addAttribute("instanceName", instanceName);
         Iterator<Order> orderIterator = items.iterator();
@@ -119,7 +148,7 @@ public class NodeOrderViewController {
             log.severe(e.getMessage());
         }
 
-        List<Order> items = repository.findAll();
+        List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(newOrder.getProductOwnerTelegramUserId());
         Iterator<Order> orderIterator = items.iterator();
         while(orderIterator.hasNext()){
             Order next = orderIterator.next();
