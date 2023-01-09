@@ -78,12 +78,9 @@ public abstract class NodeService<T extends Document, S extends T> {
 		Collections.sort(content);
 		List<S> documents = getRepository().findAllByOrderByTimestampAsc();
 		for (int i = 0; i < content.size(); i++) {
-			if (i < documents.size()) {
-				if (!documents.get(i).getId().equals(content.get(i).getId())) {
-					throw new GistGuildGenericException("Guild registry has been corrupted");
-				} else {
-					updateLocal(content.get(i));
-				}
+			updateLocal(content.get(i));
+			if (i < documents.size() && !documents.get(i).getId().equals(content.get(i).getId())) {
+				throw new GistGuildGenericException("Guild registry has been corrupted");
 			}
 		}
 	}
