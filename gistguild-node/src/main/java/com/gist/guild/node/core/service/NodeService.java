@@ -2,6 +2,8 @@ package com.gist.guild.node.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gist.guild.commons.exception.GistGuildGenericException;
+import com.gist.guild.commons.message.DistributionEventType;
+import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.repository.DocumentRepository;
@@ -10,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -87,5 +92,15 @@ public abstract class NodeService<T extends Document, S extends T> {
 
 	public List<S> findAll(){
 		return getRepository().findAllByOrderByTimestampAsc();
+	}
+
+	public void corruptionDetected(DistributionMessage<?> msg, Class classDetected, MessageChannel messageChannel) {
+		log.error(String.format("Corruption detected on document [%s]: send message with Correlation ID [%s]", classDetected.getSimpleName(), msg.getCorrelationID()));
+		DistributionMessage<List<Document>> responseMessage = new DistributionMessage<>();
+		responseMessage.setCorrelationID(msg.getCorrelationID());
+		responseMessage.setInstanceName(instanceName);
+		responseMessage.setType(DistributionEventType.CORRUPTION_DETECTED);
+		Message<DistributionMessage<List<Document>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+		messageChannel.send(responseMsg);
 	}
 }

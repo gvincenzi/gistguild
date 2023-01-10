@@ -110,7 +110,7 @@ public class NodeOrderViewController {
 
     @GetMapping("/order/{id}")
     public String prepareModifyProduct(Principal principal, Model model, @PathVariable String id) throws GistGuildGenericException {
-        List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
         com.gist.guild.commons.message.entity.Order toModify = new com.gist.guild.commons.message.entity.Order();
         model.addAttribute("instanceName", instanceName);
         Iterator<Order> orderIterator = items.iterator();
@@ -128,6 +128,8 @@ public class NodeOrderViewController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
+
+        model.addAttribute("inProgress", Boolean.TRUE);
         model.addAttribute("newOrder", toModify);
         return "order"; //view
     }
@@ -165,7 +167,7 @@ public class NodeOrderViewController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
-
+        model.addAttribute("inProgress", Boolean.TRUE);
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
 
         return "order"; //view
