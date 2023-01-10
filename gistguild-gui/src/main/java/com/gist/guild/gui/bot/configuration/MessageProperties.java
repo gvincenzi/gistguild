@@ -76,6 +76,7 @@ public class MessageProperties {
     String orderDetails4;
     String orderDetails5;
     String orderDetails6;
+    String orderDetails7;
 
     String productDetails1;
     String productDetails2;
@@ -90,7 +91,9 @@ public class MessageProperties {
                 (order.getAddress()!=null ? String.format(getOrderDetails3(),order.getAddress()) : EMPTY_STRING) +
                 (order.getAmount()!=null ? String.format(getOrderDetails4(),order.getAmount()) : EMPTY_STRING ) +
                 String.format(getOrderDetails5(), order.getProductName()) +
-                (order.getPaid() && order.getProductPassword() != null && order.getProductPassword() != EMPTY_STRING ? String.format(getOrderDetails6(), order.getProductPassword()) : EMPTY_STRING);
+                (order.getPaid() && order.getProductPassword() != null && order.getProductPassword() != EMPTY_STRING ? String.format(getOrderDetails6(), order.getProductPassword()) : EMPTY_STRING) +
+                (order.getPaid() && order.getProductUrl() != null && order.getProductUrl() != EMPTY_STRING ? String.format(getOrderDetails7(), order.getProductUrl()) : EMPTY_STRING);
+
     }
 
     public String toString(Product product) {
