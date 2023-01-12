@@ -13,7 +13,7 @@ public class DistributionConcurrenceServiceImpl extends DistributionConcurrenceS
         int numberOfTry = 0;
         while(getCorrelationIDs().contains(getLastBlockingCorrelationID())){
             log.info(String.format("Waiting last blocking correlationID process end - CorrelationID [%s]",getLastBlockingCorrelationID().toString()));
-            if(numberOfTry == 10){
+            if(numberOfTry == 60){
                 getCorrelationIDs().remove(getLastBlockingCorrelationID());
                 throw new DistributionException(String.format("Timeout while last blocking correlationID process end waiting  - CorrelationID [%s]",getLastBlockingCorrelationID().toString()));
             }
