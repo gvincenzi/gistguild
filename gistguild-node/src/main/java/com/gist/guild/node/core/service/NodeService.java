@@ -62,10 +62,6 @@ public abstract class NodeService<T extends Document, S extends T> {
 				result = false;
 				log.error("Corruption detected in PreviousId");
 			}
-			if (previousItem == null && !GENESIS.equals(currentItem.getPreviousId())) {
-				result = false;
-				log.error("Corruption detected in previousItem for non GENESIS block");
-			}
 			if (!NodeUtils.isHashResolved(currentItem, difficultLevel)) {
 				result = false;
 				log.error("Corruption detected in hash resolving");
