@@ -36,6 +36,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setDeleted(document.getDeleted());
             order.setDelivered(document.getDelivered());
             if(order.getDeleted()) nodeBusinessService.deleteOrder(document);
+            order.setPaymentId(document.getPaymentId());
             return repository.save(order);
         } else {
             Order previous = repository.findTopByOrderByTimestampDesc();
@@ -66,7 +67,7 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
         order.setQuantity(document.getQuantity());
         order.setDeleted(document.getDeleted());
         order.setDelivered(document.getDelivered());
-
+        order.setPaymentId(document.getPaymentId());
         Random random = new Random(order.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
         order.setNonce(nonce);
@@ -103,12 +104,14 @@ public class OrderServiceImpl extends NodeService<com.gist.guild.commons.message
             order.setExternalShortId(document.getExternalShortId());
             order.setDeleted(document.getDeleted());
             order.setDelivered(document.getDelivered());
+            order.setPaymentId(document.getPaymentId());
             repository.save(order);
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Order order = repository.findById(document.getId()).get();
             order.setAddress(document.getAddress());
             order.setDeleted(document.getDeleted());
             order.setDelivered(document.getDelivered());
+            order.setPaymentId(document.getPaymentId());
             repository.save(order);
         }
 

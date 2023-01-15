@@ -57,17 +57,6 @@ public class NodeOrderViewController {
     @GetMapping("/order")
     public String welcome(Principal principal, Model model) throws GistGuildGenericException {
         List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
-        Iterator<Order> orderIterator = items.iterator();
-        while(orderIterator.hasNext()){
-            Order next = orderIterator.next();
-            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
-            if (payments.size() > 0) {
-                next.setPaid(Boolean.TRUE);
-            } else {
-                next.setPaid(Boolean.FALSE);
-            }
-        }
-
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
@@ -84,17 +73,6 @@ public class NodeOrderViewController {
     @GetMapping("/orderInProgress")
     public String orderInProgress(Principal principal, Model model) throws GistGuildGenericException {
         List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
-        Iterator<Order> orderIterator = items.iterator();
-        while(orderIterator.hasNext()){
-            Order next = orderIterator.next();
-            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
-            if (payments.size() > 0) {
-                next.setPaid(Boolean.TRUE);
-            } else {
-                next.setPaid(Boolean.FALSE);
-            }
-        }
-
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
@@ -152,15 +130,6 @@ public class NodeOrderViewController {
 
         List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(newOrder.getProductOwnerTelegramUserId());
         Iterator<Order> orderIterator = items.iterator();
-        while(orderIterator.hasNext()){
-            Order next = orderIterator.next();
-            List<Payment> payments = paymentRepository.findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(next.getId(), next.getCustomerTelegramUserId());
-            if (payments.size() > 0) {
-                next.setPaid(Boolean.TRUE);
-            } else {
-                next.setPaid(Boolean.FALSE);
-            }
-        }
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());

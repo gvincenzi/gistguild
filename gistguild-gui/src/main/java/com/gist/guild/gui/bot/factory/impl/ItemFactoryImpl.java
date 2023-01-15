@@ -118,10 +118,14 @@ public class ItemFactoryImpl implements ItemFactory {
             button2.setText(messageProperties.getMenuItem3());
             button2.setCallbackData(CallbackDataKey.ORDER_LIST.name());
             rowInline2.add(button2);
+            InlineKeyboardButton button20 = new InlineKeyboardButton();
+            button20.setText(messageProperties.getMenuItem20());
+            button20.setCallbackData(CallbackDataKey.ORDER_PAID_LIST.name());
+            rowInline2.add(button20);
             InlineKeyboardButton button3 = new InlineKeyboardButton();
             button3.setText(messageProperties.getMenuItem4());
             button3.setCallbackData(CallbackDataKey.CREDIT.name());
-            rowInline2.add(button3);
+            rowInline3.add(button3);
             InlineKeyboardButton button6 = new InlineKeyboardButton();
             button6.setText(messageProperties.getMenuItem5());
             button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
@@ -331,6 +335,10 @@ public class ItemFactoryImpl implements ItemFactory {
         button4.setText(messageProperties.getMenuItem12());
         button4.setCallbackData(CallbackDataKey.ORDER_LIST.name());
         rowInline4.add(button4);
+        InlineKeyboardButton button5 = new InlineKeyboardButton();
+        button5.setText(messageProperties.getMenuItem20());
+        button5.setCallbackData(CallbackDataKey.ORDER_PAID_LIST.name());
+        rowInline4.add(button5);
 
         InlineKeyboardButton button3 = new InlineKeyboardButton();
         button3.setText(messageProperties.getMenuItem13());
@@ -338,7 +346,7 @@ public class ItemFactoryImpl implements ItemFactory {
         rowInline5.add(button3);
 
         // Set the keyboard to the markup
-        if(!order.getPaid()){
+        if(order.getPaymentId() == null){
             rowsInline.add(rowInline1);
             rowsInline.add(rowInline2);
         } else {

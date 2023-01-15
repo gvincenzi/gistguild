@@ -84,7 +84,9 @@ public class CallbackProcessor extends UpdateProcessor {
                 log.error(e.getMessage());
             }
         } else if (call_data.startsWith(CallbackDataKey.ORDER_LIST.name())) {
-            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
+            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.FALSE);
+        } else if (call_data.startsWith(CallbackDataKey.ORDER_PAID_LIST.name())) {
+            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.TRUE);
         } else if (call_data.startsWith(CallbackDataKey.CATALOG.name())) {
             try {
                 List<Product> products = resourceManagerService.getProducts().get();
@@ -226,8 +228,12 @@ public class CallbackProcessor extends UpdateProcessor {
         } else if (call_data.startsWith(CallbackDataKey.ORDER_DETAILS.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
-            Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
-            message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+            try{
+                Order order = resourceManagerService.getOrder(orderExternalShortId).get();
+                message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
+            }
         } else if (call_data.startsWith(CallbackDataKey.PAYMENT.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
@@ -246,12 +252,14 @@ public class CallbackProcessor extends UpdateProcessor {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
             try {
-                Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
+                Order order = resourceManagerService.getOrder(orderExternalShortId).get();
                 order.setDeleted(Boolean.TRUE);
                 order = resourceManagerService.addOrUpdateOrder(order);
                 message = itemFactory.message(chat_id, String.format(messageProperties.getMessage21(), order.getExternalShortId()));
             } catch (GistGuildGenericException e) {
                 message = itemFactory.message(chat_id, String.format(messageProperties.getError1(), e.getMessage()));
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
             }
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.ADD_CREDIT.name())) {
             message = itemFactory.userCredit(chat_id);

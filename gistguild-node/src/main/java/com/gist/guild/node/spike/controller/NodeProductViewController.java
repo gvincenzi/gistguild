@@ -89,7 +89,7 @@ public class NodeProductViewController {
     }
 
     @PostMapping("/product")
-    public String newProduct(@ModelAttribute com.gist.guild.commons.message.entity.Product newProduct, Model model) throws GistGuildGenericException, InterruptedException {
+    public String newProduct(Principal principal, @ModelAttribute com.gist.guild.commons.message.entity.Product newProduct, Model model) throws GistGuildGenericException, InterruptedException {
         DocumentProposition documentProposition = new DocumentProposition();
         documentProposition.setDocumentPropositionType(DocumentPropositionType.PRODUCT_REGISTRATION);
         documentProposition.setDocumentClass(com.gist.guild.commons.message.entity.Product.class.getSimpleName());
@@ -112,7 +112,9 @@ public class NodeProductViewController {
         Collections.reverse(items);
         model.addAttribute("items", items);
 
-        model.addAttribute("newProduct", new com.gist.guild.commons.message.entity.Product());
+        newProduct = new com.gist.guild.commons.message.entity.Product();
+        newProduct.setOwnerTelegramUserId(Long.parseLong(principal.getName()));
+        model.addAttribute("newProduct", newProduct);
 
         return "product"; //view
     }

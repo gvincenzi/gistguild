@@ -13,9 +13,6 @@ public class Order extends com.gist.guild.commons.message.entity.Order {
     @Id
     private String id;
 
-    @Transient
-    private Boolean paid;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

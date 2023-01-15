@@ -10,6 +10,7 @@ import com.gist.guild.commons.message.entity.RechargeCreditType;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
+import com.gist.guild.node.core.repository.OrderRepository;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.repository.RechargeCreditRepository;
@@ -31,6 +32,9 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     @Autowired
     NodeService<RechargeCredit, com.gist.guild.node.core.document.RechargeCredit> rechargeCreditNodeService;
@@ -90,5 +94,12 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
             product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
         }
         productRepository.save(product);
+    }
+
+    @Override
+    public void payOrder(com.gist.guild.node.core.document.Payment payment) {
+        com.gist.guild.node.core.document.Order order = orderRepository.findById(payment.getOrderId()).get();
+        order.setPaymentId(payment.getId());
+        orderRepository.save(order);
     }
 }
