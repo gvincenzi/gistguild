@@ -24,9 +24,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.DelayQueue;
 
 @Slf4j
@@ -130,6 +128,13 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
                     }
                     items.add(payment);
                     log.info(String.format("Payment with ID [%s] correctly validated and ingested", payment.getId()));
+                    sendResponseMessage(msg, items, documentClass);
+
+                    List<RechargeCredit> rechargeCreditList = rechargeCreditNodeService.findAll();
+                    Collections.reverse(rechargeCreditList);
+                    items.clear();
+                    items.add(rechargeCreditList.iterator().next());
+                    documentClass = com.gist.guild.commons.message.entity.RechargeCredit.class;
                     sendResponseMessage(msg, items, documentClass);
                     break;
             }
