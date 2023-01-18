@@ -332,7 +332,7 @@ public class ItemFactoryImpl implements ItemFactory {
         }
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
-        button4.setText(messageProperties.getMenuItem12());
+        button4.setText(messageProperties.getMenuItem3());
         button4.setCallbackData(CallbackDataKey.ORDER_LIST.name());
         rowInline4.add(button4);
         InlineKeyboardButton button5 = new InlineKeyboardButton();

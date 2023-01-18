@@ -99,7 +99,9 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
     @Override
     public void payOrder(com.gist.guild.node.core.document.Payment payment) {
         com.gist.guild.node.core.document.Order order = orderRepository.findById(payment.getOrderId()).get();
-        order.setPaymentId(payment.getId());
-        orderRepository.save(order);
+        if(order.getPaymentId() == null || order.getPaymentId() == "") {
+            order.setPaymentId(payment.getId());
+            orderRepository.save(order);
+        }
     }
 }

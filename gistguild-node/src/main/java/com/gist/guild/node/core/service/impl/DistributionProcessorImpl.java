@@ -111,7 +111,7 @@ public class DistributionProcessorImpl implements DistributionProcessor {
                 }
                 if (RechargeCredit.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     for (Object item : msg.getContent()) {
-                        // RECAHRGE_CREDIT DOCUMENT
+                        // RECHARGE_CREDIT DOCUMENT
                         if (rechargeCreditNodeService.updateLocal(mapper.readValue(mapper.writeValueAsString(item), com.gist.guild.commons.message.entity.RechargeCredit.class))) {
                             log.info("RechargeCredit correctly updated in local registry");
                         } else {

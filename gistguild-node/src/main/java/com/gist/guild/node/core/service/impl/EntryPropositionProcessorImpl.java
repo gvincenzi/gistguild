@@ -13,6 +13,7 @@ import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.document.*;
+import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.service.EntryPropositionProcessor;
 import com.gist.guild.node.core.service.NodeService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,9 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
     @Autowired
     NodeService<com.gist.guild.commons.message.entity.Payment, Payment> paymentNodeService;
 
+    @Autowired
+    ParticipantRepository participantRepository;
+
     @Value("${spring.application.name}")
     private String instanceName;
 
@@ -83,6 +87,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
                     documentClass = com.gist.guild.commons.message.entity.Participant.class;
                     items.add(participant);
                     log.info(String.format("Participant with ID [%s] correctly validated and ingested", participant.getId()));
+                    sendNewParticipantCommunication(participant);
                     if(participant.getNewAdministratorTempPassword() != null && participant.getNewAdministratorTempPassword() != "") {
                         sendNewAdministratorCommunication(participant);
                     }
@@ -108,6 +113,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
                     items.add(order);
                     log.info(String.format("Order with ID [%s] correctly validated and ingested", order.getId()));
                     sendResponseMessage(msg, items, documentClass);
+                    sendNewOrderCommunication(order);
                     break;
                 case RECHARGE_USER_CREDIT:
                     RechargeCredit rechargeCredit = rechargeCreditNodeService.add(mapper.readValue(mapper.writeValueAsString(msg.getContent().getDocument()), com.gist.guild.commons.message.entity.RechargeCredit.class));
@@ -148,7 +154,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
     private void sendNewAdministratorCommunication(Participant participant) {
         Communication communication = new Communication();
         communication.setMessage(String.format(messageProperties.getAdminPasswordMessage(),participant.getTelegramUserId(),participant.getNewAdministratorTempPassword()));
-        communication.setRecipient(participant);
+        communication.setRecipientTelegramUserId(participant.getTelegramUserId());
 
         List<Communication> items = new ArrayList<>(1);
         items.add(communication);
@@ -163,6 +169,46 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         responseChannel.send(responseMsg);
 
         participant.setNewAdministratorTempPassword(null);
+    }
+
+    private void sendNewOrderCommunication(Order order) {
+        if(order.getCustomerTelegramUserId().equals(order.getProductOwnerTelegramUserId())) return;
+        Communication communication = new Communication();
+        communication.setMessage(String.format(messageProperties.getNewOrderMessage(),order.getCustomerNickname(),order.getProductName()));
+        communication.setRecipientTelegramUserId(order.getProductOwnerTelegramUserId());
+
+        List<Communication> items = new ArrayList<>(1);
+        items.add(communication);
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(UUID.randomUUID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.COMMUNICATION);
+        responseMessage.setDocumentClass(Communication.class);
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
+    }
+
+    private void sendNewParticipantCommunication(Participant participant) {
+        List<Participant> administrators = participantRepository.findByAdministratorTrue();
+        List<Communication> items = new ArrayList<>(administrators.size());
+        for(Participant administrator : administrators) {
+            if(administrator.getTelegramUserId().equals(participant.getTelegramUserId())) continue;
+            Communication communication = new Communication();
+            communication.setMessage(String.format(messageProperties.getNewParticipantMessage(), participant.getNickname()));
+            communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
+            items.add(communication);
+        }
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(UUID.randomUUID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.COMMUNICATION);
+        responseMessage.setDocumentClass(Communication.class);
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
     }
 
     private void sendResponseMessage(DistributionMessage<DocumentProposition<?>> msg, List<Document> items, Class documentClass) {

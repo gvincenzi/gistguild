@@ -63,7 +63,7 @@ public class BotUtils {
                 rowsInline.add(rowInline);
 
                 markupInline.setKeyboard(rowsInline);
-                message = itemFactory.message(chat_id, messageProperties.getMessage28());
+                message = itemFactory.message(chat_id, paid ? messageProperties.getMessage30() : messageProperties.getMessage28());
 
                 ((SendMessage) message).setReplyMarkup(markupInline);
             }
