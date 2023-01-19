@@ -136,6 +136,7 @@ public class DistributionProcessorImpl implements DistributionProcessor {
             // A MESSAGE RECEIVED FOR EACH DOCUMENT TYPE
             Class classProcessing = null;
             NodeService nodeProcessing = null;
+            StartupConfig.reset();
             try {
                 if (Participant.class.getSimpleName().equalsIgnoreCase(msg.getDocumentClass().getSimpleName())) {
                     classProcessing = Participant.class;

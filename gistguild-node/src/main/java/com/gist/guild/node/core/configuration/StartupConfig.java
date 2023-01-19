@@ -48,4 +48,15 @@ public class StartupConfig {
     public static Boolean getStartupProcessed(){
         return startupParticipantProcessed && startupProductProcessed && startupOrderProcessed && startupRechargeCreditProcessed && startupPaymentProcessed;
     }
+
+    public static void reset(){
+        if(getStartupProcessed()) {
+            log.info("Startup node reset");
+            startupParticipantProcessed = Boolean.FALSE;
+            startupProductProcessed = Boolean.FALSE;
+            startupOrderProcessed = Boolean.FALSE;
+            startupRechargeCreditProcessed = Boolean.FALSE;
+            startupPaymentProcessed = Boolean.FALSE;
+        }
+    }
 }
