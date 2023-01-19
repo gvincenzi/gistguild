@@ -1,12 +1,15 @@
 package com.gist.guild.node.spike.controller;
 
 import com.gist.guild.commons.exception.GistGuildGenericException;
+import com.gist.guild.commons.message.DistributionEventType;
 import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.DocumentPropositionType;
 import com.gist.guild.commons.message.DocumentRepositoryMethodParameter;
+import com.gist.guild.commons.message.entity.Communication;
 import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.commons.message.entity.RechargeCreditType;
 import com.gist.guild.node.binding.CorrelationIdCache;
+import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.*;
 import com.gist.guild.node.core.repository.ParticipantRepository;
@@ -16,7 +19,11 @@ import com.gist.guild.node.spike.client.SpikeClient;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +31,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.security.Principal;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -53,6 +58,12 @@ public class NodeParticipantController {
     @Autowired
     CorrelationIdCache correlationIdCache;
 
+    @Autowired
+    MessageChannel responseChannel;
+
+    @Autowired
+    private MessageProperties messageProperties;
+
     @GetMapping("/participant")
     public String welcome(Model model) throws GistGuildGenericException {
         List<Participant> items = participantRepository.findAll();
@@ -72,7 +83,7 @@ public class NodeParticipantController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
-
+        model.addAttribute("newCommunication", new Communication());
         model.addAttribute("newParticipant", new com.gist.guild.commons.message.entity.Participant());
 
         return "participant"; //view
@@ -103,6 +114,7 @@ public class NodeParticipantController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
+        model.addAttribute("newCommunication", new Communication());
         model.addAttribute("newParticipant", toModify);
         return "participant"; //view
     }
@@ -169,10 +181,54 @@ public class NodeParticipantController {
         Collections.sort(items);
         Collections.reverse(items);
         model.addAttribute("items", items);
-
+        model.addAttribute("newCommunication", new Communication());
         model.addAttribute("newParticipant", new com.gist.guild.commons.message.entity.Participant());
 
         return "participant"; //view
+    }
+
+    @GetMapping("/communication/{id}")
+    public String prepareCommunicationParticipant(Model model, @PathVariable String id) throws GistGuildGenericException {
+        List<Participant> items = participantRepository.findAll();
+        model.addAttribute("instanceName", instanceName);
+        Iterator<Participant> participantIterator = items.iterator();
+
+        while(participantIterator.hasNext()){
+            Participant next = participantIterator.next();
+            if(next.getId().equals(id)){
+                Communication communication = new Communication();
+                communication.setRecipientTelegramUserId(next.getTelegramUserId());
+                model.addAttribute("newCommunication", communication);
+                break;
+            }
+        }
+
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
+        model.addAttribute("items", items);
+        model.addAttribute("newParticipant", new com.gist.guild.commons.message.entity.Participant());
+
+        return "participant"; //view
+    }
+
+    @PostMapping("/communication")
+    public String newCommunication(Principal principal, @ModelAttribute com.gist.guild.commons.message.entity.Communication newCommunication, Model model) throws GistGuildGenericException, InterruptedException {
+        Participant administrator = participantRepository.findByTelegramUserId(Long.parseLong(principal.getName())).iterator().next();
+        newCommunication.setMessage(String.format(messageProperties.getAdminMessage(),administrator.getNickname(),newCommunication.getMessage()));
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(UUID.randomUUID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.COMMUNICATION);
+        responseMessage.setDocumentClass(Communication.class);
+        List<Communication> communications = new ArrayList<>(1);
+        communications.add(newCommunication);
+        responseMessage.setContent(communications);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
+
+        return welcome(model);
     }
 
 }
