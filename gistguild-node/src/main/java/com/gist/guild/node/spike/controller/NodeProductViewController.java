@@ -51,7 +51,6 @@ public class NodeProductViewController {
     public String welcome(Principal principal, Model model) throws GistGuildGenericException {
         List<Product> items = repository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(Long.parseLong(principal.getName()));
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -79,7 +78,6 @@ public class NodeProductViewController {
             }
         }
 
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -106,7 +104,6 @@ public class NodeProductViewController {
 
         List<Product> items = repository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(newProduct.getOwnerTelegramUserId());
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);

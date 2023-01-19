@@ -58,7 +58,6 @@ public class NodeOrderViewController {
     public String welcome(Principal principal, Model model) throws GistGuildGenericException {
         List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -74,7 +73,6 @@ public class NodeOrderViewController {
     public String orderInProgress(Principal principal, Model model) throws GistGuildGenericException {
         List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -101,7 +99,6 @@ public class NodeOrderViewController {
             }
         }
 
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -131,7 +128,6 @@ public class NodeOrderViewController {
         List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(newOrder.getProductOwnerTelegramUserId());
         Iterator<Order> orderIterator = items.iterator();
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);

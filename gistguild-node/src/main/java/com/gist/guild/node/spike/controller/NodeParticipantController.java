@@ -68,7 +68,6 @@ public class NodeParticipantController {
         }
 
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -100,7 +99,6 @@ public class NodeParticipantController {
             }
         }
 
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
@@ -167,7 +165,6 @@ public class NodeParticipantController {
             }
         }
         model.addAttribute("instanceName", instanceName);
-        model.addAttribute("validation", nodeService.validate(items));
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
