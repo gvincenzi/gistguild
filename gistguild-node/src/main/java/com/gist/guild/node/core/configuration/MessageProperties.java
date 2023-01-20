@@ -21,4 +21,5 @@ public class MessageProperties {
     String adminMessage;
     String newRechargeCreditInvoiceMessage;
     String newRechargeCreditAdminMessage;
+    String newRechargeCreditParticipantMessage;
 }

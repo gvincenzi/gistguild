@@ -181,6 +181,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
             return;
         }
 
+        //MESSAGE TO ADMINISTRATORS
         List<Participant> administrators = participantRepository.findByAdministratorTrue();
         List<Communication> items = new ArrayList<>(administrators.size());
         for (Participant administrator : administrators) {
@@ -198,6 +199,18 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
             communication.setMessage(String.format(message,rechargeCredit.getCustomerNickname(),rechargeCredit.getNewCredit()-rechargeCredit.getOldCredit(),rechargeCredit.getNewCredit()));
             communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
             items.add(communication);
+        }
+
+        //MESSAGE TO PARTICIPANT
+        if(RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())) {
+            Iterator<Participant> participantIterator = participantRepository.findByTelegramUserId(rechargeCredit.getCustomerTelegramUserId()).iterator();
+            if (participantIterator.hasNext()) {
+                Participant participant = participantIterator.next();
+                Communication communication = new Communication();
+                communication.setMessage(String.format(messageProperties.getNewRechargeCreditParticipantMessage(), rechargeCredit.getNewCredit() - rechargeCredit.getOldCredit(), rechargeCredit.getNewCredit()));
+                communication.setRecipientTelegramUserId(participant.getTelegramUserId());
+                items.add(communication);
+            }
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
