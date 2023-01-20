@@ -11,6 +11,7 @@ import com.gist.guild.commons.message.DistributionMessage;
 import com.gist.guild.commons.message.entity.Communication;
 import com.gist.guild.commons.message.entity.Document;
 import com.gist.guild.commons.message.entity.DocumentProposition;
+import com.gist.guild.commons.message.entity.RechargeCreditType;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.document.*;
 import com.gist.guild.node.core.repository.ParticipantRepository;
@@ -121,6 +122,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
                     items.add(rechargeCredit);
                     log.info(String.format("RechargeCredit with ID [%s] correctly validated and ingested", rechargeCredit.getId()));
                     sendResponseMessage(msg, items, documentClass);
+                    sendNewRechargeCreditCommunication(rechargeCredit);
                     break;
                 case ORDER_PAYMENT_CONFIRMATION:
                     Payment payment = null;
@@ -169,6 +171,43 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         responseChannel.send(responseMsg);
 
         participant.setNewAdministratorTempPassword(null);
+    }
+
+    private void sendNewRechargeCreditCommunication(RechargeCredit rechargeCredit) {
+        if(
+                !RechargeCreditType.INVOICE.equals(rechargeCredit.getRechargeUserCreditType())
+                && !RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())
+        ){
+            return;
+        }
+
+        List<Participant> administrators = participantRepository.findByAdministratorTrue();
+        List<Communication> items = new ArrayList<>(administrators.size());
+        for (Participant administrator : administrators) {
+            if (administrator.getTelegramUserId().equals(rechargeCredit.getCustomerTelegramUserId())) continue;
+
+            String message = null;
+
+            if(RechargeCreditType.INVOICE.equals(rechargeCredit.getRechargeUserCreditType())){
+                message = messageProperties.getNewRechargeCreditInvoiceMessage();
+            } else if(RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())){
+                message = messageProperties.getNewRechargeCreditAdminMessage();
+            }
+
+            Communication communication = new Communication();
+            communication.setMessage(String.format(message,rechargeCredit.getCustomerNickname(),rechargeCredit.getNewCredit()-rechargeCredit.getOldCredit(),rechargeCredit.getNewCredit()));
+            communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
+            items.add(communication);
+        }
+
+        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+        responseMessage.setCorrelationID(UUID.randomUUID());
+        responseMessage.setInstanceName(instanceName);
+        responseMessage.setType(DistributionEventType.COMMUNICATION);
+        responseMessage.setDocumentClass(Communication.class);
+        responseMessage.setContent(items);
+        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+        responseChannel.send(responseMsg);
     }
 
     private void sendNewOrderCommunication(Order order) {

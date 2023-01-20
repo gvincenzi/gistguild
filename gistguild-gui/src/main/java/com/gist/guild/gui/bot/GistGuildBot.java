@@ -62,9 +62,9 @@ public class GistGuildBot extends TelegramLongPollingBot {
         }
 
         try {
-            execute(message); // Call method to send the message
+            if(message != null) execute(message);
 
-            if(message instanceof AnswerPreCheckoutQuery){
+            if(message != null && message instanceof AnswerPreCheckoutQuery){
                 messageProcessor.process(update, message);
             }
 

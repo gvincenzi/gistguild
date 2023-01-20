@@ -19,4 +19,6 @@ public class MessageProperties {
     String newOrderMessage;
     String newParticipantMessage;
     String adminMessage;
+    String newRechargeCreditInvoiceMessage;
+    String newRechargeCreditAdminMessage;
 }
