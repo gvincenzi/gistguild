@@ -191,24 +191,27 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
     }
 
     private void sendNewParticipantCommunication(Participant participant) {
-        List<Participant> administrators = participantRepository.findByAdministratorTrue();
-        List<Communication> items = new ArrayList<>(administrators.size());
-        for(Participant administrator : administrators) {
-            if(administrator.getTelegramUserId().equals(participant.getTelegramUserId())) continue;
-            Communication communication = new Communication();
-            communication.setMessage(String.format(messageProperties.getNewParticipantMessage(), participant.getNickname()));
-            communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
-            items.add(communication);
-        }
+        Boolean isNewParticipant = participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0;
+        if(isNewParticipant) {
+            List<Participant> administrators = participantRepository.findByAdministratorTrue();
+            List<Communication> items = new ArrayList<>(administrators.size());
+            for (Participant administrator : administrators) {
+                if (administrator.getTelegramUserId().equals(participant.getTelegramUserId())) continue;
+                Communication communication = new Communication();
+                communication.setMessage(String.format(messageProperties.getNewParticipantMessage(), participant.getNickname()));
+                communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
+                items.add(communication);
+            }
 
-        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-        responseMessage.setCorrelationID(UUID.randomUUID());
-        responseMessage.setInstanceName(instanceName);
-        responseMessage.setType(DistributionEventType.COMMUNICATION);
-        responseMessage.setDocumentClass(Communication.class);
-        responseMessage.setContent(items);
-        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-        responseChannel.send(responseMsg);
+            DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
+            responseMessage.setCorrelationID(UUID.randomUUID());
+            responseMessage.setInstanceName(instanceName);
+            responseMessage.setType(DistributionEventType.COMMUNICATION);
+            responseMessage.setDocumentClass(Communication.class);
+            responseMessage.setContent(items);
+            Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
+            responseChannel.send(responseMsg);
+        }
     }
 
     private void sendResponseMessage(DistributionMessage<DocumentProposition<?>> msg, List<Document> items, Class documentClass) {

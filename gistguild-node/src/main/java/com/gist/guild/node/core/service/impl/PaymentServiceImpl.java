@@ -80,6 +80,7 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
             payment.setTimestamp(document.getTimestamp());
             payment.setNonce(document.getNonce());
             payment.setExternalShortId(document.getExternalShortId());
+            payment.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
             payment = repository.save(payment);
             nodeBusinessService.payOrder(payment);
         }

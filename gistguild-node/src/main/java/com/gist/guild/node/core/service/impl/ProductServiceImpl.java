@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Random;
 
 @Data
@@ -37,6 +38,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
+            product.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
             return repository.save(product);
         } else {
             Product previous = repository.findTopByOrderByTimestampDesc();
@@ -62,6 +64,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setPassword(document.getPassword());
         product.setUrl(document.getUrl());
         product.setOwnerTelegramUserId(document.getOwnerTelegramUserId());
+        product.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
 
         Random random = new Random(product.getTimestamp().toEpochMilli());
         int nonce = random.nextInt();
@@ -97,6 +100,8 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setTimestamp(document.getTimestamp());
             product.setNonce(document.getNonce());
             product.setExternalShortId(document.getExternalShortId());
+            product.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
+
             repository.save(product);
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             Product product = repository.findById(document.getId()).get();
@@ -108,6 +113,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setDescription(document.getDescription());
             product.setPassword(document.getPassword());
             product.setUrl(document.getUrl());
+            product.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
             // WE CANNOT MODIFY OWNER AND NAME
             repository.save(product);
         }

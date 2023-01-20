@@ -29,9 +29,6 @@ public class CallbackProcessor extends UpdateProcessor {
     @Value("${gistguild.bot.stripe.token}")
     private String stripeToken;
 
-    @Value("${gistguild.bot.entryFreeCredit.active}")
-    private Boolean entryFreeCredit;
-
     @Value("${gistguild.bot.entryFreeCredit.amount}")
     private Long entryFreeCreditAmount;
 
@@ -46,17 +43,17 @@ public class CallbackProcessor extends UpdateProcessor {
             try {
                 participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getCallbackQuery().getFrom())).get();
                 message = itemFactory.message(chat_id, String.format(messageProperties.getMessage10(), participant.getNickname()));
-                if (entryFreeCredit) {
-                    RechargeCredit rechargeCredit = new RechargeCredit();
-                    rechargeCredit.setCustomerNickname(participant.getNickname());
-                    rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
-                    rechargeCredit.setNewCredit(entryFreeCreditAmount);
-                    rechargeCredit.setOldCredit(ZERO);
-                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
-                    resourceManagerService.addCredit(rechargeCredit).get();
+                RechargeCredit rechargeCredit = new RechargeCredit();
+                rechargeCredit.setCustomerNickname(participant.getNickname());
+                rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
+                rechargeCredit.setNewCredit(entryFreeCreditAmount);
+                rechargeCredit.setOldCredit(ZERO);
+                rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                resourceManagerService.addCredit(rechargeCredit).get();
+                if (entryFreeCreditAmount > 0) {
                     message = itemFactory.message(chat_id, String.format(messageProperties.getMessage11(), participant.getNickname(), entryFreeCreditAmount));
                 } else {
-                    message = itemFactory.message(chat_id, messageProperties.getMessage10());
+                    message = itemFactory.message(chat_id,  String.format(messageProperties.getMessage10(), participant.getNickname()));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());

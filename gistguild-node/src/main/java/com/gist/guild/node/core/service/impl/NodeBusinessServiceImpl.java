@@ -19,6 +19,7 @@ import com.gist.guild.node.core.service.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,6 +82,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
             product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
         }
 
+        product.setLastUpdateTimestamp(Instant.now());
         productRepository.save(product);
     }
 
@@ -93,6 +95,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         if(order.getQuantity() != null && product.getAvailableQuantity() != null){
             product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
         }
+        product.setLastUpdateTimestamp(Instant.now());
         productRepository.save(product);
     }
 
@@ -101,6 +104,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         com.gist.guild.node.core.document.Order order = orderRepository.findById(payment.getOrderId()).get();
         if(order.getPaymentId() == null || order.getPaymentId() == "") {
             order.setPaymentId(payment.getId());
+            order.setLastUpdateTimestamp(Instant.now());
             orderRepository.save(order);
         }
     }

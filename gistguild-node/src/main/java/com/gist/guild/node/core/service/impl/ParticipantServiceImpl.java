@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -92,12 +93,14 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                 participant.setTelegramUserId(document.getTelegramUserId());
                 participant.setNonce(document.getNonce());
                 participant.setExternalShortId(document.getExternalShortId());
+                participant.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
                 repository.save(participant);
         } else if(repository.findByIsCorruptionDetectedTrue().size() == 0 && repository.existsById(document.getId())){
             participant = repository.findById(document.getId()).get();
             participant.setActive(document.getActive());
             participant.setAdministrator(document.getAdministrator());
             participant.setAdminPasswordEncoded(document.getAdminPasswordEncoded());
+            participant.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
             repository.save(participant);
         }
 
@@ -136,7 +139,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
                 participant.setAdminPasswordEncoded(getDefaultAdminPassword(participant));
             }
             participant.setAdministrator(GENESIS.equals(participant.getPreviousId()) ? Boolean.TRUE : document.getAdministrator());
-
+            participant.setLastUpdateTimestamp(Instant.now());
             newParticipant = repository.save(participant);
         } else {
             Participant previous = repository.findTopByOrderByTimestampDesc();
