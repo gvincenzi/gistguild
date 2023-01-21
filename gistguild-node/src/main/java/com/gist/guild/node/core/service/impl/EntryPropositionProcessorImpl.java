@@ -243,7 +243,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
     }
 
     private void sendNewParticipantCommunication(Participant participant) {
-        Boolean isNewParticipant = participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0;
+        Boolean isNewParticipant = (participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0);
         if(isNewParticipant) {
             List<Participant> administrators = participantRepository.findByAdministratorTrue();
             List<Communication> items = new ArrayList<>(administrators.size());
