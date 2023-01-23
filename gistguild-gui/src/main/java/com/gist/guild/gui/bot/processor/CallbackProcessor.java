@@ -123,6 +123,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 List<InlineKeyboardButton> rowInline = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
                 InlineKeyboardButton button = new InlineKeyboardButton();
                 button.setText(messageProperties.getMenuItem14());
                 button.setCallbackData(CallbackDataKey.PRODUCT_SELECT.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
@@ -141,16 +142,22 @@ public class CallbackProcessor extends UpdateProcessor {
                 button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline1.add(button4);
 
+                InlineKeyboardButton buttonMessageToProductOwner = new InlineKeyboardButton();
+                buttonMessageToProductOwner.setText(messageProperties.getMenuItem12());
+                buttonMessageToProductOwner.setCallbackData(CallbackDataKey.PRODUCT_OWNER_MESSAGE.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
+                rowInline2.add(buttonMessageToProductOwner);
+
                 InlineKeyboardButton button5 = new InlineKeyboardButton();
                 button5.setText(messageProperties.getMenuItem13());
                 button5.setCallbackData(CallbackDataKey.WELCOME.name());
-                rowInline2.add(button5);
+                rowInline3.add(button5);
                 // Set the keyboard to the markup
                 rowsInline.add(rowInline);
                 if (resourceManagerService.findParticipantByTelegramId(user_id).get().getAdministrator()) {
                     rowsInline.add(rowInline1);
                 }
                 rowsInline.add(rowInline2);
+                rowsInline.add(rowInline3);
                 // Add it to the message
                 markupInline.setKeyboard(rowsInline);
                 ((SendMessage) message).setReplyMarkup(markupInline);
@@ -222,6 +229,16 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }
+        } else if (call_data.startsWith(CallbackDataKey.PRODUCT_OWNER_MESSAGE.name() + CallbackDataKey.DELIMITER)) {
+            String[] split = call_data.split(CallbackDataKey.DELIMITER);
+            Long productExternalShortId = Long.parseLong(split[1]);
+
+            Action action = new Action();
+            action.setActionType(ActionType.PRODUCT_OWNER_MESSAGE);
+            action.setTelegramUserId(user_id);
+            action.setSelectedProductId(productExternalShortId);
+            resourceManagerService.saveAction(action);
+            message = itemFactory.sendMessageToProductOwner(chat_id);
         } else if (call_data.startsWith(CallbackDataKey.ORDER_DETAILS.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);

@@ -4,6 +4,7 @@ import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.commons.message.entity.RechargeCredit;
+import com.gist.guild.gui.bot.GistGuildBot;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.configuration.MessageProperties;
@@ -36,6 +37,9 @@ public class ItemFactoryImpl implements ItemFactory {
 
     @Autowired
     private MessageProperties messageProperties;
+
+    @Autowired
+    private GistGuildBot gistGuildBot;
 
     public SendMessage welcomeMessage(Message update, Long user_id) {
         SendMessage message;
@@ -93,6 +97,16 @@ public class ItemFactoryImpl implements ItemFactory {
                 action.setTelegramUserId(participant.getTelegramUserId());
                 resourceManagerService.saveAction(action);
                 return userManagementMenu(update.getChatId(), participantByTelegramId);
+            } else if (actionInProgress != null && ActionType.PRODUCT_OWNER_MESSAGE.equals(actionInProgress.getActionType())) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+                try {
+                    Product product = resourceManagerService.getProduct(actionInProgress.getSelectedProductId()).get();
+                    Participant participantByTelegramId = resourceManagerService.findParticipantByTelegramId(product.getOwnerTelegramUserId()).get();
+                    gistGuildBot.sendMessage(product.getOwnerTelegramUserId(),String.format(messageProperties.getMessage32(),participantByTelegramId.getNickname(),product.getName(),update.getText()));
+                    return message(update.getChatId(), messageProperties.getMessage33());
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             }
 
         }
@@ -363,5 +377,10 @@ public class ItemFactoryImpl implements ItemFactory {
         message.setReplyMarkup(markupInline);
         message.enableHtml(Boolean.TRUE);
         return message;
+    }
+
+    @Override
+    public SendMessage sendMessageToProductOwner(Long chat_id) {
+        return message(chat_id, messageProperties.getMessage31());
     }
 }

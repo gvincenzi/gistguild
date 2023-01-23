@@ -43,6 +43,9 @@ public class MessageProperties {
     String message28;
     String message29;
     String message30;
+    String message31;
+    String message32;
+    String message33;
 
     String menuItem1;
     String menuItem2;
