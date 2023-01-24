@@ -101,6 +101,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
             participant.setAdministrator(document.getAdministrator());
             participant.setAdminPasswordEncoded(document.getAdminPasswordEncoded());
             participant.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
+            participant.setNickname(document.getNickname());
             repository.save(participant);
         }
 
@@ -135,6 +136,7 @@ public class ParticipantServiceImpl extends NodeService<com.gist.guild.commons.m
         if(participants.size() > 0) {
             Participant participant = participants.iterator().next();
             participant.setActive(document.getActive());
+            participant.setNickname(document.getNickname());
             if(!participant.getAdministrator() && document.getAdministrator()){
                 participant.setAdminPasswordEncoded(getDefaultAdminPassword(participant));
             }
