@@ -81,7 +81,13 @@
                                 </div>
                             </div>
                             <div class="row g-3">
-                                <div class="col-auto">
+                                <div class="col">
+                                    <input type="text" class="form-control" placeholder="Tags" aria-label="Tags"
+                                           th:field="*{tags}"/>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
                                     <div class="form-check" style="position: absolute;">
                                         <input class="form-check-input" type="checkbox" id="delivery"
                                                th:field="*{delivery}">
@@ -90,10 +96,8 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-auto">
-                                    <div class="form-check">
+                                <div class="col">
+                                    <div class="form-check" style="position: absolute;">
                                         <input class="form-check-input" type="checkbox" id="activationToggle"
                                                th:field="*{active}">
                                         <label class="form-check-label" for="activationToggle">
@@ -101,14 +105,12 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-auto">
-                                    <div class="form-check">
+                                <div class="col">
+                                    <div class="form-check" style="position: absolute;">
                                         <input class="form-check-input" type="checkbox" id="deletedToggle"
                                                th:field="*{deleted}">
                                         <label class="form-check-label" for="deletedToggle">
-                                            Marked as deleted
+                                            Marked as <b>deleted</b>
                                         </label>
                                     </div>
                                 </div>

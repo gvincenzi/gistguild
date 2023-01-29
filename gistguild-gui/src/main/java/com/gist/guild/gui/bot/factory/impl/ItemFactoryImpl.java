@@ -128,6 +128,10 @@ public class ItemFactoryImpl implements ItemFactory {
             button1.setText(messageProperties.getMenuItem2());
             button1.setCallbackData(CallbackDataKey.CATALOG.name());
             rowInline1.add(button1);
+            InlineKeyboardButton button7 = new InlineKeyboardButton();
+            button7.setText(messageProperties.getMenuItem21());
+            button7.setCallbackData(CallbackDataKey.SEARCH_PRODUCT.name());
+            rowInline1.add(button7);
             InlineKeyboardButton button2 = new InlineKeyboardButton();
             button2.setText(messageProperties.getMenuItem3());
             button2.setCallbackData(CallbackDataKey.ORDER_LIST.name());
@@ -145,7 +149,7 @@ public class ItemFactoryImpl implements ItemFactory {
             button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
             if(stripeActive) rowInline3.add(button6);
             InlineKeyboardButton button4 = new InlineKeyboardButton();
-            button4.setText(String.format(messageProperties.getMenuItem6(), participant.getNickname(), participant.getTelegramUserId()));
+            button4.setText(String.format(messageProperties.getMenuItem6(), participant.getTelegramUserId()));
             button4.setCallbackData(CallbackDataKey.CANCELLATION.name());
             rowInline4.add(button4);
             InlineKeyboardButton button5 = new InlineKeyboardButton();
@@ -210,7 +214,7 @@ public class ItemFactoryImpl implements ItemFactory {
         button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name());
         rowInline1.add(button1);
         InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText(String.format(messageProperties.getMenuItem6(), participantToManage.getNickname(), participantToManage.getTelegramUserId()));
+        button2.setText(String.format(messageProperties.getMenuItem6(), participantToManage.getTelegramUserId()));
         button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION);
         rowInline1.add(button2);
         InlineKeyboardButton button3 = new InlineKeyboardButton();

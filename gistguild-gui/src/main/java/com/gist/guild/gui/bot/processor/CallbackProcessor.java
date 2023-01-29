@@ -112,6 +112,12 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (ExecutionException e) {
                 log.error(e.getMessage());
             }
+        } else if (call_data.equalsIgnoreCase(CallbackDataKey.SEARCH_PRODUCT.name())) {
+            Action action = new Action();
+            action.setActionType(ActionType.SEARCH_PRODUCT);
+            action.setTelegramUserId(user_id);
+            resourceManagerService.saveAction(action);
+            message = itemFactory.message(chat_id, messageProperties.getMessage34());
         } else if (call_data.startsWith(CallbackDataKey.PRODUCT_DETAILS.name() + CallbackDataKey.DELIMITER)) {
             try {
                 String[] split = call_data.split(CallbackDataKey.DELIMITER);

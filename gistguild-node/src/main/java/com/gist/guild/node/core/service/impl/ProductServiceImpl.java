@@ -32,6 +32,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setActive(document.getActive());
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
+            product.setTags(document.getTags());
             product.setDelivery(document.getDelivery());
             product.setDeleted(document.getDeleted());
             product.setName(document.getName());
@@ -57,6 +58,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
         product.setActive(document.getActive());
         product.setPrice(document.getPrice());
         product.setAvailableQuantity(document.getAvailableQuantity());
+        product.setTags(document.getTags());
         product.setDelivery(document.getDelivery());
         product.setDeleted(document.getDeleted());
         product.setDescription(document.getDescription());
@@ -90,6 +92,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setActive(document.getActive());
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
+            product.setTags(document.getTags());
             product.setDelivery(document.getDelivery());
             product.setDeleted(document.getDeleted());
             product.setDescription(document.getDescription());
@@ -108,6 +111,7 @@ public class ProductServiceImpl extends NodeService<com.gist.guild.commons.messa
             product.setActive(document.getActive());
             product.setPrice(document.getPrice());
             product.setAvailableQuantity(document.getAvailableQuantity());
+            product.setTags(document.getTags());
             product.setDelivery(document.getDelivery());
             product.setDeleted(document.getDeleted());
             product.setDescription(document.getDescription());

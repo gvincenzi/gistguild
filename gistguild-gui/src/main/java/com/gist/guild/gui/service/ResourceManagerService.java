@@ -17,6 +17,7 @@ public interface ResourceManagerService {
     void saveAction(Action action);
     void deleteActionInProgress(Action action);
     Future<List<Product>> getProducts();
+    Future<List<Product>> getProductsByTags(String tags);
     Future<Product> getProduct(Long productExternalShortId);
     Future<Product> updateProduct(Product product);
     Future<List<Order>> getOrders(Long telegramUserId);

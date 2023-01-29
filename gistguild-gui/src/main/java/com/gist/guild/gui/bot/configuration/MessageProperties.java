@@ -46,6 +46,8 @@ public class MessageProperties {
     String message31;
     String message32;
     String message33;
+    String message34;
+    String message35;
 
     String menuItem1;
     String menuItem2;
@@ -67,6 +69,7 @@ public class MessageProperties {
     String menuItem18;
     String menuItem19;
     String menuItem20;
+    String menuItem21;
 
     String error1;
     String error2;

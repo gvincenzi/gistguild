@@ -32,6 +32,8 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Autowired
     private ActionRepository actionRepository;
 
+    private static String REGEX = ".*%s.*";
+
     @Override
     public Future<Participant> findParticipantByTelegramId(Long participant_id) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
@@ -90,6 +92,15 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findCatalog", params);
+        return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<List<Product>> getProductsByTags(String tags) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
+        params.add(new DocumentRepositoryMethodParameter<String>(String.class, String.format(REGEX,tags)));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findCatalogByTag", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
