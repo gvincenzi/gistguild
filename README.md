@@ -6,6 +6,20 @@ Each software federating the GIST Guild Universe can launch one or more *node* :
 
 ***Spring Security*** is the component used to manage security, for API and for GUI access.
 
+## First software federating the GIST Guild
+The first two software of this universe will be : 
+- **GasSMan**: an italian association that works for an ethical purchasing group
+- **InMediArt**: an italian association that works for independent artists production and distribution  
+
+## Used Technologies
+- [Apache Maven](https://maven.apache.org/)
+- Spring Boot
+- Spring Cloud (Netflix Eureka Server, Zuul, Hystrix, Stream Rabbit, Feign Client)
+- [Spring Data MongoDB](https://spring.io/projects/spring-data-mongodb)
+- [Spring Security](https://spring.io/projects/spring-security)
+- [MongoDB](https://www.mongodb.com/) 
+- [LavinMQ Message Broker](https://lavinmq.com/)
+
 ## Documents 
 The document specializations are:
 - Participant
@@ -89,5 +103,17 @@ A Node has also a atom that expose a Thymeleaf interface, accessible only to fed
 - Recharge participant credits
 - View/Modify orders of its own products
 
-(... to be continued...)
+### GUI (Telegram bot)
+This molecule contains a Telegram BOT: this bot calls the Distribution molecule Spike (API REST) to send their requests, and that subscribes to the 'response' channel of message broker to receives and process responses from nodes.
+Via the bot, Telegram users can:
+- ***Sign up*** to the univers, becooming a *participant*
+- See the ***Catalog*** (all products of all federate participants)
+- ***Find a product*** by a word that will be searched in product names and tags
+- See the list of ***her/his own orders*** in progress
+- See the list of ***purchased product***
+- Check ***remaining credit***
+- ***Cancellation*** of a participant 
+
+#### Communication, a meta document
+In this project the bean **Communication** is used as a Document sent in message broker response channel: in this object the system will find all information to send a notification (via Telegram BOT) to participants.
 
