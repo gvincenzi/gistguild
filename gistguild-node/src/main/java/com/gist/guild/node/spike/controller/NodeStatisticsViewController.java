@@ -7,8 +7,9 @@ import com.gist.guild.commons.message.entity.DocumentProposition;
 import com.gist.guild.node.binding.CorrelationIdCache;
 import com.gist.guild.node.core.configuration.StartupConfig;
 import com.gist.guild.node.core.document.Order;
-import com.gist.guild.node.core.repository.OrderRepository;
-import com.gist.guild.node.core.repository.PaymentRepository;
+import com.gist.guild.node.core.document.Product;
+import com.gist.guild.node.core.document.RechargeCredit;
+import com.gist.guild.node.core.repository.*;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.spike.client.SpikeClient;
 import lombok.extern.java.Log;
@@ -37,15 +38,49 @@ public class NodeStatisticsViewController {
     private String instanceName;
 
     @Autowired
-    SpikeClient spikeClient;
+    ParticipantRepository participantRepository;
 
     @Autowired
-    CorrelationIdCache correlationIdCache;
+    ProductRepository productRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Autowired
+    RechargeCreditRepository rechargeCreditRepository;
+
 
     @GetMapping("/statistics")
     public String statistics(Principal principal, Model model) throws GistGuildGenericException {
         model.addAttribute("instanceName", instanceName);
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
+
+        long numberOfParticipants = participantRepository.count();
+        long numberOfProducts = productRepository.count();
+        long numberOfOrders = orderRepository.count();
+
+        model.addAttribute("numberOfParticipants", numberOfParticipants);
+        model.addAttribute("numberOfProducts", numberOfProducts);
+        model.addAttribute("numberOfOrders", numberOfOrders);
+
+
+        Iterator<RechargeCredit> rechargeCreditIterator = rechargeCreditRepository.findAll().iterator();
+        long numberOfFreeCredit = 0;
+        long numberOfUsedCredit = 0;
+        long numberOfRechargedCredit = 0;
+        while(rechargeCreditIterator.hasNext()){
+            RechargeCredit rechargeCredit = rechargeCreditIterator.next();
+            switch (rechargeCredit.getRechargeUserCreditType()){
+                case FREE: numberOfFreeCredit+=(rechargeCredit.getNewCredit()-rechargeCredit.getOldCredit()); break;
+                case PAYMENT: numberOfUsedCredit+=(rechargeCredit.getOldCredit()-rechargeCredit.getNewCredit()); break;
+                default : numberOfRechargedCredit +=(rechargeCredit.getNewCredit()-rechargeCredit.getOldCredit()); break;
+            }
+
+        }
+
+        model.addAttribute("numberOfFreeCredit", numberOfFreeCredit);
+        model.addAttribute("numberOfUsedCredit", numberOfUsedCredit);
+        model.addAttribute("numberOfRechargedCredit", numberOfRechargedCredit);
 
         return "statistics"; //view
     }
