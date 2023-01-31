@@ -48,7 +48,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
                 rechargeCredit.setNewCredit(entryFreeCreditAmount);
                 rechargeCredit.setOldCredit(ZERO);
-                rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                rechargeCredit.setRechargeUserCreditType(RechargeCreditType.FREE);
                 resourceManagerService.addCredit(rechargeCredit).get();
                 if (entryFreeCreditAmount > 0) {
                     message = itemFactory.message(chat_id, String.format(messageProperties.getMessage11(), participant.getNickname(), entryFreeCreditAmount));
@@ -362,7 +362,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     rechargeCredit.setCustomerTelegramUserId(participantToRecharge.getTelegramUserId());
                     rechargeCredit.setNewCredit(rechargeCreditLast.getNewCredit() + credit);
                     rechargeCredit.setOldCredit(rechargeCreditLast.getNewCredit());
-                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.ADMIN);
                     resourceManagerService.addCredit(rechargeCredit).get();
                     message = itemFactory.message(chat_id, messageProperties.getMessage26());
                 } catch (InterruptedException | ExecutionException e) {
