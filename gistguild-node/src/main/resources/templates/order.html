@@ -120,6 +120,15 @@
 
         <a th:if="${inProgress == true}" class="nav-link fw-bold py-1 px-0 active" aria-current="page"  href="/order">Show all order history</a>
         <a th:if="${inProgress == false}" class="nav-link fw-bold py-1 px-0 active" aria-current="page"  href="/orderInProgress">Show only order in progress</a>
+        <div class="dropdown">
+            <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Filter by product
+            </button>
+            <ul class="dropdown-menu">
+                <li th:if="${inProgress == false}" th:each="product : ${products}"><a class="dropdown-item" th:href="'/order/by/' + ${product}" th:text="${product}"></a></li>
+                <li th:if="${inProgress == true}" th:each="product : ${products}"><a class="dropdown-item" th:href="'/orderInProgress/by/' + ${product}" th:text="${product}"></a></li>
+            </ul>
+        </div>
 
         <table class="table table-dark table-striped table-hover">
             <thead>

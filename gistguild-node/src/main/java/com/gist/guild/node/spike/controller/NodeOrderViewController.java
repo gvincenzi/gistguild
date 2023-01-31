@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 @Log
 @Controller
 public class NodeOrderViewController {
+    private static final String ALL_PRODUCTS = "-";
     @Value("${spring.application.name}")
     private String instanceName;
 
@@ -61,6 +60,14 @@ public class NodeOrderViewController {
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
+
+        Set<String> products = new HashSet<>();
+        for(Order item : items){
+            products.add(item.getProductName());
+        }
+        products.add(ALL_PRODUCTS);
+        model.addAttribute("products", products);
+
         model.addAttribute("items", items);
         model.addAttribute("inProgress", Boolean.FALSE);
 
@@ -76,6 +83,14 @@ public class NodeOrderViewController {
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         Collections.sort(items);
         Collections.reverse(items);
+
+        Set<String> products = new HashSet<>();
+        for(Order item : items){
+            products.add(item.getProductName());
+        }
+        products.add(ALL_PRODUCTS);
+        model.addAttribute("products", products);
+
         model.addAttribute("items", items);
         model.addAttribute("inProgress", Boolean.TRUE);
 
@@ -133,6 +148,70 @@ public class NodeOrderViewController {
         Collections.reverse(items);
         model.addAttribute("items", items);
         model.addAttribute("inProgress", Boolean.TRUE);
+        model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
+
+        return "order"; //view
+    }
+
+    @GetMapping("/order/by/{product}")
+    public String orderByProduct(Principal principal, Model model, @PathVariable String product) throws GistGuildGenericException {
+        if(ALL_PRODUCTS.equalsIgnoreCase((product))) return welcome(principal,model);
+        List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        model.addAttribute("instanceName", instanceName);
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
+
+        Set<String> products = new HashSet<>();
+        for(Order item : items){
+            products.add(item.getProductName());
+        }
+        products.add(ALL_PRODUCTS);
+        model.addAttribute("products", products);
+
+        //Filter by product
+        Set<Order> filteredItems = new HashSet<>();
+        for(Order item : items){
+            if(item.getProductName().equalsIgnoreCase(product)){
+                filteredItems.add(item);
+            }
+        }
+
+        model.addAttribute("items", filteredItems);
+        model.addAttribute("inProgress", Boolean.FALSE);
+
+        model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
+
+        return "order"; //view
+    }
+
+    @GetMapping("/orderInProgress/by/{product}")
+    public String orderInProgressByProduct(Principal principal, Model model, @PathVariable String product) throws GistGuildGenericException {
+        if(ALL_PRODUCTS.equalsIgnoreCase((product))) return orderInProgress(principal,model);
+        List<Order> items = repository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        model.addAttribute("instanceName", instanceName);
+        model.addAttribute("startup", StartupConfig.getStartupProcessed());
+        Collections.sort(items);
+        Collections.reverse(items);
+
+        Set<String> products = new HashSet<>();
+        for(Order item : items){
+            products.add(item.getProductName());
+        }
+        products.add(ALL_PRODUCTS);
+        model.addAttribute("products", products);
+
+        //Filter by product
+        Set<Order> filteredItems = new HashSet<>();
+        for(Order item : items){
+            if(item.getProductName().equalsIgnoreCase(product)){
+                filteredItems.add(item);
+            }
+        }
+
+        model.addAttribute("items", filteredItems);
+        model.addAttribute("inProgress", Boolean.TRUE);
+
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
 
         return "order"; //view
