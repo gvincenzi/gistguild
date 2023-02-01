@@ -10,4 +10,8 @@ public interface OrderRepository extends DocumentRepository<Order>, MongoReposit
     List<Order> findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long productOwnerTelegramUserId);
     List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNullOrderByTimestampAsc(Long telegramUserId);
     List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNotNullOrderByTimestampAsc(Long telegramUserId);
+
+    //Statistics methods
+    List<Order> findByDeletedIsFalseAndPaymentIdNotNull();
+    List<Order> findByProductOwnerTelegramUserIdAndDeletedIsFalseAndPaymentIdNotNull(Long telegramUserId);
 }

@@ -63,6 +63,13 @@ public class NodeStatisticsViewController {
         model.addAttribute("numberOfProducts", numberOfProducts);
         model.addAttribute("numberOfOrders", numberOfOrders);
 
+        List<Order> paidOrders = orderRepository.findByDeletedIsFalseAndPaymentIdNotNull();
+        long numberOfEngagedCredit = 0;
+        for(Order paidOrder : paidOrders){
+            numberOfEngagedCredit+=paidOrder.getAmount();
+        }
+        model.addAttribute("numberOfPaidOrders", orderRepository.findByDeletedIsFalseAndPaymentIdNotNull().size());
+        model.addAttribute("numberOfEngagedCredit", numberOfEngagedCredit);
 
         Iterator<RechargeCredit> rechargeCreditIterator = rechargeCreditRepository.findAll().iterator();
         long numberOfFreeCredit = 0;
@@ -75,7 +82,6 @@ public class NodeStatisticsViewController {
                 case PAYMENT: numberOfUsedCredit+=(rechargeCredit.getOldCredit()-rechargeCredit.getNewCredit()); break;
                 default : numberOfRechargedCredit +=(rechargeCredit.getNewCredit()-rechargeCredit.getOldCredit()); break;
             }
-
         }
 
         model.addAttribute("numberOfFreeCredit", numberOfFreeCredit);
@@ -87,11 +93,14 @@ public class NodeStatisticsViewController {
         long numberOfYourOrders = orders.size();
         long numberOfYourEngagedCredit = 0;
         for(Order yourOrder : orders){
-            numberOfYourEngagedCredit+=yourOrder.getAmount();
+            if(yourOrder.getPaymentId() != null){
+                numberOfYourEngagedCredit+=yourOrder.getAmount();
+            }
         }
 
         model.addAttribute("numberOfYourProducts", numberOfYourProducts);
         model.addAttribute("numberOfYourOrders", numberOfYourOrders);
+        model.addAttribute("numberOfYourPaidOrders", orderRepository.findByProductOwnerTelegramUserIdAndDeletedIsFalseAndPaymentIdNotNull(Long.parseLong(principal.getName())).size());
         model.addAttribute("numberOfYourEngagedCredit", numberOfYourEngagedCredit);
 
         return "statistics"; //view
