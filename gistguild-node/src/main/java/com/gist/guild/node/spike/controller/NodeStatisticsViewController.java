@@ -82,6 +82,18 @@ public class NodeStatisticsViewController {
         model.addAttribute("numberOfUsedCredit", numberOfUsedCredit);
         model.addAttribute("numberOfRechargedCredit", numberOfRechargedCredit);
 
+        long numberOfYourProducts = productRepository.findByDeletedFalseAndOwnerTelegramUserIdOrderByTimestampAsc(Long.parseLong(principal.getName())).size();
+        List<Order> orders = orderRepository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        long numberOfYourOrders = orders.size();
+        long numberOfYourEngagedCredit = 0;
+        for(Order yourOrder : orders){
+            numberOfYourEngagedCredit+=yourOrder.getAmount();
+        }
+
+        model.addAttribute("numberOfYourProducts", numberOfYourProducts);
+        model.addAttribute("numberOfYourOrders", numberOfYourOrders);
+        model.addAttribute("numberOfYourEngagedCredit", numberOfYourEngagedCredit);
+
         return "statistics"; //view
     }
 
