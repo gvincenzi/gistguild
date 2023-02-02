@@ -87,18 +87,18 @@ public class MQListener {
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
-        log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
 
         distributionProcessor.add(msg);
 
-        log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
     @StreamListener(target = "requestChannel")
     public void processDocumentProposition(DistributionMessage<DocumentProposition<?>> msg) {
         waitingForDistributionProcess();
 
-        log.info(String.format("START >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("START >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_PROPOSITION.equals(msg.getType()) && msg.getContent() != null && StartupConfig.getStartupProcessed()) {
             entryPropositionProcessor.add(msg);
         } else if (DistributionEventType.INTEGRITY_VERIFICATION.equals(msg.getType())) {
@@ -112,7 +112,7 @@ public class MQListener {
                 log.error(e.getMessage());
             }
         }
-        log.info(String.format("END >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("END >> Message received in Request Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
     private void processGetDocumentRequest(DistributionMessage<DocumentProposition<?>> msg) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

@@ -60,7 +60,7 @@ public class DistributionProcessorImpl implements DistributionProcessor {
     private DelayQueue<DistributionMessage<List<?>>> messageDelayQueue = new DelayQueue<DistributionMessage<List<?>>>();
 
     public void add(DistributionMessage<List<?>> msg){
-        log.info(String.format("DistributionMessage [%s] in queue",msg.getCorrelationID()));
+        log.debug(String.format("DistributionMessage [%s] in queue",msg.getCorrelationID()));
         messageDelayQueue.add(msg);
     }
 
@@ -75,7 +75,7 @@ public class DistributionProcessorImpl implements DistributionProcessor {
             return;
         }
         DistributionMessage<List<?>> msg = messageDelayQueue.take();
-        log.info(String.format("DistributionMessage [%s] START processing",msg.getCorrelationID()));
+        log.debug(String.format("DistributionMessage [%s] START processing",msg.getCorrelationID()));
 
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && !instanceName.equals(msg.getInstanceName()) && StartupConfig.getStartupProcessed()) {
             try {
@@ -214,6 +214,6 @@ public class DistributionProcessorImpl implements DistributionProcessor {
         //PUT IN CACHE FOR ADMINISTRATION GUI REQUESTS
         correlationIdCache.putInCache(msg.getCorrelationID(), msg.getExceptions());
 
-        log.info(String.format("DistributionMessage [%s] END processing",msg.getCorrelationID()));
+        log.debug(String.format("DistributionMessage [%s] END processing",msg.getCorrelationID()));
     }
 }

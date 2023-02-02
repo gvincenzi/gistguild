@@ -24,6 +24,6 @@ public class DistributionConcurrenceServiceImpl extends DistributionConcurrenceS
                 log.error(e.getMessage());
             }
         }
-        log.info("No blocking correlationID in progress");
+        log.debug("No blocking correlationID in progress");
     }
 }

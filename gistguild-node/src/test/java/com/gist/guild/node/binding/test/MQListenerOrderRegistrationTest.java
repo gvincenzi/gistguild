@@ -55,14 +55,6 @@ public class MQListenerOrderRegistrationTest extends MQListenerTest{
     @Autowired
     NodeService<com.gist.guild.commons.message.entity.Order, Order> orderNodeService;
 
-    protected static DocumentProposition getNewDocument(String json) throws JsonProcessingException {
-        log.info(json);
-        DocumentProposition documentProposition = mapper.readValue(json, DocumentProposition.class);
-        log.info(mapper.writeValueAsString(documentProposition));
-
-        return documentProposition;
-    }
-
     private DocumentProposition getDocumentPropositionOrderRegistration() throws JsonProcessingException {
         String json = "{\n" +
                 "    \"documentPropositionType\" : \"ORDER_REGISTRATION\",\n" +
@@ -77,7 +69,7 @@ public class MQListenerOrderRegistrationTest extends MQListenerTest{
                 "      }\n" +
                 "    }\n" +
                 "}";
-        DocumentProposition proposition = getNewDocument(json);
+        DocumentProposition proposition = mapper.readValue(json, DocumentProposition.class);
         return proposition;
     }
 
@@ -96,7 +88,7 @@ public class MQListenerOrderRegistrationTest extends MQListenerTest{
                 "      }\n" +
                 "    }\n" +
                 "}";
-        DocumentProposition proposition = getNewDocument(json);
+        DocumentProposition proposition = mapper.readValue(json, DocumentProposition.class);
         return proposition;
     }
 

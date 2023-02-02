@@ -64,7 +64,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
     private DelayQueue<DistributionMessage<DocumentProposition<?>>> messageDelayQueue = new DelayQueue<DistributionMessage<DocumentProposition<?>>>();
 
     public void add(DistributionMessage<DocumentProposition<?>> msg){
-        log.info(String.format("DocumentProposition [%s] in queue",msg.getCorrelationID())); messageDelayQueue.add(msg);
+        log.debug(String.format("DocumentProposition [%s] in queue",msg.getCorrelationID())); messageDelayQueue.add(msg);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
             return;
         }
         DistributionMessage<DocumentProposition<?>> msg = messageDelayQueue.take();
-        log.info(String.format("DocumentProposition [%s] START processing",msg.getCorrelationID()));
+        log.debug(String.format("DocumentProposition [%s] START processing",msg.getCorrelationID()));
         try {
             List<Document> items = new ArrayList<>();
             Class documentClass = null;
@@ -150,7 +150,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
             log.error(e.getMessage());
         }
 
-        log.info(String.format("DocumentProposition [%s] END processing",msg.getCorrelationID()));
+        log.debug(String.format("DocumentProposition [%s] END processing",msg.getCorrelationID()));
     }
 
     private void sendNewAdministratorCommunication(Participant participant) {
