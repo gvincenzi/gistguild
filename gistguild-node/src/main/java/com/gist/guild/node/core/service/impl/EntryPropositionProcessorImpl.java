@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -242,7 +243,9 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         responseChannel.send(responseMsg);
     }
 
-    private void sendNewParticipantCommunication(Participant participant) {
+    @Async
+    void sendNewParticipantCommunication(Participant participant) throws InterruptedException {
+        Thread.sleep(2000);
         Boolean isNewParticipant = (participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0);
         if(isNewParticipant) {
             List<Participant> administrators = participantRepository.findByAdministratorTrue();

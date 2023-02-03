@@ -8,12 +8,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 //@EnableEurekaClient
 @EnableBinding(MQBinding.class)
 @EnableMongoRepositories
 @EnableFeignClients
 @EnableConfigurationProperties(MessageProperties.class)
+@EnableAsync
 @SpringBootApplication
 public class GistGuildNodeApplication {
     public static void main(String[] args) {
