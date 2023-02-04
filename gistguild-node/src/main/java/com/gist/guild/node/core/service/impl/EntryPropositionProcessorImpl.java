@@ -33,6 +33,7 @@ import java.util.concurrent.DelayQueue;
 @Slf4j
 @Service
 public class EntryPropositionProcessorImpl implements EntryPropositionProcessor {
+    private static final int COMMUNICATION_MESSAGE_DELAY_SENDING = 1000;
     @Autowired
     MessageChannel responseChannel;
 
@@ -154,7 +155,9 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         log.debug(String.format("DocumentProposition [%s] END processing",msg.getCorrelationID()));
     }
 
-    private void sendNewAdministratorCommunication(Participant participant) {
+    @Async
+    void sendNewAdministratorCommunication(Participant participant) throws InterruptedException {
+        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
         Communication communication = new Communication();
         communication.setMessage(String.format(messageProperties.getAdminPasswordMessage(),participant.getTelegramUserId(),participant.getNewAdministratorTempPassword()));
         communication.setRecipientTelegramUserId(participant.getTelegramUserId());
@@ -174,7 +177,9 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         participant.setNewAdministratorTempPassword(null);
     }
 
-    private void sendNewRechargeCreditCommunication(RechargeCredit rechargeCredit) {
+    @Async
+    void sendNewRechargeCreditCommunication(RechargeCredit rechargeCredit) throws InterruptedException {
+        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
         if(
                 !RechargeCreditType.INVOICE.equals(rechargeCredit.getRechargeUserCreditType())
                 && !RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())
@@ -224,7 +229,9 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         responseChannel.send(responseMsg);
     }
 
-    private void sendNewOrderCommunication(Order order) {
+    @Async
+    void sendNewOrderCommunication(Order order) throws InterruptedException {
+        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
         if(order.getCustomerTelegramUserId().equals(order.getProductOwnerTelegramUserId())) return;
         Communication communication = new Communication();
         communication.setMessage(String.format(messageProperties.getNewOrderMessage(),order.getCustomerNickname(),order.getProductName()));
@@ -245,7 +252,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
 
     @Async
     void sendNewParticipantCommunication(Participant participant) throws InterruptedException {
-        Thread.sleep(2000);
+        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
         Boolean isNewParticipant = (participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0);
         if(isNewParticipant) {
             List<Participant> administrators = participantRepository.findByAdministratorTrue();
