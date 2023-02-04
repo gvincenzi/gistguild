@@ -33,7 +33,7 @@ import java.util.concurrent.DelayQueue;
 @Slf4j
 @Service
 public class EntryPropositionProcessorImpl implements EntryPropositionProcessor {
-    private static final int COMMUNICATION_MESSAGE_DELAY_SENDING = 1000;
+    private static final int COMMUNICATION_MESSAGE_DELAY_SENDING = 2000;
     @Autowired
     MessageChannel responseChannel;
 
@@ -189,7 +189,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
 
         //MESSAGE TO ADMINISTRATORS
         List<Participant> administrators = participantRepository.findByAdministratorTrue();
-        List<Communication> items = new ArrayList<>(administrators.size());
+        List<Communication> items = new ArrayList<>();
         for (Participant administrator : administrators) {
             if (administrator.getTelegramUserId().equals(rechargeCredit.getCustomerTelegramUserId())) continue;
 
@@ -209,14 +209,10 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
 
         //MESSAGE TO PARTICIPANT
         if(RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())) {
-            Iterator<Participant> participantIterator = participantRepository.findByTelegramUserId(rechargeCredit.getCustomerTelegramUserId()).iterator();
-            if (participantIterator.hasNext()) {
-                Participant participant = participantIterator.next();
-                Communication communication = new Communication();
-                communication.setMessage(String.format(messageProperties.getNewRechargeCreditParticipantMessage(), rechargeCredit.getNewCredit() - rechargeCredit.getOldCredit(), rechargeCredit.getNewCredit()));
-                communication.setRecipientTelegramUserId(participant.getTelegramUserId());
-                items.add(communication);
-            }
+            Communication communication = new Communication();
+            communication.setMessage(String.format(messageProperties.getNewRechargeCreditParticipantMessage(), rechargeCredit.getNewCredit() - rechargeCredit.getOldCredit(), rechargeCredit.getNewCredit()));
+            communication.setRecipientTelegramUserId(rechargeCredit.getCustomerTelegramUserId());
+            items.add(communication);
         }
 
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();

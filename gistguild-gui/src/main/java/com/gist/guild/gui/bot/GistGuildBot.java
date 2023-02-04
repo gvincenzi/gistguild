@@ -19,6 +19,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Slf4j
 @Component
 public class GistGuildBot extends TelegramLongPollingBot {
+    private static final int MESSAGE_DELAY_SENDING = 2000;
+
     @Value("${gistguild.bot.username}")
     private String botUsername;
 
@@ -85,8 +87,9 @@ public class GistGuildBot extends TelegramLongPollingBot {
 
     public Message sendMessage(Long chat_id, String text){
         try {
+            Thread.sleep(MESSAGE_DELAY_SENDING);
             return execute(itemFactory.message(chat_id, text)); // Call method to send the message
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException | InterruptedException e) {
             log.error(e.getMessage());
         }
         return null;
