@@ -19,7 +19,7 @@ public class DocumentAsyncService<T extends Document> {
 
     public Future<T> getUniqueResult(UUID correlationID) {
         return executor.submit(() -> {
-            int timeout = 10000, waitingTime = 1000, waitingTimeTotal = 0;
+            int timeout = 15000, waitingTime = 1000, waitingTimeTotal = 0;
             while(!cacheMap.containsKey(correlationID) && waitingTimeTotal<=timeout){
                 Thread.sleep(waitingTime);
                 waitingTimeTotal+=1000;
@@ -30,7 +30,7 @@ public class DocumentAsyncService<T extends Document> {
 
     public Future<List<T>> getResult(UUID correlationID) {
         return executor.submit(() -> {
-            int timeout = 10000, waitingTime = 100, waitingTimeTotal = 0;
+            int timeout = 15000, waitingTime = 100, waitingTimeTotal = 0;
             while(!cacheMap.containsKey(correlationID) && waitingTimeTotal<=timeout){
                 Thread.sleep(waitingTime);
                 waitingTimeTotal+=1000;

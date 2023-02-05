@@ -79,8 +79,8 @@ public class MessageProcessor extends UpdateProcessor {
                     order.setQuantity(Long.parseLong(update.getMessage().getText()));
                     order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                     try {
-                        resourceManagerService.addOrUpdateOrder(order);
-                        message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.FALSE);
+                        order = resourceManagerService.addOrUpdateOrder(order);
+                        message = itemFactory.message(chat_id, String.format(messageProperties.getMessage20(), order.getExternalShortId()));
                     } catch (GistGuildGenericException e) {
                         message = itemFactory.message(chat_id,String.format(messageProperties.getError1(),e.getMessage()));
                     }
@@ -105,8 +105,8 @@ public class MessageProcessor extends UpdateProcessor {
                 order.setAddress(update.getMessage().getText());
                 order.setAmount(order.getQuantity() != null ? product.getPrice() * order.getQuantity() : product.getPrice());
                 try {
-                    resourceManagerService.addOrUpdateOrder(order);
-                    message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.FALSE);
+                    order = resourceManagerService.addOrUpdateOrder(order);
+                    message = itemFactory.message(chat_id, String.format(messageProperties.getMessage20(), order.getExternalShortId()));
                 } catch (GistGuildGenericException e) {
                     message = itemFactory.message(chat_id, String.format(messageProperties.getError1(), e.getMessage()));
                 }
