@@ -19,6 +19,9 @@ public class NodeController {
     @Value("${spring.application.name}")
     private String instanceName;
 
+    @Value("${gistguild.software.name}")
+    private String softwareName;
+
     @Autowired
     ParticipantRepository participantRepository;
 
@@ -30,8 +33,8 @@ public class NodeController {
 
     @GetMapping("/")
     public String welcome(Model model) throws GistGuildGenericException {
-        spikeClient.integrityVerification();
         model.addAttribute("instanceName", instanceName);
+        model.addAttribute("softwareName", softwareName);
         model.addAttribute("startup", StartupConfig.getStartupProcessed());
         model.addAttribute("validation", nodeService.validate(participantRepository.findAllByOrderByTimestampAsc()));
         return "welcome"; //view

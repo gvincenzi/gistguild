@@ -38,5 +38,6 @@
     <!-- LOG "com.gist*" at INFO level -->
     <logger name="com.gist" level="info">
         <appender-ref ref="Console"/>
+        <appender-ref ref="RollingFile"/>
     </logger>
 </configuration>
