@@ -19,7 +19,6 @@ gistguild:
     username: gist_it_bot
     token: TOKEN
     entryFreeCredit:
-      active: true
       amount: 5
     stripe:
       active: false

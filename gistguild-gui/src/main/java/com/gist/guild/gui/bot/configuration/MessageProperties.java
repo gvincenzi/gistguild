@@ -41,6 +41,13 @@ public class MessageProperties {
     String message26;
     String message27;
     String message28;
+    String message29;
+    String message30;
+    String message31;
+    String message32;
+    String message33;
+    String message34;
+    String message35;
 
     String menuItem1;
     String menuItem2;
@@ -61,6 +68,8 @@ public class MessageProperties {
     String menuItem17;
     String menuItem18;
     String menuItem19;
+    String menuItem20;
+    String menuItem21;
 
     String error1;
     String error2;
@@ -76,6 +85,7 @@ public class MessageProperties {
     String orderDetails4;
     String orderDetails5;
     String orderDetails6;
+    String orderDetails7;
 
     String productDetails1;
     String productDetails2;
@@ -90,7 +100,9 @@ public class MessageProperties {
                 (order.getAddress()!=null ? String.format(getOrderDetails3(),order.getAddress()) : EMPTY_STRING) +
                 (order.getAmount()!=null ? String.format(getOrderDetails4(),order.getAmount()) : EMPTY_STRING ) +
                 String.format(getOrderDetails5(), order.getProductName()) +
-                (order.getPaid() && order.getProductPassword() != null && order.getProductPassword() != EMPTY_STRING ? String.format(getOrderDetails6(), order.getProductPassword()) : EMPTY_STRING);
+                (order.getPaymentId() != null && order.getProductPassword() != null && order.getProductPassword() != EMPTY_STRING ? String.format(getOrderDetails6(), order.getProductPassword()) : EMPTY_STRING) +
+                (order.getPaymentId() != null && order.getProductUrl() != null && order.getProductUrl() != EMPTY_STRING ? String.format(getOrderDetails7(), order.getProductUrl()) : EMPTY_STRING);
+
     }
 
     public String toString(Product product) {

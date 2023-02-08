@@ -6,5 +6,7 @@ public enum ActionType {
     SELECT_ADDRESS,
     USER_MANAGEMENT,
     USER_CREDIT,
-    PRODUCT_URL;
+    PRODUCT_URL,
+    PRODUCT_OWNER_MESSAGE,
+    SEARCH_PRODUCT;
 }

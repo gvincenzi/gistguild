@@ -50,14 +50,6 @@ public class DeliveryValenceServiceTest {
     @MockBean
     DistributionConcurrenceService distributionConcurrenceService;
 
-    protected static DocumentProposition getNewDocument(String json) throws JsonProcessingException {
-        log.info(json);
-        DocumentProposition documentProposition = mapper.readValue(json, DocumentProposition.class);
-        log.info(mapper.writeValueAsString(documentProposition));
-
-        return documentProposition;
-    }
-
     private DocumentProposition getDocumentProposition() throws JsonProcessingException {
         String json = "{\n" +
                 "    \"documentPropositionType\" : \"USER_REGISTRATION\",\n" +
@@ -68,7 +60,7 @@ public class DeliveryValenceServiceTest {
                 "      }\n" +
                 "    }\n" +
                 "}";
-        DocumentProposition proposition = getNewDocument(json);
+        DocumentProposition proposition = mapper.readValue(json, DocumentProposition.class);
         return proposition;
     }
 

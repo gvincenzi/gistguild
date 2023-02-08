@@ -32,6 +32,8 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Autowired
     private ActionRepository actionRepository;
 
+    private static String REGEX = ".*%s.*";
+
     @Override
     public Future<Participant> findParticipantByTelegramId(Long participant_id) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
@@ -94,6 +96,15 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public Future<List<Product>> getProductsByTags(String tags) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, 0L));
+        params.add(new DocumentRepositoryMethodParameter<String>(String.class, String.format(REGEX,tags)));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Product.class.getSimpleName(), "findCatalogByTag", params);
+        return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
     public Future<Product> getProduct(Long productExternalShortId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, productExternalShortId));
@@ -116,52 +127,24 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public Future<List<Order>> getOrders(Long telegramUserId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampAsc", params);
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNullOrderByTimestampAsc", params);
         return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
     }
 
-    private Future<Order> getOrder(Long orderExternalId) {
+    @Override
+    public Future<List<Order>> getPaidOrders(Long telegramUserId) {
+        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
+        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, telegramUserId));
+        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNotNullOrderByTimestampAsc", params);
+        return documentAsyncService.getResult(distributionMessageResponseEntity.getBody().getCorrelationID());
+    }
+
+    @Override
+    public Future<Order> getOrder(Long orderExternalId) {
         List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
         params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
         ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
         return documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID());
-    }
-
-    @Override
-    public Order getOrderProcessed(Long orderExternalId) {
-        List<DocumentRepositoryMethodParameter<?>> params = new ArrayList<>(1);
-        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, orderExternalId));
-        ResponseEntity<DistributionMessage<Void>> distributionMessageResponseEntity = documentClient.documentByClass(Order.class.getSimpleName(), "findByExternalShortId", params);
-        Order order = null;
-        try {
-            order = (Order) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage());
-        }
-
-        params.clear();
-        params.add(new DocumentRepositoryMethodParameter<String>(String.class, order.getId()));
-        params.add(new DocumentRepositoryMethodParameter<Long>(Long.class, order.getCustomerTelegramUserId()));
-        distributionMessageResponseEntity = documentClient.documentByClass(Payment.class.getSimpleName(), "findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc", params);
-        try {
-            Payment payment = (Payment) documentAsyncService.getUniqueResult(distributionMessageResponseEntity.getBody().getCorrelationID()).get();
-            if (payment != null) {
-                log.info(String.format("Order ID [%s] has been payed by Payment ID [%s]", order.getId(), payment.getId()));
-                order.setPaid(Boolean.TRUE);
-            } else {
-                order.setPaid(Boolean.FALSE);
-            }
-
-        } catch (ExecutionException e) {
-            if (NoSuchElementException.class == e.getCause().getClass()) {
-                order.setPaid(Boolean.FALSE);
-            } else {
-                log.error(e.getMessage());
-            }
-        } catch (InterruptedException e) {
-            log.error(e.getMessage());
-        }
-        return order;
     }
 
     @Override

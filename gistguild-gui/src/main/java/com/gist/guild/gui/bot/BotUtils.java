@@ -37,11 +37,11 @@ public class BotUtils {
         return pattern.matcher(text).matches();
     }
 
-    public static BotApiMethod getOrderList(BotApiMethod message, Long user_id, Long chat_id, ResourceManagerService resourceManagerService, ItemFactory itemFactory, MessageProperties messageProperties) {
+    public static BotApiMethod getOrderList(BotApiMethod message, Long user_id, Long chat_id, ResourceManagerService resourceManagerService, ItemFactory itemFactory, MessageProperties messageProperties, Boolean paid) {
         try {
-            List<Order> orders = resourceManagerService.getOrders(user_id).get();
+            List<Order> orders = paid ? resourceManagerService.getPaidOrders(user_id).get() : resourceManagerService.getOrders(user_id).get();
             if (orders.isEmpty()) {
-                message = itemFactory.message(chat_id, messageProperties.getMessage27());
+                message = paid ? itemFactory.message(chat_id, messageProperties.getMessage29()) : itemFactory.message(chat_id, messageProperties.getMessage27());
             } else {
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -63,7 +63,7 @@ public class BotUtils {
                 rowsInline.add(rowInline);
 
                 markupInline.setKeyboard(rowsInline);
-                message = itemFactory.message(chat_id, messageProperties.getMessage28());
+                message = itemFactory.message(chat_id, paid ? messageProperties.getMessage30() : messageProperties.getMessage28());
 
                 ((SendMessage) message).setReplyMarkup(markupInline);
             }

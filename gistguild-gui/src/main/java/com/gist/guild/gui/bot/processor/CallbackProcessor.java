@@ -29,9 +29,6 @@ public class CallbackProcessor extends UpdateProcessor {
     @Value("${gistguild.bot.stripe.token}")
     private String stripeToken;
 
-    @Value("${gistguild.bot.entryFreeCredit.active}")
-    private Boolean entryFreeCredit;
-
     @Value("${gistguild.bot.entryFreeCredit.amount}")
     private Long entryFreeCreditAmount;
 
@@ -46,17 +43,17 @@ public class CallbackProcessor extends UpdateProcessor {
             try {
                 participant = resourceManagerService.addOrUpdateParticipant(BotUtils.createParticipant(update.getCallbackQuery().getFrom())).get();
                 message = itemFactory.message(chat_id, String.format(messageProperties.getMessage10(), participant.getNickname()));
-                if (entryFreeCredit) {
-                    RechargeCredit rechargeCredit = new RechargeCredit();
-                    rechargeCredit.setCustomerNickname(participant.getNickname());
-                    rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
-                    rechargeCredit.setNewCredit(entryFreeCreditAmount);
-                    rechargeCredit.setOldCredit(ZERO);
-                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
-                    resourceManagerService.addCredit(rechargeCredit).get();
+                RechargeCredit rechargeCredit = new RechargeCredit();
+                rechargeCredit.setCustomerNickname(participant.getNickname());
+                rechargeCredit.setCustomerTelegramUserId(participant.getTelegramUserId());
+                rechargeCredit.setNewCredit(entryFreeCreditAmount);
+                rechargeCredit.setOldCredit(ZERO);
+                rechargeCredit.setRechargeUserCreditType(RechargeCreditType.FREE);
+                resourceManagerService.addCredit(rechargeCredit).get();
+                if (entryFreeCreditAmount > 0) {
                     message = itemFactory.message(chat_id, String.format(messageProperties.getMessage11(), participant.getNickname(), entryFreeCreditAmount));
                 } else {
-                    message = itemFactory.message(chat_id, messageProperties.getMessage10());
+                    message = itemFactory.message(chat_id,  String.format(messageProperties.getMessage10(), participant.getNickname()));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
@@ -84,7 +81,9 @@ public class CallbackProcessor extends UpdateProcessor {
                 log.error(e.getMessage());
             }
         } else if (call_data.startsWith(CallbackDataKey.ORDER_LIST.name())) {
-            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties);
+            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.FALSE);
+        } else if (call_data.startsWith(CallbackDataKey.ORDER_PAID_LIST.name())) {
+            message = BotUtils.getOrderList(message, user_id, chat_id, resourceManagerService, itemFactory, messageProperties, Boolean.TRUE);
         } else if (call_data.startsWith(CallbackDataKey.CATALOG.name())) {
             try {
                 List<Product> products = resourceManagerService.getProducts().get();
@@ -113,6 +112,12 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (ExecutionException e) {
                 log.error(e.getMessage());
             }
+        } else if (call_data.equalsIgnoreCase(CallbackDataKey.SEARCH_PRODUCT.name())) {
+            Action action = new Action();
+            action.setActionType(ActionType.SEARCH_PRODUCT);
+            action.setTelegramUserId(user_id);
+            resourceManagerService.saveAction(action);
+            message = itemFactory.message(chat_id, messageProperties.getMessage34());
         } else if (call_data.startsWith(CallbackDataKey.PRODUCT_DETAILS.name() + CallbackDataKey.DELIMITER)) {
             try {
                 String[] split = call_data.split(CallbackDataKey.DELIMITER);
@@ -124,6 +129,7 @@ public class CallbackProcessor extends UpdateProcessor {
                 List<InlineKeyboardButton> rowInline = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
                 InlineKeyboardButton button = new InlineKeyboardButton();
                 button.setText(messageProperties.getMenuItem14());
                 button.setCallbackData(CallbackDataKey.PRODUCT_SELECT.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
@@ -142,16 +148,22 @@ public class CallbackProcessor extends UpdateProcessor {
                 button4.setCallbackData(CallbackDataKey.ADMIN_CATALOG_MANAGEMENT.name() + CallbackDataKey.DELIMITER + CallbackDataKey.ACTIVATION.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
                 rowInline1.add(button4);
 
+                InlineKeyboardButton buttonMessageToProductOwner = new InlineKeyboardButton();
+                buttonMessageToProductOwner.setText(messageProperties.getMenuItem12());
+                buttonMessageToProductOwner.setCallbackData(CallbackDataKey.PRODUCT_OWNER_MESSAGE.name() + CallbackDataKey.DELIMITER + product.getExternalShortId());
+                rowInline2.add(buttonMessageToProductOwner);
+
                 InlineKeyboardButton button5 = new InlineKeyboardButton();
                 button5.setText(messageProperties.getMenuItem13());
                 button5.setCallbackData(CallbackDataKey.WELCOME.name());
-                rowInline2.add(button5);
+                rowInline3.add(button5);
                 // Set the keyboard to the markup
                 rowsInline.add(rowInline);
                 if (resourceManagerService.findParticipantByTelegramId(user_id).get().getAdministrator()) {
                     rowsInline.add(rowInline1);
                 }
                 rowsInline.add(rowInline2);
+                rowsInline.add(rowInline3);
                 // Add it to the message
                 markupInline.setKeyboard(rowsInline);
                 ((SendMessage) message).setReplyMarkup(markupInline);
@@ -223,11 +235,25 @@ public class CallbackProcessor extends UpdateProcessor {
             } catch (InterruptedException | ExecutionException e) {
                 log.error(e.getMessage());
             }
+        } else if (call_data.startsWith(CallbackDataKey.PRODUCT_OWNER_MESSAGE.name() + CallbackDataKey.DELIMITER)) {
+            String[] split = call_data.split(CallbackDataKey.DELIMITER);
+            Long productExternalShortId = Long.parseLong(split[1]);
+
+            Action action = new Action();
+            action.setActionType(ActionType.PRODUCT_OWNER_MESSAGE);
+            action.setTelegramUserId(user_id);
+            action.setSelectedProductId(productExternalShortId);
+            resourceManagerService.saveAction(action);
+            message = itemFactory.sendMessageToProductOwner(chat_id);
         } else if (call_data.startsWith(CallbackDataKey.ORDER_DETAILS.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
-            Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
-            message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+            try{
+                Order order = resourceManagerService.getOrder(orderExternalShortId).get();
+                message = itemFactory.orderDetailsMessageBuilder(chat_id, order);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
+            }
         } else if (call_data.startsWith(CallbackDataKey.PAYMENT.name() + CallbackDataKey.DELIMITER)) {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
@@ -246,12 +272,14 @@ public class CallbackProcessor extends UpdateProcessor {
             String[] split = call_data.split(CallbackDataKey.DELIMITER);
             Long orderExternalShortId = Long.parseLong(split[1]);
             try {
-                Order order = resourceManagerService.getOrderProcessed(orderExternalShortId);
+                Order order = resourceManagerService.getOrder(orderExternalShortId).get();
                 order.setDeleted(Boolean.TRUE);
                 order = resourceManagerService.addOrUpdateOrder(order);
                 message = itemFactory.message(chat_id, String.format(messageProperties.getMessage21(), order.getExternalShortId()));
             } catch (GistGuildGenericException e) {
                 message = itemFactory.message(chat_id, String.format(messageProperties.getError1(), e.getMessage()));
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
             }
         } else if (call_data.equalsIgnoreCase(CallbackDataKey.ADD_CREDIT.name())) {
             message = itemFactory.userCredit(chat_id);
@@ -334,7 +362,7 @@ public class CallbackProcessor extends UpdateProcessor {
                     rechargeCredit.setCustomerTelegramUserId(participantToRecharge.getTelegramUserId());
                     rechargeCredit.setNewCredit(rechargeCreditLast.getNewCredit() + credit);
                     rechargeCredit.setOldCredit(rechargeCreditLast.getNewCredit());
-                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.TELEGRAM);
+                    rechargeCredit.setRechargeUserCreditType(RechargeCreditType.ADMIN);
                     resourceManagerService.addCredit(rechargeCredit).get();
                     message = itemFactory.message(chat_id, messageProperties.getMessage26());
                 } catch (InterruptedException | ExecutionException e) {

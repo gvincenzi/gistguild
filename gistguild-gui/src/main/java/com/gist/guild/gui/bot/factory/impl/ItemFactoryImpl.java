@@ -4,6 +4,7 @@ import com.gist.guild.commons.message.entity.Order;
 import com.gist.guild.commons.message.entity.Participant;
 import com.gist.guild.commons.message.entity.Product;
 import com.gist.guild.commons.message.entity.RechargeCredit;
+import com.gist.guild.gui.bot.GistGuildBot;
 import com.gist.guild.gui.bot.action.entity.Action;
 import com.gist.guild.gui.bot.action.entity.ActionType;
 import com.gist.guild.gui.bot.configuration.MessageProperties;
@@ -36,6 +37,9 @@ public class ItemFactoryImpl implements ItemFactory {
 
     @Autowired
     private MessageProperties messageProperties;
+
+    @Autowired
+    private GistGuildBot gistGuildBot;
 
     public SendMessage welcomeMessage(Message update, Long user_id) {
         SendMessage message;
@@ -93,6 +97,16 @@ public class ItemFactoryImpl implements ItemFactory {
                 action.setTelegramUserId(participant.getTelegramUserId());
                 resourceManagerService.saveAction(action);
                 return userManagementMenu(update.getChatId(), participantByTelegramId);
+            } else if (actionInProgress != null && ActionType.PRODUCT_OWNER_MESSAGE.equals(actionInProgress.getActionType())) {
+                resourceManagerService.deleteActionInProgress(actionInProgress);
+                try {
+                    Product product = resourceManagerService.getProduct(actionInProgress.getSelectedProductId()).get();
+                    Participant participantByTelegramId = resourceManagerService.findParticipantByTelegramId(product.getOwnerTelegramUserId()).get();
+                    gistGuildBot.sendMessage(product.getOwnerTelegramUserId(),String.format(messageProperties.getMessage32(),participantByTelegramId.getNickname(),product.getName(),update.getText()));
+                    return message(update.getChatId(), messageProperties.getMessage33());
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
             }
 
         }
@@ -114,20 +128,28 @@ public class ItemFactoryImpl implements ItemFactory {
             button1.setText(messageProperties.getMenuItem2());
             button1.setCallbackData(CallbackDataKey.CATALOG.name());
             rowInline1.add(button1);
+            InlineKeyboardButton button7 = new InlineKeyboardButton();
+            button7.setText(messageProperties.getMenuItem21());
+            button7.setCallbackData(CallbackDataKey.SEARCH_PRODUCT.name());
+            rowInline1.add(button7);
             InlineKeyboardButton button2 = new InlineKeyboardButton();
             button2.setText(messageProperties.getMenuItem3());
             button2.setCallbackData(CallbackDataKey.ORDER_LIST.name());
             rowInline2.add(button2);
+            InlineKeyboardButton button20 = new InlineKeyboardButton();
+            button20.setText(messageProperties.getMenuItem20());
+            button20.setCallbackData(CallbackDataKey.ORDER_PAID_LIST.name());
+            rowInline2.add(button20);
             InlineKeyboardButton button3 = new InlineKeyboardButton();
             button3.setText(messageProperties.getMenuItem4());
             button3.setCallbackData(CallbackDataKey.CREDIT.name());
-            rowInline2.add(button3);
+            rowInline3.add(button3);
             InlineKeyboardButton button6 = new InlineKeyboardButton();
             button6.setText(messageProperties.getMenuItem5());
             button6.setCallbackData(CallbackDataKey.ADD_CREDIT.name());
             if(stripeActive) rowInline3.add(button6);
             InlineKeyboardButton button4 = new InlineKeyboardButton();
-            button4.setText(String.format(messageProperties.getMenuItem6(), participant.getNickname(), participant.getTelegramUserId()));
+            button4.setText(String.format(messageProperties.getMenuItem6(), participant.getTelegramUserId()));
             button4.setCallbackData(CallbackDataKey.CANCELLATION.name());
             rowInline4.add(button4);
             InlineKeyboardButton button5 = new InlineKeyboardButton();
@@ -192,7 +214,7 @@ public class ItemFactoryImpl implements ItemFactory {
         button1.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.ADD_CREDIT.name());
         rowInline1.add(button1);
         InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText(String.format(messageProperties.getMenuItem6(), participantToManage.getNickname(), participantToManage.getTelegramUserId()));
+        button2.setText(String.format(messageProperties.getMenuItem6(), participantToManage.getTelegramUserId()));
         button2.setCallbackData(CallbackDataKey.USER_MANAGEMENT.name()+CallbackDataKey.DELIMITER+CallbackDataKey.CANCELLATION);
         rowInline1.add(button2);
         InlineKeyboardButton button3 = new InlineKeyboardButton();
@@ -328,9 +350,13 @@ public class ItemFactoryImpl implements ItemFactory {
         }
 
         InlineKeyboardButton button4 = new InlineKeyboardButton();
-        button4.setText(messageProperties.getMenuItem12());
+        button4.setText(messageProperties.getMenuItem3());
         button4.setCallbackData(CallbackDataKey.ORDER_LIST.name());
         rowInline4.add(button4);
+        InlineKeyboardButton button5 = new InlineKeyboardButton();
+        button5.setText(messageProperties.getMenuItem20());
+        button5.setCallbackData(CallbackDataKey.ORDER_PAID_LIST.name());
+        rowInline4.add(button5);
 
         InlineKeyboardButton button3 = new InlineKeyboardButton();
         button3.setText(messageProperties.getMenuItem13());
@@ -338,7 +364,7 @@ public class ItemFactoryImpl implements ItemFactory {
         rowInline5.add(button3);
 
         // Set the keyboard to the markup
-        if(!order.getPaid()){
+        if(order.getPaymentId() == null){
             rowsInline.add(rowInline1);
             rowsInline.add(rowInline2);
         } else {
@@ -355,5 +381,10 @@ public class ItemFactoryImpl implements ItemFactory {
         message.setReplyMarkup(markupInline);
         message.enableHtml(Boolean.TRUE);
         return message;
+    }
+
+    @Override
+    public SendMessage sendMessageToProductOwner(Long chat_id) {
+        return message(chat_id, messageProperties.getMessage31());
     }
 }

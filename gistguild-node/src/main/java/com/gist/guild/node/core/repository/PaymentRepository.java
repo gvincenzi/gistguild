@@ -6,5 +6,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface PaymentRepository extends DocumentRepository<Payment>, MongoRepository<Payment, String> {
-    List<Payment> findTopByOrderIdAndCustomerTelegramUserIdOrderByTimestampDesc(String orderId, Long customerTelegramId);
 }

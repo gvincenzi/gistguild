@@ -35,7 +35,9 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
 
         //Validation payment : check if Participant has got credit enough to purchase
         nodeBusinessService.validatePayment(document);
-        return repository.save(newItem);
+        Payment payment = repository.save(newItem);
+        nodeBusinessService.payOrder(payment);
+        return payment;
     }
 
     protected Payment getNewItem(com.gist.guild.commons.message.entity.Payment document, Payment previous) throws GistGuildGenericException {
@@ -78,7 +80,9 @@ public class PaymentServiceImpl extends NodeService<com.gist.guild.commons.messa
             payment.setTimestamp(document.getTimestamp());
             payment.setNonce(document.getNonce());
             payment.setExternalShortId(document.getExternalShortId());
-            repository.save(payment);
+            payment.setLastUpdateTimestamp(document.getLastUpdateTimestamp());
+            payment = repository.save(payment);
+            nodeBusinessService.payOrder(payment);
         }
 
         return validate(repository.findAllByOrderByTimestampAsc());

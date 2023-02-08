@@ -47,3 +47,5 @@ gistguild:
     error5: "Product does not exist"
     error6: "Not enough quantity available"
     adminPasswordMessage: "Sei stato designato Amministratore del sistema. Prendi nota di queste credenziali per accedere ad un nodo della GIST Guild:\n\nusername > <b>[%d]</b>\npassword > <b>[%s]</b>\n\n<b>Non ti sarà più possibile richiederle</b>."
+    newOrderMessage: "Hai ricevuto un nuovo ordine da [<b>%s</b>] per il prodotto [<b>%s</b>]"
+    newParticipantMessage: "Un nuovo partecipante [<b>%s</b>] si è iscritto al software"

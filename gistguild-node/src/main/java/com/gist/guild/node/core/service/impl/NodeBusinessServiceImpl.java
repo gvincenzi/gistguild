@@ -10,6 +10,7 @@ import com.gist.guild.commons.message.entity.RechargeCreditType;
 import com.gist.guild.node.core.configuration.MessageProperties;
 import com.gist.guild.node.core.document.Participant;
 import com.gist.guild.node.core.document.Product;
+import com.gist.guild.node.core.repository.OrderRepository;
 import com.gist.guild.node.core.repository.ParticipantRepository;
 import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.repository.RechargeCreditRepository;
@@ -18,6 +19,7 @@ import com.gist.guild.node.core.service.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +33,9 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     @Autowired
     NodeService<RechargeCredit, com.gist.guild.node.core.document.RechargeCredit> rechargeCreditNodeService;
@@ -77,6 +82,7 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
             product.setAvailableQuantity(product.getAvailableQuantity()-order.getQuantity());
         }
 
+        product.setLastUpdateTimestamp(Instant.now());
         productRepository.save(product);
     }
 
@@ -89,6 +95,17 @@ public class NodeBusinessServiceImpl implements NodeBusinessService {
         if(order.getQuantity() != null && product.getAvailableQuantity() != null){
             product.setAvailableQuantity(product.getAvailableQuantity()+order.getQuantity());
         }
+        product.setLastUpdateTimestamp(Instant.now());
         productRepository.save(product);
+    }
+
+    @Override
+    public void payOrder(com.gist.guild.node.core.document.Payment payment) {
+        com.gist.guild.node.core.document.Order order = orderRepository.findById(payment.getOrderId()).get();
+        if(order.getPaymentId() == null || order.getPaymentId() == "") {
+            order.setPaymentId(payment.getId());
+            order.setLastUpdateTimestamp(Instant.now());
+            orderRepository.save(order);
+        }
     }
 }

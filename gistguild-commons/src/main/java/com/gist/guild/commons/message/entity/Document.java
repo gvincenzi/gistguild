@@ -11,6 +11,7 @@ public class Document implements Comparable<Document>{
     String id;
     String previousId;
     Instant timestamp = Instant.now();
+    Instant lastUpdateTimestamp = Instant.now();
     Integer nonce;
     String nodeInstanceName;
     Boolean isCorruptionDetected = Boolean.FALSE;
@@ -27,6 +28,7 @@ public class Document implements Comparable<Document>{
         documentCorruption.setNodeInstanceName("gistguild-distribution");
         documentCorruption.setIsCorruptionDetected(Boolean.TRUE);
         documentCorruption.setTimestamp(Instant.now());
+        documentCorruption.setLastUpdateTimestamp(Instant.now());
         return documentCorruption;
     }
 }

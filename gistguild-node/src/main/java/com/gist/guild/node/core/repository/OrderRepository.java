@@ -8,5 +8,10 @@ import java.util.List;
 public interface OrderRepository extends DocumentRepository<Order>, MongoRepository<Order, String> {
     List<Order> findByProductOwnerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampDesc(Long productOwnerTelegramUserId);
     List<Order> findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long productOwnerTelegramUserId);
-    List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseOrderByTimestampAsc(Long telegramUserId);
+    List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNullOrderByTimestampAsc(Long telegramUserId);
+    List<Order> findByCustomerTelegramUserIdAndDeletedIsFalseAndDeliveredIsFalseAndPaymentIdNotNullOrderByTimestampAsc(Long telegramUserId);
+
+    //Statistics methods
+    List<Order> findByDeletedIsFalseAndPaymentIdNotNull();
+    List<Order> findByProductOwnerTelegramUserIdAndDeletedIsFalseAndPaymentIdNotNull(Long telegramUserId);
 }

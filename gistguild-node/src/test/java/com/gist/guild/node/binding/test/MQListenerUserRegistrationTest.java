@@ -93,7 +93,7 @@ public class MQListenerUserRegistrationTest extends MQListenerTest {
 
     @Test
     public void processDocumentPropositionTest1() throws JsonProcessingException, GistGuildGenericException {
-        DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_PROPOSITION);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setContent(getDocumentPropositionUserRegistration());
@@ -133,7 +133,7 @@ public class MQListenerUserRegistrationTest extends MQListenerTest {
 
     @Test
     public void processDocumentPropositionTest2() throws JsonProcessingException, GistGuildGenericException {
-        DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_PROPOSITION);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setContent(getDocumentPropositionUserCancellation());

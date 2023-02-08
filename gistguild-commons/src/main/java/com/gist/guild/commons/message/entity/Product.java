@@ -16,6 +16,7 @@ public class Product extends Document {
     private Boolean delivery = Boolean.FALSE;
     private Boolean deleted = Boolean.FALSE;
     private Long ownerTelegramUserId;
+    private String tags;
 
     @Override
     public boolean equals(Object o) {

@@ -16,4 +16,10 @@ public class MessageProperties {
     String error6;
 
     String adminPasswordMessage;
+    String newOrderMessage;
+    String newParticipantMessage;
+    String adminMessage;
+    String newRechargeCreditInvoiceMessage;
+    String newRechargeCreditAdminMessage;
+    String newRechargeCreditParticipantMessage;
 }

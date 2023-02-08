@@ -17,4 +17,5 @@ public interface ItemFactory {
     SendMessage selectProductQuantity(Long chat_id);
     SendMessage selectAddress(Long chat_id);
     SendMessage orderDetailsMessageBuilder(Long chat_id, Order order);
+    SendMessage sendMessageToProductOwner(Long chat_id);
 }

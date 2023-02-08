@@ -79,7 +79,7 @@ public class MQListenerRechargeCreditRegistrationTest extends MQListenerTest{
 
     @Test
     public void processDocumentPropositionTest1() throws JsonProcessingException, GistGuildGenericException {
-        DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.ENTRY_PROPOSITION);
         msg.setCorrelationID(UUID.randomUUID());
         msg.setContent(getDocumentPropositionRechargeCreditRegistration());

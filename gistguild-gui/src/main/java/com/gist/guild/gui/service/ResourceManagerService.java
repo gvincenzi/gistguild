@@ -17,11 +17,13 @@ public interface ResourceManagerService {
     void saveAction(Action action);
     void deleteActionInProgress(Action action);
     Future<List<Product>> getProducts();
+    Future<List<Product>> getProductsByTags(String tags);
     Future<Product> getProduct(Long productExternalShortId);
     Future<Product> updateProduct(Product product);
     Future<List<Order>> getOrders(Long telegramUserId);
+    Future<List<Order>> getPaidOrders(Long telegramUserId);
+    Future<Order> getOrder(Long orderExternalId);
     Order addOrUpdateOrder(Order order) throws GistGuildGenericException;
-    Order getOrderProcessed(Long orderExternalId);
     void payOrder(Long orderExternalId, String customerNickname, Long customerTelegramUserId) throws GistGuildGenericException;
     Future<RechargeCredit> getCredit(Long telegramUserId);
     Future<RechargeCredit> addCredit(RechargeCredit rechargeCredit);

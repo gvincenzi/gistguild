@@ -41,19 +41,19 @@ public class MQListener {
 
     @StreamListener(target = "distributionChannel")
     public void processDistribution(DistributionMessage<List<?>> msg) {
-        log.info(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("START >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
         if (DistributionEventType.ENTRY_RESPONSE.equals(msg.getType()) && msg.getContent() != null && GuiConcurrenceService.getCorrelationIDs().contains(msg.getCorrelationID())) {
-            log.info(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
+            log.debug(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
             GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
             putInCache(msg);
         } else if (DistributionEventType.CORRUPTION_DETECTED.equals(msg.getType()) && msg.getContent() != null) {
             //FIXNME How ?
         } else if (DistributionEventType.GET_DOCUMENT.equals(msg.getType())) {
-            log.info(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
+            log.debug(String.format("Correlation ID [%s] processed", msg.getCorrelationID()));
             GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
             putInCache(msg);
         } else if (DistributionEventType.BUSINESS_EXCEPTION.equals(msg.getType()) && msg.getContent() != null) {
-            log.info(String.format("Correlation ID [%s] processed with exception", msg.getCorrelationID()));
+            log.debug(String.format("Correlation ID [%s] processed with exception", msg.getCorrelationID()));
             GuiConcurrenceService.getCorrelationIDs().remove(msg.getCorrelationID());
             putInCache(msg);
         } else if (DistributionEventType.COMMUNICATION.equals(msg.getType()) && msg.getContent() != null) {
@@ -61,14 +61,14 @@ public class MQListener {
                 Communication communication = null;
                 try {
                     communication = mapper.readValue(mapper.writeValueAsString(item), Communication.class);
-                    gistGuildBot.sendMessage(communication.getRecipient().getTelegramUserId(),communication.getMessage());
+                    gistGuildBot.sendMessage(communication.getRecipientTelegramUserId(),communication.getMessage());
                 } catch (JsonProcessingException e) {
                     log.error(e.getMessage());
                 }
 
             }
         }
-        log.info(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
+        log.debug(String.format("END >> Message received in Distribution Channel with Correlation ID [%s]", msg.getCorrelationID()));
     }
 
     private void putInCache(DistributionMessage<List<?>> msg) {

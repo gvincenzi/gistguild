@@ -56,7 +56,7 @@ public class MQListenerIntegrityRequestTest extends MQListenerTest{
         Mockito.when(paymentNodeService.validate(ArgumentMatchers.any(List.class))).thenReturn(Boolean.TRUE);
         Mockito.when(responseChannel.send(ArgumentMatchers.any(Message.class))).thenReturn(Boolean.TRUE);
 
-        DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.INTEGRITY_VERIFICATION);
         msg.setCorrelationID(UUID.randomUUID());
 
@@ -73,7 +73,7 @@ public class MQListenerIntegrityRequestTest extends MQListenerTest{
         Mockito.when(paymentNodeService.validate(ArgumentMatchers.any(List.class))).thenReturn(Boolean.TRUE);
         Mockito.when(responseChannel.send(ArgumentMatchers.any(Message.class))).thenReturn(Boolean.TRUE);
 
-        DistributionMessage<DocumentProposition> msg = new DistributionMessage<>();
+        DistributionMessage<DocumentProposition<?>> msg = new DistributionMessage<>();
         msg.setType(DistributionEventType.INTEGRITY_VERIFICATION);
         msg.setCorrelationID(UUID.randomUUID());
 
