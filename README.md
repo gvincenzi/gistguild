@@ -10,7 +10,7 @@ Each software federating the GIST Guild Universe can launch one or more *node* :
 
 ## First software federating the GIST Guild
 The first two software of this universe will be : 
-- **GasSMan**: an italian association that works for an ethical purchasing group
+- **ResponsabItaly**: an italian association that works for an ethical purchasing group
 - **InMediArt**: an italian association that works for independent artists production and distribution  
 
 ## Used Technologies
