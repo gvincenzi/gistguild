@@ -101,8 +101,7 @@ public class ItemFactoryImpl implements ItemFactory {
                 resourceManagerService.deleteActionInProgress(actionInProgress);
                 try {
                     Product product = resourceManagerService.getProduct(actionInProgress.getSelectedProductId()).get();
-                    Participant participantByTelegramId = resourceManagerService.findParticipantByTelegramId(product.getOwnerTelegramUserId()).get();
-                    gistGuildBot.sendMessage(product.getOwnerTelegramUserId(),String.format(messageProperties.getMessage32(),participantByTelegramId.getNickname(),product.getName(),update.getText()));
+                    gistGuildBot.sendMessage(product.getOwnerTelegramUserId(),String.format(messageProperties.getMessage32(),participant.getNickname(),product.getName(),update.getText()));
                     return message(update.getChatId(), messageProperties.getMessage33());
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
