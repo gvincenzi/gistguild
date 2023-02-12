@@ -20,6 +20,7 @@ import java.util.List;
 @Slf4j
 @EnableBinding(MQBinding.class)
 public class MQListener {
+    private static final int COMMUNICATION_MESSAGE_DELAY_SENDING = 2000;
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Autowired
     private DocumentAsyncService<Participant> participantAsyncService;
@@ -61,8 +62,9 @@ public class MQListener {
                 Communication communication = null;
                 try {
                     communication = mapper.readValue(mapper.writeValueAsString(item), Communication.class);
+                    Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
                     gistGuildBot.sendMessage(communication.getRecipientTelegramUserId(),communication.getMessage());
-                } catch (JsonProcessingException e) {
+                } catch (JsonProcessingException | InterruptedException e) {
                     log.error(e.getMessage());
                 }
 
