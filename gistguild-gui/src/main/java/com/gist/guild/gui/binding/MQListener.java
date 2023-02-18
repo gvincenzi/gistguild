@@ -62,8 +62,8 @@ public class MQListener {
                 Communication communication = null;
                 try {
                     communication = mapper.readValue(mapper.writeValueAsString(item), Communication.class);
+                    gistGuildBot.sendMessage(communication.getRecipientTelegramUserId(), communication.getMessage());
                     Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
-                    gistGuildBot.sendMessage(communication.getRecipientTelegramUserId(),communication.getMessage());
                 } catch (JsonProcessingException | InterruptedException e) {
                     log.error(e.getMessage());
                 }

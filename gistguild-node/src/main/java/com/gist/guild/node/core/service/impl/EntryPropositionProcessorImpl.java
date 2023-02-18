@@ -23,17 +23,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.DelayQueue;
 
 @Slf4j
 @Service
 public class EntryPropositionProcessorImpl implements EntryPropositionProcessor {
-    private static final int COMMUNICATION_MESSAGE_DELAY_SENDING = 2000;
     @Autowired
     MessageChannel responseChannel;
 
@@ -155,9 +156,7 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         log.debug(String.format("DocumentProposition [%s] END processing",msg.getCorrelationID()));
     }
 
-    @Async
-    void sendNewAdministratorCommunication(Participant participant) throws InterruptedException {
-        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
+    void sendNewAdministratorCommunication(Participant participant) {
         Communication communication = new Communication();
         communication.setMessage(String.format(messageProperties.getAdminPasswordMessage(),participant.getTelegramUserId(),participant.getNewAdministratorTempPassword()));
         communication.setRecipientTelegramUserId(participant.getTelegramUserId());
@@ -165,21 +164,12 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         List<Communication> items = new ArrayList<>(1);
         items.add(communication);
 
-        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-        responseMessage.setCorrelationID(UUID.randomUUID());
-        responseMessage.setInstanceName(instanceName);
-        responseMessage.setType(DistributionEventType.COMMUNICATION);
-        responseMessage.setDocumentClass(Communication.class);
-        responseMessage.setContent(items);
-        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-        responseChannel.send(responseMsg);
+        buildCommunicationResponseMessage(items);
 
         participant.setNewAdministratorTempPassword(null);
     }
 
-    @Async
-    void sendNewRechargeCreditCommunication(RechargeCredit rechargeCredit) throws InterruptedException {
-        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
+    void sendNewRechargeCreditCommunication(RechargeCredit rechargeCredit) {
         if(
                 !RechargeCreditType.INVOICE.equals(rechargeCredit.getRechargeUserCreditType())
                 && !RechargeCreditType.ADMIN.equals(rechargeCredit.getRechargeUserCreditType())
@@ -215,19 +205,10 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
             items.add(communication);
         }
 
-        DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-        responseMessage.setCorrelationID(UUID.randomUUID());
-        responseMessage.setInstanceName(instanceName);
-        responseMessage.setType(DistributionEventType.COMMUNICATION);
-        responseMessage.setDocumentClass(Communication.class);
-        responseMessage.setContent(items);
-        Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-        responseChannel.send(responseMsg);
+        buildCommunicationResponseMessage(items);
     }
 
-    @Async
-    void sendNewOrderCommunication(Order order) throws InterruptedException {
-        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
+    void sendNewOrderCommunication(Order order) {
         if(order.getCustomerTelegramUserId().equals(order.getProductOwnerTelegramUserId())) return;
         Communication communication = new Communication();
         communication.setMessage(String.format(messageProperties.getNewOrderMessage(),order.getCustomerNickname(),order.getProductName()));
@@ -236,6 +217,28 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         List<Communication> items = new ArrayList<>(1);
         items.add(communication);
 
+        buildCommunicationResponseMessage(items);
+    }
+
+    void sendNewParticipantCommunication(Participant participant) {
+        Boolean isNewParticipant = (participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0);
+        if(isNewParticipant) {
+            List<Participant> administrators = participantRepository.findByAdministratorTrue();
+            List<Communication> items = new ArrayList<>(administrators.size());
+            for (Participant administrator : administrators) {
+                if (!administrator.getTelegramUserId().equals(participant.getTelegramUserId())) {
+                    Communication communication = new Communication();
+                    communication.setMessage(String.format(messageProperties.getNewParticipantMessage(), participant.getNickname()));
+                    communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
+                    items.add(communication);
+                }
+            }
+
+            buildCommunicationResponseMessage(items);
+        }
+    }
+
+    private void buildCommunicationResponseMessage(List<Communication> items) {
         DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
         responseMessage.setCorrelationID(UUID.randomUUID());
         responseMessage.setInstanceName(instanceName);
@@ -244,32 +247,6 @@ public class EntryPropositionProcessorImpl implements EntryPropositionProcessor 
         responseMessage.setContent(items);
         Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
         responseChannel.send(responseMsg);
-    }
-
-    @Async
-    void sendNewParticipantCommunication(Participant participant) throws InterruptedException {
-        Thread.sleep(COMMUNICATION_MESSAGE_DELAY_SENDING);
-        Boolean isNewParticipant = (participant.getTimestamp().compareTo(participant.getLastUpdateTimestamp()) == 0);
-        if(isNewParticipant) {
-            List<Participant> administrators = participantRepository.findByAdministratorTrue();
-            List<Communication> items = new ArrayList<>(administrators.size());
-            for (Participant administrator : administrators) {
-                if (administrator.getTelegramUserId().equals(participant.getTelegramUserId())) continue;
-                Communication communication = new Communication();
-                communication.setMessage(String.format(messageProperties.getNewParticipantMessage(), participant.getNickname()));
-                communication.setRecipientTelegramUserId(administrator.getTelegramUserId());
-                items.add(communication);
-            }
-
-            DistributionMessage<List<?>> responseMessage = new DistributionMessage<>();
-            responseMessage.setCorrelationID(UUID.randomUUID());
-            responseMessage.setInstanceName(instanceName);
-            responseMessage.setType(DistributionEventType.COMMUNICATION);
-            responseMessage.setDocumentClass(Communication.class);
-            responseMessage.setContent(items);
-            Message<DistributionMessage<List<?>>> responseMsg = MessageBuilder.withPayload(responseMessage).build();
-            responseChannel.send(responseMsg);
-        }
     }
 
     private void sendResponseMessage(DistributionMessage<DocumentProposition<?>> msg, List<Document> items, Class documentClass) {

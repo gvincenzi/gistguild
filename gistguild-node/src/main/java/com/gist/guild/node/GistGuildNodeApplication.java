@@ -15,7 +15,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableMongoRepositories
 @EnableFeignClients
 @EnableConfigurationProperties(MessageProperties.class)
-@EnableAsync
 @SpringBootApplication
 public class GistGuildNodeApplication {
     public static void main(String[] args) {
