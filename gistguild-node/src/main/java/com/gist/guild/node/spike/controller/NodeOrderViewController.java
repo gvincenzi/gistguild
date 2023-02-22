@@ -15,6 +15,8 @@ import com.gist.guild.node.core.repository.ProductRepository;
 import com.gist.guild.node.core.service.NodeService;
 import com.gist.guild.node.spike.client.SpikeClient;
 import lombok.extern.java.Log;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -215,5 +220,32 @@ public class NodeOrderViewController {
         model.addAttribute("newOrder", new com.gist.guild.commons.message.entity.Order());
 
         return "order"; //view
+    }
+
+    @GetMapping("/order/export/csv")
+    public void exportCSV(Principal principal, HttpServletResponse response) throws IOException {
+        List<Order> items = repository.findByProductOwnerTelegramUserIdOrderByTimestampDesc(Long.parseLong(principal.getName()));
+        Collections.sort(items);
+        Collections.reverse(items);
+
+
+        response.setContentType("text/csv");
+        response.addHeader("Content-Disposition", "attachment; filename=\"orders.csv\"");
+
+        CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT);
+        printer.printRecord("Product name", "Customer nickname", "Quantity", "Amount", "Address", "Timestamp", "Insertion date/time", "Status");
+        for (Order order : items) {
+            String status = "IN PROGRESS";
+            if(order.getDeleted()){
+                status = "DELETED";
+            }
+            if(order.getPaymentId() != null) {
+                status = "PAID";
+            }
+            if(order.getDelivered()){
+                status = "DELIVERED";
+            }
+            printer.printRecord(order.getProductName(), order.getCustomerNickname(), order.getQuantity(), order.getAmount(), order.getAddress(), order.getTimestamp(), status);
+        }
     }
 }

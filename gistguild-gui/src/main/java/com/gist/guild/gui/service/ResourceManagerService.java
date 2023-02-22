@@ -14,6 +14,7 @@ public interface ResourceManagerService {
     Future<Participant> findParticipantByTelegramId(Long participant_id);
     Future<Participant> addOrUpdateParticipant(Participant participant);
     Action getActionInProgress(Long telegramUserId);
+    void deleteAllActionInProgress(Long telegramUserId);
     void saveAction(Action action);
     void deleteActionInProgress(Action action);
     Future<List<Product>> getProducts();

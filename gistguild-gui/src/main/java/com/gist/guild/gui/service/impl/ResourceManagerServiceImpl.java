@@ -204,4 +204,12 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public void deleteActionInProgress(Action action) {
         actionRepository.delete(action);
     }
+
+    @Override
+    public void deleteAllActionInProgress(Long telegramUserId) {
+        Optional<Action> byTelegramUserIdAndInProgressTrue = actionRepository.findByTelegramUserIdAndInProgressTrue(telegramUserId);
+        if(byTelegramUserIdAndInProgressTrue.isPresent()){
+            actionRepository.delete(byTelegramUserIdAndInProgressTrue.get());
+        }
+    }
 }

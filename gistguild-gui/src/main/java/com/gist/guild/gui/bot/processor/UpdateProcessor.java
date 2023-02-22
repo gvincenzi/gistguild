@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public abstract class UpdateProcessor {
     protected static final int CURRENCY_DIVISOR = 100;
     protected static final String START_TOKEN = "/start";
+    protected static final String RESET_TOKEN = "/reset";
     protected static final long ZERO = 0L;
     protected static final String PLUS = "+";
     protected static final String MINUS = "-";

@@ -50,6 +50,8 @@ public class MessageProcessor extends UpdateProcessor {
 
         if (update.getMessage().getText() != null && update.getMessage().getText().equalsIgnoreCase(START_TOKEN)) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
+        } else if (update.getMessage().getText() != null && update.getMessage().getText().equalsIgnoreCase(RESET_TOKEN)) {
+            message = itemFactory.resetMessage(update.getMessage(), user_id);
         } else if (update.getMessage().getText() != null && actionInProgress != null && !(ActionType.SELECT_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SEARCH_PRODUCT.equals(actionInProgress.getActionType()) || ActionType.SELECT_ADDRESS.equals(actionInProgress.getActionType()))) {
             message = itemFactory.welcomeMessage(update.getMessage(), user_id);
         } else if (actionInProgress != null && ActionType.USER_SEARCH.equals(actionInProgress.getActionType())) {

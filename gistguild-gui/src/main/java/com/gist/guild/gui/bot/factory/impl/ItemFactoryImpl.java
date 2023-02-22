@@ -173,6 +173,21 @@ public class ItemFactoryImpl implements ItemFactory {
         return message;
     }
 
+    public SendMessage resetMessage(Message update, Long user_id) {
+        Participant participant = null;
+        try {
+            participant = resourceManagerService.findParticipantByTelegramId(user_id).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+        }
+
+        if (participant != null) {
+            resourceManagerService.deleteAllActionInProgress(participant.getTelegramUserId());
+        }
+
+        return message(update.getChatId(), "RESET OK");
+    }
+
     @Override
     public SendMessage message(Long chat_id, String text) {
         SendMessage sendMessage = new SendMessage();

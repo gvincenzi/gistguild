@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface ItemFactory {
     SendMessage welcomeMessage(Message update, Long user_id);
+    SendMessage resetMessage(Message message, Long user_id);
     SendMessage message(Long chat_id, String text);
     SendMessage productUrlManagement(Long chat_id);
     SendMessage userCredit(Long chat_id);
