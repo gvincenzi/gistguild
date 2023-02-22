@@ -232,8 +232,8 @@ public class NodeOrderViewController {
         response.setContentType("text/csv");
         response.addHeader("Content-Disposition", "attachment; filename=\"orders.csv\"");
 
-        CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT);
-        printer.printRecord("Product name", "Customer nickname", "Quantity", "Amount", "Address", "Timestamp", "Insertion date/time", "Status");
+        CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.EXCEL.withDelimiter(';'));
+        printer.printRecord("Product name", "Customer nickname", "Quantity", "Amount", "Address", "Insertion date/time", "Status");
         for (Order order : items) {
             String status = "IN PROGRESS";
             if(order.getDeleted()){
